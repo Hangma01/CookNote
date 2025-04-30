@@ -5,9 +5,15 @@ export const routes = [
         name: 'mainPage',
         component: () => import('../views/MainView.vue') 
     },
+    { 
+      path: '/recipes-search',
+      // name으로 하면 path 경로 바뀌어도 괜찮음
+      name: 'recipesSearch',
+      component: () => import('../views/RecipesView.vue') ,
+    },
     {
         path: '/login',
-        component: () => import('../views/Login.vue'),
+        component: () => import('../views/LoginView.vue'),
         children: [
           {
             path: '',
@@ -34,7 +40,7 @@ export const routes = [
     {
         path: '/mypage',
         name: 'myPage',
-        component: () => import('../views/MyPage.vue'),
+        component: () => import('../views/MyPageView.vue'),
         meta: { requiresAuth: true },
     }
   ]

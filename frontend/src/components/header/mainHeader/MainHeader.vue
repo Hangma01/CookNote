@@ -31,7 +31,7 @@ import NavMenu from "./NavMenu.vue";
 }
 
 .nav{
-    background-color: #8B5E3C ;
+    background-color:#c09370 ;
     height: 4rem;
 }
 </style>

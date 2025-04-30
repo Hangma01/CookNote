@@ -1,14 +1,14 @@
 package com.cooknote.backend.mappers;
 
-import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
-import com.cooknote.backend.domain.user.UserDTO;
 
 @Mapper
 public interface UserMapper {
-	// 유저 찾기
-	List<UserDTO> find();
+	
+	// 아이디 중복 체크
+	boolean getExistsLoginId(@Param("loginId") String loginId);
 
 }

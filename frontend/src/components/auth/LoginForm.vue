@@ -1,11 +1,15 @@
 <script setup>
-import { reactive } from 'vue';
+import { computed, reactive } from 'vue';
 
 
 const formValues = reactive({
   id: '',
   pw: '',
 })
+
+const isFormValid = computed(() => {
+  return formValues.id.trim() !== '' && formValues.pw.trim() !== '';
+});
 </script>
 
 <template>
@@ -28,24 +32,40 @@ const formValues = reactive({
                 density="comfortable"
                 hide-details="auto"
             />
-        </div>
 
-        <div>
-            버튼들
+            <v-btn :disabled="!isFormValid" class="login-btn">
+                로그인
+            </v-btn>
         </div>
-        <div>
-            <router-link :to="{ name: 'userjoin' }">
-                gd
-            </router-link>
-        </div>
-
-
     </v-form>
+
+    <div class="find-wrap">
+        <ul class="find-box">
+            <li>
+                <router-link :to="{ name: 'userjoin' }" class="find-text">
+                    비밀번호 찾기
+                </router-link>
+            </li>
+
+            <li>
+                <router-link :to="{ name: 'userjoin' }" class="find-text">
+                    아이디 찾기
+                </router-link>
+            </li>
+
+            <li> 
+                <router-link :to="{ name: 'userjoin' }" class="find-text">
+                    회원가입
+                </router-link>
+            </li>
+        </ul>
+    </div>
+    
 </template>
 
 
 <style lang="scss" scoped>
-.login-form{
+.login-form, .find-wrap{
 
     display: flex;
     flex-direction: column;
@@ -56,6 +76,39 @@ const formValues = reactive({
         flex-direction: column;
         gap: 1.8rem;
 
+        .login-btn {
+            height: 3rem;
+            font-weight: 900;
+        }
+
+        .login-btn:not(:disabled) {
+            background-color: #c09370;
+        }
+    }
+
+    .find-box {
+        margin-top: 3rem;
+        display: flex;
+        gap: 2rem;
+        justify-content: space-around;
+    }
+
+    li {
+        position: relative;
+  
+        .find-text{
+            color: #888;
+        }
+    }
+
+    li + li::before {
+        content: '|';
+        position: absolute;
+        left: -50%;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #dadada;
+        font-size: 0.9rem;
     }
 }
 

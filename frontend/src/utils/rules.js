@@ -9,7 +9,7 @@ export const required  = (v) => {
     return !!v || '필수 정보입니다.'
 }
 
-export const userIdRule = (v) => {
+export const loginIdRule = (v) => {
     if(!v) {
         return '아이디는 필수 정보입니다.'
     }

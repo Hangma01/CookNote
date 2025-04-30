@@ -8,7 +8,7 @@
 		<id property="userId" column="USER_ID" />
 	</resultMap>
 
-	<select id="find" resultMap="userResultMap">
-		select * from user
+	<select id="getExistsLoginId" resultType="boolean">
+		SELECT EXISTS (SELECT 1 FROM USER WHERE LOGIN_ID = #{loginId})
 	</select>
 </mapper>

@@ -14,6 +14,11 @@ import { RouterView } from 'vue-router'
   box-sizing: border-box;
 }
 
+a{
+  color: black;
+  text-decoration: none;
+}
+
 ul {
   list-style: none;
 }

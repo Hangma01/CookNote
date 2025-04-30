@@ -52,8 +52,10 @@ public class WebSecurityConfig {
 
 				// 인가 설정
 				.authorizeHttpRequests((auth) -> auth
-						.requestMatchers("/*").permitAll()
-						.anyRequest().authenticated())
+						.anyRequest().permitAll())
+//				.authorizeHttpRequests((auth) -> auth
+//						.requestMatchers("/*").permitAll()
+//						.anyRequest().authenticated())
 
 				// 세션 설정
 				.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

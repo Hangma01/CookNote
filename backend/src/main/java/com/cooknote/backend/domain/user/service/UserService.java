@@ -14,9 +14,20 @@ public class UserService {
 	
 	
 	// 아이디 중복 체크
-	public boolean getExistsLoginId(String loginId) {
+	public boolean getCheckLoginId(String loginId) {
 
-		return userMapper.getExistsLoginId(loginId);
+		return userMapper.getCheckLoginId(loginId);
 	}
 
+	// 닉네임 중복 체크
+	public boolean getCheckNickname(String nickname) {
+
+		return userMapper.getCheckNickname(nickname);
+	}
+
+	// 이메일 중복 체크
+	public boolean getCheckEmail(String email) {
+
+		return userMapper.getCheckEmail(email);
+	}
 }

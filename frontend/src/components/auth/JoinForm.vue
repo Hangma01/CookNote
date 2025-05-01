@@ -1,11 +1,31 @@
 <script setup>
-import {reactive, ref } from 'vue';
-import { loginIdRule, userPwRule, userUsernameRule, userNicknameRule, userEmailRule } from '../../utils/rules';
-import userService from '@/services/userService';
-import { HttpStatusCode } from 'axios';
+import { reactive, ref, watch } from 'vue';
+import { loginIdRule, userPwRule, userUsernameRule, userNicknameRule, userEmailRule, required } from '@/utils/rules';
+import { checkLoginId, checkNickname, checkEmail } from '@/services/userService';
+import { checkDuplicate, handleInputHangle } from '@/utils/commonFunction';
 
 
-const formValues = reactive({         // input-field 목록들
+// 유효성 겁사
+const formRef = ref(null)                 // Form 유효성 검사
+const ruleIdRef = ref(null)               // 아이디 유효성 검사
+const ruleNicknameRef = ref(null)         // 닉네임 유효성 검사
+const ruleEmailRef = ref(null)            // 이메일 유효성 검사
+
+// 에러 메시지
+const errorMsgIdDuplicate = ref('')       // 아이디 중복 시 에러 메시지
+const errorMsgNicknameDuplicate = ref('') // 닉네임 중복 시 에러 메시지
+const errorMsgEmailDuplicate = ref('')    // 이메일 중복 시 에러 메시지
+const errorMsgAuthCode = ref('')          // 메일 인증 코드 에러 메시지
+
+// 성공 메시지
+const successMsgAuthCode = ref('fe')        // 메일 인증 코드 성공 메시지
+
+// etc...
+const isAuthCodeRequest = ref(false)      // 메일 인증 요청 토글
+const pwVisible = ref(false)              // 비밀번호 필드 토글
+
+// input-field
+const formValues = reactive({             // Form input-field             
   username: '',
   id: '',
   pw: '',
@@ -13,77 +33,102 @@ const formValues = reactive({         // input-field 목록들
   nickname: ''
 })
 
-
-const formRef = ref(null)             // Form 유효성 검사
-const ruleIdRef = ref(null)           // 아이디 유효성 검사
-const errorMsgIdDuplicate = ref('')   // 아이디 중복 시 메시지
-
-// 사용자 이름 길이 MAX 20 설정
-const handleUsernameInput = (e) => {  
-  const username = e.target.value;
-
-  if (username.length > 20) {
-    formValues.username = username.slice(0, 20);
-  } else {
-    formValues.username = username;
-  }
-}
+const authCodeValue = ref('')             // 메일 인증 input-field
 
 
-// 사용자 닉네임 길이 MAX 15 설정
-const handleNicknameInput = (e) => {
-    const nickname = e.target.value;
+// 이름 20자 제한 (한글)
+const handleUsernameInput = (e) => handleInputHangle(e, 20, (value) => formValues.username = value)
 
-  if (nickname.length > 15) {
-    formValues.nickname = nickname.slice(0, 15);
-  } else {
-    formValues.nickname = nickname;
-  }
-}
-
+// 닉네임 15자 제한 (한글)
+const handleNicknameInput = (e) => handleInputHangle(e, 15, (value) => formValues.nickname = value)
 
 
 // 아이디 중복 체크
 const checkIdDuplicate = async () => {
+  await checkDuplicate({
+    value: formValues.id,               
+    validatorRef: ruleIdRef,            
+    errorMsgRef: errorMsgIdDuplicate,   
+    apiCall: checkLoginId              
+  });
+};
 
-  let isIdValid = await ruleIdRef.value.validate();
 
-  // 아이디 유효성 검증
-  if (!formValues.id || isIdValid[0]) {
-    errorMsgIdDuplicate.value = ''
-    return
-  }
+// 닉네임 중복 체크
+const checkNicknameDuplicate = async () => {
+  await checkDuplicate({
+    value: formValues.nickname,             
+    validatorRef: ruleNicknameRef,          
+    errorMsgRef: errorMsgNicknameDuplicate, 
+    apiCall: checkNickname
+  });
+};
 
-  // 아이디 중복 체크
-  try {
-    const res = await userService.existsLoginId(formValues.id)
 
-    if (res.status === HttpStatusCode.Ok) {         // 아이디 중복 없음
-        errorMsgIdDuplicate.value = ''
-    } 
-  } catch (e) {
-    const error = e.response.data
-
-    if (error.status === HttpStatusCode.Conflict) { // 아이디 중복일 경우
-        errorMsgIdDuplicate.value = error.message
-    } else {                                        // 예외 처리
-      alert('서버와의 통신이 원할하지 않습니다.')
-    }
-  }
+// 이메일 중복 체크
+const checkEmailDuplicate = async () => {
+  await checkDuplicate({
+    value: formValues.email,             
+    validatorRef: ruleEmailRef,          
+    errorMsgRef: errorMsgEmailDuplicate, 
+    apiCall: checkEmail
+  });
 }
 
-// 메일 인증하기
-const handleSubmit = async () => {
-  const isValid = await formRef.value.validate();
+// 메일 인증 요청하기
+const handleAuthMailRequest = async () => {
 
-  if(isValid.vaild && errorMsgIdDuplicate){ // 유효성 검사 통과 시 메일 인증 코드 발송
+  const isFormValid = await formRef.value.validate()
+
+  // 유효성 검사 통과 시 메일 인증 코드 발송
+  if (
+      isFormValid.valid &&
+      !errorMsgIdDuplicate.value &&
+      !errorMsgNicknameDuplicate.value &&
+      !errorMsgEmailDuplicate.value
+  ) { 
+    // 인증 요청 True
+    isAuthCodeRequest.value = true
+  }  
+}
+
+
+// 인증 코드 검증하기
+
+
+// 회원 가입 하기
+const handleSubmitJoin = async () => {
+  const isFormValid = await formRef.value.validate(); // 전체 유효성 검사 확인
+
+  // 유효성 검사 통과 시 회원 가입
+  if (
+    isFormValid.valid &&
+    !errorMsgAuthCode.value
+  ) { 
     console.log('성공')
   } 
 }
+
+watch (
+  () => ({ ...formValues }),
+  (newVal, oldVal) => {
+    if (
+        isAuthCodeRequest.value &&
+        Object.keys(newVal).some(key => newVal[key] !== oldVal[key])
+    ) {
+      isAuthCodeRequest.value = false;
+      authCodeValue.value = ''
+      errorMsgAuthCode.value = ''
+      successMsgAuthCode.value = ''
+    }
+  },
+  { deep: true }  // formValues 내부 값들을 추적 가능하게 함
+)
+
 </script>
 
 <template>
-    <v-form ref="formRef" class="join-form" @submit.prevent="handleSubmit">
+    <v-form ref="formRef" class="join-form" @submit.prevent="handleSubmitJoin">
         <div class="join-content">
             <v-text-field
                 v-model="formValues.id"
@@ -101,13 +146,15 @@ const handleSubmit = async () => {
 
             <v-text-field
                 v-model="formValues.pw"
-                type="text"
+                :type="pwVisible ? 'text' : 'password'"
                 label="비밀번호"
                 variant="solo"
                 density="comfortable"
                 hide-details="auto"
                 maxlength="16"
                 :rules="[userPwRule]"
+                :append-inner-icon="pwVisible ? 'mdi-eye-off' : 'mdi-eye'"
+                @click:append-inner="pwVisible = !pwVisible"
             />
 
             <v-text-field
@@ -129,7 +176,10 @@ const handleSubmit = async () => {
                 variant="solo"
                 density="comfortable"
                 hide-details="auto"
+                ref="ruleNicknameRef"
                 :rules="[userNicknameRule]"
+                :error-messages="errorMsgNicknameDuplicate"
+                @blur="checkNicknameDuplicate()"
             />
 
             <v-text-field
@@ -141,19 +191,39 @@ const handleSubmit = async () => {
                 hide-details="auto"
                 maxlength="100"
                 :rules="[userEmailRule]"
-            />
-
-            <v-btn type="submit" class="login-btn">
-                인증요청
-            </v-btn>
+                :error-messages="errorMsgEmailDuplicate"
+                @blur="checkEmailDuplicate()"
+            />               
         </div>
+
+        <div class="authCodeFiled">
+          <v-text-field
+                  v-model="authCodeValue"
+                  type="text"
+                  label="인증번호"
+                  variant="solo"
+                  density="comfortable"
+                  hide-details="auto"
+                  maxlength="6"
+                  :rules="[required]"
+                  :error-messages="errorMsgAuthCode"
+                  :success-messages="successMsgAuthCode"
+                  v-if="isAuthCodeRequest"
+          />
+        </div>
+        <v-btn type="button" class="login-btn" @click="handleAuthMailRequest" v-show="!isAuthCodeRequest">
+            인증요청
+        </v-btn>
+
+        <v-btn type="submit" class="login-btn" v-show="isAuthCodeRequest">
+            인증 후 회원가입
+        </v-btn>
     </v-form>
 </template>
 
 
 <style lang="scss" scoped>
-
-.join-form{
+.join-form {
 
     display: flex;
     flex-direction: column;
@@ -164,7 +234,10 @@ const handleSubmit = async () => {
         flex-direction: column;
         gap: 1.8rem;
     }
+
+    .authCodeFiled {
+      width: 10rem;
+      height: 5rem;
+    }
 }
-
-
 </style>

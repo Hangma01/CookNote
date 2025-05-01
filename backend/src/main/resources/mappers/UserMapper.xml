@@ -8,7 +8,18 @@
 		<id property="userId" column="USER_ID" />
 	</resultMap>
 
-	<select id="getExistsLoginId" resultType="boolean">
+	<!-- 아이디 중복 체크 -->
+	<select id="getCheckLoginId" resultType="boolean">
 		SELECT EXISTS (SELECT 1 FROM USER WHERE LOGIN_ID = #{loginId})
+	</select>
+	
+	<!-- 닉네임 중복 체크 -->
+	<select id="getCheckNickname" resultType="boolean">
+		SELECT EXISTS (SELECT 1 FROM USER WHERE NICKNAME = #{nickname})
+	</select>
+	
+	<!-- 이메일 중복 체크 -->
+	<select id="getCheckEmail" resultType="boolean">
+		SELECT EXISTS (SELECT 1 FROM USER WHERE EMAIL = #{email})
 	</select>
 </mapper>

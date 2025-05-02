@@ -1,4 +1,4 @@
-package com.cooknote.backend.config;
+package com.cooknote.backend.global.config;
 
 import java.util.Properties;
 

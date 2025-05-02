@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cooknote.backend.domain.user.service.UserService;
-import com.cooknote.backend.error.ErrorMessage;
+import com.cooknote.backend.global.error.ErrorMessage;
 
 import lombok.RequiredArgsConstructor;
 

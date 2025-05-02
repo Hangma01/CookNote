@@ -193,11 +193,8 @@ watch (
                 :rules="[userEmailRule]"
                 :error-messages="errorMsgEmailDuplicate"
                 @blur="checkEmailDuplicate()"
-            />               
-        </div>
-
-        <div class="authCodeFiled">
-          <v-text-field
+            />        
+            <v-text-field
                   v-model="authCodeValue"
                   type="text"
                   label="인증번호"
@@ -209,7 +206,9 @@ watch (
                   :error-messages="errorMsgAuthCode"
                   :success-messages="successMsgAuthCode"
                   v-if="isAuthCodeRequest"
-          />
+                  class="authCodeFiled"
+          />       
+
         </div>
         <v-btn type="button" class="login-btn" @click="handleAuthMailRequest" v-show="!isAuthCodeRequest">
             인증요청
@@ -228,16 +227,26 @@ watch (
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    height: 36rem;
+    justify-content: space-between;
 
     .join-content {
         display: flex;
         flex-direction: column;
         gap: 1.8rem;
+
+        .authCodeFiled {
+          width: 10rem;
+          height: 3rem;
+        }
     }
 
-    .authCodeFiled {
-      width: 10rem;
-      height: 5rem;
+    .login-btn {
+      background-color: #c09370;
+      color: white;
+      font-size: 1.3rem;
+      height: 3rem;
+      
     }
 }
 </style>

@@ -1,4 +1,4 @@
-package com.cooknote.backend.error;
+package com.cooknote.backend.global.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

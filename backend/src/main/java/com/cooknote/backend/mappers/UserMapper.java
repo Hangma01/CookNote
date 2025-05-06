@@ -4,6 +4,8 @@ package com.cooknote.backend.mappers;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.cooknote.backend.domain.user.dto.UserDTO;
+
 
 @Mapper
 public interface UserMapper {
@@ -17,4 +19,6 @@ public interface UserMapper {
 	// 이메일 중복 체크
 	boolean getCheckEmail(@Param("email") String email);
 
+	// 회원가입
+	void userJoin(UserDTO userDTO);
 }

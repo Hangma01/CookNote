@@ -11,7 +11,7 @@ export const checkDuplicate = async ({ value, validatorRef, errorMsgRef, apiCall
         const res = await apiCall(value);
         errorMsgRef.value = res.data;
     } catch (e) {
-        alert('서버와의 통신이 원활하지 않습니다.');
+        alert('서버와의 통신이 원활하지 않습니다. 잠시 후 다시 시도해주세요.');
     }
 };
 

@@ -1,39 +1,36 @@
 package com.cooknote.backend.global.infra.mail.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.cooknote.backend.domain.user.service.UserService;
+
+import com.cooknote.backend.global.infra.mail.dto.AuthCodeRequest;
+import com.cooknote.backend.global.infra.mail.dto.VerifyAuthCodeResponse;
 import com.cooknote.backend.global.infra.mail.service.MailService;
 
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-
 
 @RestController
 @RequestMapping("/api/mail")
 @RequiredArgsConstructor
 public class MailController {
-	
+
 	private final MailService mailService;
 
-	
-	// 인증코드 발송
-	@GetMapping("/send/authcode")
-	public ResponseEntity<Void> sendAuthCode(String to)  {
+	// 인증 번호 발송
+	@PostMapping("/send/authcode")
+	public ResponseEntity<Void> sendAuthCode(@RequestBody AuthCodeRequest authCodeRequest) {
+		mailService.sendAuthCode(authCodeRequest.getEmail());
 		
-		try {
-			mailService.sendAuthCode(to);
-		} catch (MessagingException e) {
-			
-		}
-		return null;
+		return ResponseEntity.ok().build();	
 	}
-
-	// 이메일로 아이디 찾기
-	// 이메일로 비밀번호 찾기
 	
-	// 이메일 인증 보내기
-	// 이메일로 인증 하기
+	// 인증 번호 검증
+	@PostMapping("/verify")
+	public ResponseEntity<VerifyAuthCodeResponse> verifyAuthCode(@RequestBody AuthCodeRequest authCodeRequest) {
+	
+		return ResponseEntity.ok(mailService.verifyAuthCode(authCodeRequest.getEmail(), authCodeRequest.getAuthCode()));	
+	}
 }

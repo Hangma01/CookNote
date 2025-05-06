@@ -5,8 +5,17 @@
 <mapper namespace="com.cooknote.backend.mappers.UserMapper">
 
 	<resultMap type="UserDTO" id="userResultMap">
-		<id property="userId" column="USER_ID" />
+		<id property="userId" column="user_id" />
+	    <result property="loginId" column="login_id" />
+	    <result property="name" column="name" />
+	    <result property="password" column="password" />
+	    <result property="email" column="email" />
+	    <result property="nickname" column="nickname" />
+	    <result property="profileImage" column="profile_image" />
+	    <result property="createAt" column="create_at" />
+	    <result property="updateAt" column="update_at" />
 	</resultMap>
+    
 
 	<!-- 아이디 중복 체크 -->
 	<select id="getCheckLoginId" resultType="boolean">
@@ -22,4 +31,13 @@
 	<select id="getCheckEmail" resultType="boolean">
 		SELECT EXISTS (SELECT 1 FROM USER WHERE EMAIL = #{email})
 	</select>
+
+	<!-- 회원 가입 -->
+	<insert id="userJoin" parameterType="UserDTO">
+		INSERT INTO users (
+        	login_id, password, name, nickname, email
+    	) VALUES (
+        	#{loginId}, #{password}, #{name}, #{nickname}, #{email}
+    	)
+	</insert>
 </mapper>

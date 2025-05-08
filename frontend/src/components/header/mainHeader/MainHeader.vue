@@ -24,10 +24,11 @@ import NavMenu from "./NavMenu.vue";
 .header-bottom {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: end;
     width: 75rem;
     margin: 0 auto;
-    padding: 1.5rem 0;
+    padding-top: 0.8rem;
+    padding-bottom: 2rem;
 }
 
 .nav{

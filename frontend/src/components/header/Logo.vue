@@ -3,9 +3,7 @@
 </script>
 
 <template>
-    <div>
-로고
-    </div>
+    <img src="https://cooknote98.s3.ap-northeast-2.amazonaws.com/Logo/Logo.png" alt="Logo" />
 </template>
 
 

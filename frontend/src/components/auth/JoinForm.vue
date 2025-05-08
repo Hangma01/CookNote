@@ -151,10 +151,10 @@ const handleSubmitJoin = debounce(async () => {
   if (isFormVal.valid && isSuccessAuthCode) {
     try {
       const res = await userJoin({ ...formValues })
-      console.log(res)
+      
       alert(successMessage.userJoin);
     } catch (error) {
-      console.log(error)
+      
       if(error.response.data.status === HttpStatusCode.BadRequest) {
         alert(error.response.data.message)
       }
@@ -272,8 +272,8 @@ watch (
                 <v-btn type="button" class="auth-mail-retry" @click="handleSendAuthCodeRetry" v-if="isAuthCodeRequest">
                   재전송
                 </v-btn>
-              </div>           
-              
+              </div>     
+
               <div v-if="isSuccessAuthCode" class="success-message">
                 <span>
                   인증에 성공했습니다.
@@ -307,6 +307,7 @@ watch (
         flex-direction: column;
         gap: 1.8rem;
 
+
         .auth-code-wrap{
           display: flex;
           align-items: center;
@@ -326,9 +327,9 @@ watch (
 
 
         .success-message {
-          padding-left: 16px;
-          padding-top: 6px;
-          font-size: 12px;
+          padding-left: 1rem;
+          padding-top: 0.5rem;
+          font-size: 0.75rem;
           color: green;
         }
     }
@@ -336,8 +337,8 @@ watch (
     .login-btn {
       background-color: #c09370;
       color: white;
-      font-size: 1.3rem;
-      height: 3rem;
+      font-size: 1rem;
+      height: 2.5rem;
       
     }
 }

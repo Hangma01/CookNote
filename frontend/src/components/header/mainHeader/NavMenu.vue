@@ -68,7 +68,7 @@
 <style lang="scss" scoped>
 .nav-menu{
     display: flex;
-    gap: 4rem;
+    gap: 3rem;
     width: 75rem;
     height: 100%;
     margin: 0 auto;
@@ -76,9 +76,9 @@
 
     .nav-menu-item {
         position: relative;
-        font-size: 1.2rem;
+        font-size: 1rem;
         cursor: pointer;
-        width: 8.3rem;
+        width: 7rem;
         text-align: center;
         
         .menu-item {
@@ -106,7 +106,7 @@
             }
 
             .categoy-item:hover{
-                background-color: #c09370;
+                background-color:#c09370;
             }
         }
 

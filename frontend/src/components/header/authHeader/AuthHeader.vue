@@ -16,7 +16,8 @@ import Logo from "../Logo.vue";
     margin-bottom: 2rem;
 
     .user-logo {
-        padding-top: 4rem;
+        padding-top: 6rem;
+        text-align: center;
     }
 }
 

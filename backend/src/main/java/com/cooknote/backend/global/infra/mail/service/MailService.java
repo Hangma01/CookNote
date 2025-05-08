@@ -3,9 +3,6 @@ package com.cooknote.backend.global.infra.mail.service;
 import java.security.SecureRandom;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -13,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
-import com.cooknote.backend.global.infra.mail.dto.VerifyAuthCodeResponse;
+import com.cooknote.backend.global.infra.mail.dto.VerifyAuthCodeResponseDTO;
 import com.cooknote.backend.global.infra.utils.message.ErrorMessageUtil;
 import com.cooknote.backend.global.infra.utils.message.SuccessMessageUtil;
 import com.cooknote.backend.global.infra.utils.redis.RedisUtil;
@@ -76,21 +73,21 @@ public class MailService {
     }
     
     // 인증 번호 검증
-    public VerifyAuthCodeResponse verifyAuthCode(String email, String authCode) {
+    public VerifyAuthCodeResponseDTO verifyAuthCode(String email, String authCode) {
 
 		String redisAuthCode = redisUtil.getData(email);
 	
 		if(redisAuthCode == null){ 										// 인증 번호 시간 만료
 			throw new CustomException(ErrorCode.MAIL_AUTH_CODE_EXPIRE);
 	    } else if(redisAuthCode.equals(authCode)) {						// 인증 번호 일치
-	        return VerifyAuthCodeResponse.builder()
+	        return VerifyAuthCodeResponseDTO.builder()
 	        		.result(true)
 	                .message(SuccessMessageUtil.VERIFY_AUTH_CODE_SUCCESS.getMessage())  
 	                .build();
 	    } 
 	    
 		
-		return VerifyAuthCodeResponse.builder()							// 인증 번호 불일치
+		return VerifyAuthCodeResponseDTO.builder()							// 인증 번호 불일치
 	            .result(false)
 				.message(ErrorMessageUtil.VERIFY_AUTH_CODE_NOT_MATCH.getMessage())
 	            .build();

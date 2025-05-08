@@ -27,11 +27,11 @@ import NavMenu from "./NavMenu.vue";
     align-items: center;
     width: 75rem;
     margin: 0 auto;
-    padding: 2rem 0;
+    padding: 1.5rem 0;
 }
 
 .nav{
     background-color:#c09370 ;
-    height: 4rem;
+    height: 3.7rem;
 }
 </style>

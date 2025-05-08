@@ -10,7 +10,10 @@ import lombok.Getter;
 public enum ErrorCode {
 	
 	// 인증 코드 시간 만료
-	MAIL_AUTH_CODE_EXPIRE(HttpStatus.GONE, "인증코드 시간이 만료되었습니다. 인증 번호를 재전송 후 인증 해주세요.");
+	MAIL_AUTH_CODE_EXPIRE(HttpStatus.GONE, "인증코드 시간이 만료되었습니다. 인증 번호를 재전송 후 인증 해주세요."),
+	
+	// 회원 가입 유효성 검사
+	JOIN_VALIDATION_EXCEPTION(HttpStatus.BAD_REQUEST, "잘못된 입력을 요청하셨습니다. 잠시 후 다시 시도해주세요.");
 	
 	private final HttpStatus httpStatus;
 	private final String message;

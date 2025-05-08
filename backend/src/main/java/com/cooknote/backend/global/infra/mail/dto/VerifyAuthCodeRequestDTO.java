@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthCodeRequest {
-
+public class VerifyAuthCodeRequestDTO {
+	
 	private String email;
 	private String authCode;
 }

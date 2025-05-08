@@ -1,4 +1,4 @@
-const checkLoginIdReg = /^[a-z0-9]{5,20}$/;
+const checkUserIdReg = /^[a-z0-9]{5,20}$/;
 const checkPasswordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?])\S{10,20}$/;
 const checkNameReg = /^[a-zA-Z가-힣]{1,20}$/
 const checkNicknameReg = /^[^\s].{1,15}[^\s]$/
@@ -9,12 +9,12 @@ export const required = (v) => {
     return !!v || '필수 정보입니다.'
 }
 
-export const loginIdRule = (v) => {
+export const userIdRule = (v) => {
     if (!v) {
         return '아이디는 필수 정보입니다.'
     }
 
-    if (!checkLoginIdReg.test(v)) {
+    if (!checkUserIdReg.test(v)) {
         return '5~20자의 영문 소문자, 숫자만 사용 가능합니다.'
     }
 

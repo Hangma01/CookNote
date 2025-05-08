@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
-import { loginIdRule, passwordRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
-import { checkLoginId, checkNickname, checkEmail, userJoin } from '@/services/userService';
+import { userIdRule, passwordRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
+import { checkUserId, checkNickname, checkEmail, userJoin } from '@/services/userService';
 import { sendAuthCode, verifyAuthCode } from '@/services/mailService';
 import { checkDuplicate, handleInputHangle } from '@/utils/commonFunction';
 import { commonValues } from '@/utils/commonValues';
@@ -15,12 +15,12 @@ const router = useRouter();
 
 // 유효성 겁사
 const formRef = ref(null)                 // Form 유효성 검사
-const ruleLoginIdRef = ref(null)          // 아이디 유효성 검사
+const ruleUserIdRef = ref(null)          // 아이디 유효성 검사
 const ruleNicknameRef = ref(null)         // 닉네임 유효성 검사
 const ruleEmailRef = ref(null)            // 이메일 유효성 검사
 
 // 에러 메시지
-const errorMsgLoginIdDuplicate = ref('')       // 아이디 중복 시 에러 메시지
+const errorMsgUserIdDuplicate = ref('')       // 아이디 중복 시 에러 메시지
 const errorMsgNicknameDuplicate = ref('')     // 닉네임 중복 시 에러 메시지
 const errorMsgEmailDuplicate = ref('')        // 이메일 중복 시 에러 메시지
 const errorMsgAuthCode = ref('')              // 메일 인증 코드 에러 메시지
@@ -34,7 +34,7 @@ const passwordVisible = ref(false)        // 비밀번호 필드 토글
 
 // input-field
 const formValues = reactive({             // Form input-field             
-  loginId: '',
+  userId: '',
   password: '',
   name: '',
   nickname: '',
@@ -52,12 +52,12 @@ const handleNicknameInput = (e) => handleInputHangle(e, 15, (value) => formValue
 
 
 // 아이디 중복 체크
-const checkLoginIdDuplicate = async () => {
+const checkUserIdDuplicate = async () => {
   await checkDuplicate({
-    value: formValues.loginId,               
-    validatorRef: ruleLoginIdRef,            
-    errorMsgRef: errorMsgLoginIdDuplicate,   
-    apiCall: checkLoginId              
+    value: formValues.userId,               
+    validatorRef: ruleUserIdRef,            
+    errorMsgRef: errorMsgUserIdDuplicate,   
+    apiCall: checkUserId              
   });
 };
 
@@ -91,7 +91,7 @@ const handleSendAuthCode = async () => {
   // 유효성 검사 통과 시 메일 인증 코드 발송
   if (
       isFormVal.valid &&
-      !errorMsgLoginIdDuplicate.value &&
+      !errorMsgUserIdDuplicate.value &&
       !errorMsgNicknameDuplicate.value &&
       !errorMsgEmailDuplicate.value
   ) { 
@@ -155,6 +155,9 @@ const handleSubmitJoin = debounce(async () => {
       alert(successMessage.userJoin);
     } catch (error) {
       console.log(error)
+      if(error.response.data.status === HttpStatusCode.BadRequest) {
+        alert(error.response.data.message)
+      }
 
       alert(errorMessages.badRequest);
     }
@@ -187,17 +190,17 @@ watch (
     <v-form ref="formRef" class="join-form" @submit.prevent="handleSubmitJoin">
         <div class="join-content">
             <v-text-field
-                v-model="formValues.loginId"
+                v-model="formValues.userId"
                 type="text"
                 label="아이디"
                 variant="solo"
                 density="comfortable"
                 hide-details="auto"
                 maxlength="20"
-                ref="ruleLoginIdRef"
-                :rules="[loginIdRule]"
-                :error-messages="errorMsgLoginIdDuplicate"
-                @blur="checkLoginIdDuplicate()"
+                ref="ruleUserIdRef"
+                :rules="[userIdRule]"
+                :error-messages="errorMsgUserIdDuplicate"
+                @blur="checkUserIdDuplicate()"
             />
 
             <v-text-field

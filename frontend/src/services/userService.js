@@ -2,8 +2,8 @@ import api from '@/api/axios'
 
 
 // 아이디 중복 체크
-export const checkLoginId = async (id) => {
-    const res = await api.get(`/user/check-login-id?login_id=${id}`);
+export const checkUserId = async (userId) => {
+    const res = await api.get(`/user/check-user-id?user_id=${userId}`);
     return res;
 };
 

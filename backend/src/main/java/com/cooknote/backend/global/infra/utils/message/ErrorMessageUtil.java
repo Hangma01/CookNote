@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum ErrorMessageUtil {
 
 	// 유저 - 중복 검증 에러 메시지
-	DUPLICATE_LOGIN_ID("이미 사용중인 아이디 입니다."),
+	DUPLICATE_USER_ID("이미 사용중인 아이디 입니다."),
 	DUPLICATE_NICKNAME("이미 사용중인 닉네임 입니다."),
 	DUPLICATE_EMAIL("이미 사용중인 이메일 입니다."),
 	

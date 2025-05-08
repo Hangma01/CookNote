@@ -27,7 +27,7 @@
     .user-menu-item{
         width: 3rem;
         height: 3rem;
-        font-size: 2rem;
+        font-size: 1.7rem;
         border-radius: 100%;
         display: flex;
         justify-content: center;

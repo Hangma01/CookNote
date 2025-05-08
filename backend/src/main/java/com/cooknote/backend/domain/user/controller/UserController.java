@@ -1,6 +1,7 @@
 package com.cooknote.backend.domain.user.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cooknote.backend.domain.user.dto.UserDTO;
+import com.cooknote.backend.domain.user.dto.UserJoinRequestDTO;
 import com.cooknote.backend.domain.user.service.UserService;
+import com.cooknote.backend.global.error.CustomException;
+import com.cooknote.backend.global.error.ErrorCode;
 import com.cooknote.backend.global.infra.utils.message.ErrorMessageUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -24,9 +27,9 @@ public class UserController {
 	
 
 	// 아이디 중복 체크
-	@GetMapping("/check-login-id")
-	public ResponseEntity<String> getCheckLoginId(@RequestParam("login_id") String loginId) {
-	    return checkDuplicate(userService.getCheckLoginId(loginId), ErrorMessageUtil.DUPLICATE_LOGIN_ID);
+	@GetMapping("/check-user-id")
+	public ResponseEntity<String> getCheckUserId(@RequestParam("user_id") String userId) {
+	    return checkDuplicate(userService.getCheckUserId(userId), ErrorMessageUtil.DUPLICATE_USER_ID);
 	}
 
 	// 닉네임 중복 체크
@@ -43,8 +46,15 @@ public class UserController {
 	
 	// 회원 가입
 	@PostMapping("/join")
-	public ResponseEntity<String> userJoin(@RequestBody UserDTO userDTO) {
-		userService.userJoin(userDTO);
+	public ResponseEntity<String> userJoin(@RequestBody UserJoinRequestDTO userJoinRequestDTO, BindingResult bindingResult) {
+		
+		// 유효성 검사 확인
+		if(bindingResult.hasErrors()) {
+			throw new CustomException(ErrorCode.JOIN_VALIDATION_EXCEPTION);
+		}
+		
+		userService.userJoin(userJoinRequestDTO);
+		
 	    return ResponseEntity.ok().build();
 	}	
 	

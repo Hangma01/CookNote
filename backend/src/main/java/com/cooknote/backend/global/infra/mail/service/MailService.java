@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
-import com.cooknote.backend.global.infra.mail.dto.VerifyAuthCodeResponseDTO;
+import com.cooknote.backend.global.infra.mail.dto.response.VerifyAuthCodeResponseDTO;
 import com.cooknote.backend.global.infra.utils.message.ErrorMessageUtil;
 import com.cooknote.backend.global.infra.utils.message.SuccessMessageUtil;
 import com.cooknote.backend.global.infra.utils.redis.RedisUtil;
@@ -57,17 +57,17 @@ public class MailService {
     @Async
     public void sendAuthCode(String email) {
        
-    	String authCode = createAuthCode();									// 인증 번호 생성
-    	String content = createAuthCodeContent(authCode);					// 인증 번호용 Content 생성
+    	String authCode = createAuthCode();												// 인증 번호 생성
+    	String content = createAuthCodeContent(authCode);								// 인증 번호용 Content 생성
     	
     	try {
-    		MimeMessage message = createMessage(email, "이메일인증", content);	// 메시지 셋팅
+    		MimeMessage message = createMessage(email, "CookNote 이메일인증", content);	// 메시지 셋팅
         	
-        	javaMailSender.send(message);									// 메시지 발송	
+        	javaMailSender.send(message);												// 메시지 발송	
         	
         	// 레디스에 인증번호 저장
         	redisUtil.setDataExpire(email, authCode, authCodeExpire);
-    	} catch (MessagingException e) {
+    	} catch (Exception e) {
     		log.error("메일 발송 실패: {}", e.getMessage());
 		}
     }
@@ -78,7 +78,7 @@ public class MailService {
 		String redisAuthCode = redisUtil.getData(email);
 	
 		if(redisAuthCode == null){ 										// 인증 번호 시간 만료
-			throw new CustomException(ErrorCode.MAIL_AUTH_CODE_EXPIRE);
+			throw new CustomException(ErrorCode.MAIL_AUTH_CODE_EXPIRE_EXCEPTION);
 	    } else if(redisAuthCode.equals(authCode)) {						// 인증 번호 일치
 	        return VerifyAuthCodeResponseDTO.builder()
 	        		.result(true)
@@ -92,8 +92,6 @@ public class MailService {
 				.message(ErrorMessageUtil.VERIFY_AUTH_CODE_NOT_MATCH.getMessage())
 	            .build();
     }
-	
-
 
 	
 	// 랜덤 인증 번호 생성
@@ -110,5 +108,4 @@ public class MailService {
     private String createAuthCodeContent(String authCode) {
         return "<h2>인증 코드</h2><p>아래 인증 코드를 입력하세요:</p><strong>" + authCode + "</strong>";
     }
-
 }

@@ -1,6 +1,4 @@
-package com.cooknote.backend.domain.user.dto;
-
-import java.util.Date;
+package com.cooknote.backend.domain.user.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -18,7 +16,7 @@ public class UserJoinRequestDTO {
 	private String userId;
 	
 	@NotBlank()
-	@Pattern(regexp = "^[^\\s].{1,15}[^\\s]$")
+	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\\-+=`|\\\\(){}\\[\\]:;\"'<>,.?])\\S{8,16}$")
 	private String password;
 	
 	@NotBlank()
@@ -27,10 +25,10 @@ public class UserJoinRequestDTO {
 
 	
 	@NotBlank
-	@Pattern(regexp = "^[^\\s].{1,15}[^\\s]$")
+	@Pattern(regexp = "^(?!\\s)(.{1,15})(?<!\\s)$")
 	private String nickname;
 
 	@NotBlank()
-	@Pattern(regexp = "^[^\\s][a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}[^\\s]$")
+	@Pattern(regexp = "^[^\\s][a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{1,}[^\\s]$")
 	private String email;
 }

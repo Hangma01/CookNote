@@ -28,13 +28,23 @@ export const routes = [
           {
             path: 'userfindid',
             name: 'userFindId',
-            component: () => import('../components/auth/JoinForm.vue'),
+            component: () => import('../components/auth/FindIdForm.vue'),
+          },
+          {
+            path: 'userfindidresult',
+            name: 'userFindIdResult',
+            component: () => import('../components/auth/FindIdResult.vue'),
           },
           {
             path: 'userfindpw',
             name: 'userFindPw',
-            component: () => import('../components/auth/JoinForm.vue'),
-          }
+            component: () => import('../components/auth/FindPwForm.vue'),
+          },
+          {
+            path: 'userPwChange',
+            name: 'userPwChange',
+            component: () => import('../components/auth/userPwChange.vue'),
+          },
         ]
     },
     {

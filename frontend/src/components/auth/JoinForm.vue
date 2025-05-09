@@ -14,10 +14,10 @@ import { debounce } from 'lodash'
 const router = useRouter();
 
 // 유효성 겁사
-const formRef = ref(null)                 // Form 유효성 검사
-const ruleUserIdRef = ref(null)          // 아이디 유효성 검사
-const ruleNicknameRef = ref(null)         // 닉네임 유효성 검사
-const ruleEmailRef = ref(null)            // 이메일 유효성 검사
+const formRef = ref(null)                     // Form 유효성 검사
+const ruleUserIdRef = ref(null)               // 아이디 유효성 검사
+const ruleNicknameRef = ref(null)             // 닉네임 유효성 검사
+const ruleEmailRef = ref(null)                // 이메일 유효성 검사
 
 // 에러 메시지
 const errorMsgUserIdDuplicate = ref('')       // 아이디 중복 시 에러 메시지
@@ -26,14 +26,15 @@ const errorMsgEmailDuplicate = ref('')        // 이메일 중복 시 에러 메
 const errorMsgAuthCode = ref('')              // 메일 인증 코드 에러 메시지
 
 // 성공 메시지
-const isSuccessAuthCode = ref(false)        // 메일 인증 코드 성공 메시지
+const isSuccessAuthCode = ref(false)          // 메일 인증 코드 성공 메시지
 
 // etc...
-const isAuthCodeRequest = ref(false)      // 메일 인증 요청 토글
-const passwordVisible = ref(false)        // 비밀번호 필드 토글
+const isAuthCodeRequest = ref(false)          // 메일 인증 요청 토글
+const passwordVisible = ref(false)            // 비밀번호 필드 토글
+
 
 // input-field
-const formValues = reactive({             // Form input-field             
+const formValues = reactive({                 // Form input-field             
   userId: '',
   password: '',
   name: '',
@@ -41,7 +42,7 @@ const formValues = reactive({             // Form input-field
   email: ''
 })
 
-const authCodeValue = ref('')             // 메일 인증 input-field
+const authCodeValue = ref('')                 // 메일 인증 input-field
 
 
 // 이름 20자 제한 (한글)
@@ -57,7 +58,8 @@ const checkUserIdDuplicate = async () => {
     value: formValues.userId,               
     validatorRef: ruleUserIdRef,            
     errorMsgRef: errorMsgUserIdDuplicate,   
-    apiCall: checkUserId              
+    apiCall: checkUserId,
+    router : router  
   });
 };
 
@@ -68,7 +70,8 @@ const checkNicknameDuplicate = async () => {
     value: formValues.nickname,             
     validatorRef: ruleNicknameRef,          
     errorMsgRef: errorMsgNicknameDuplicate, 
-    apiCall: checkNickname
+    apiCall: checkNickname,
+    router : router
   });
 };
 
@@ -79,7 +82,8 @@ const checkEmailDuplicate = async () => {
     value: formValues.email,             
     validatorRef: ruleEmailRef,          
     errorMsgRef: errorMsgEmailDuplicate, 
-    apiCall: checkEmail
+    apiCall: checkEmail,
+    router : router
   });
 }
 
@@ -98,7 +102,7 @@ const handleSendAuthCode = async () => {
       try {
         const res = await sendAuthCode(formValues.email);
         isAuthCodeRequest.value = true;
-      } catch (error) {
+      } catch (e) {
         alert(errorMessages.badRequest);
         router.replace('/login');
       }
@@ -113,7 +117,7 @@ const handleSendAuthCodeRetry = async () => {
     isSuccessAuthCode.value = false;
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
-  } catch (error) {
+  } catch (e) {
     alert(errorMessages.badRequest);
     router.replace('/login');
   }
@@ -132,9 +136,9 @@ const handleVerifyAuthCode = debounce(async () => {
       isSuccessAuthCode.value = res.data.result;
       errorMsgAuthCode.value = res.data.message;
     }
-  } catch (error) {
-    if (error.response.data.status === HttpStatusCode.Gone) { // 인증 번호 만료
-      alert(res.response.data.message);
+  } catch (e) {
+    if (e.response && e.response.data.status === HttpStatusCode.Gone) { // 인증 번호 만료
+      alert(e.response.data.message);
     } else {
       alert(errorMessages.badRequest);
       router.replace('/login');
@@ -153,10 +157,10 @@ const handleSubmitJoin = debounce(async () => {
       const res = await userJoin({ ...formValues })
       
       alert(successMessage.userJoin);
-    } catch (error) {
+    } catch (e) {
       
-      if(error.response.data.status === HttpStatusCode.BadRequest) {
-        alert(error.response.data.message)
+      if(e.response && e.response.data.status === HttpStatusCode.BadRequest) {
+        alert(e.response.data.message)
       }
 
       alert(errorMessages.badRequest);
@@ -267,7 +271,7 @@ watch (
                   v-if="isAuthCodeRequest"
                   :rules="[required]"
                   :error-messages="errorMsgAuthCode"
-                  class="auth-code-filed"
+                  class="auth-code-field"
                 /> 
                 <v-btn type="button" class="auth-mail-retry" @click="handleSendAuthCodeRetry" v-if="isAuthCodeRequest">
                   재전송
@@ -282,11 +286,11 @@ watch (
             </div>
         </div>
 
-        <v-btn type="button" class="login-btn" @click="handleSendAuthCode" v-show="!isAuthCodeRequest">
+        <v-btn type="button" class="join-btn" @click="handleSendAuthCode" v-show="!isAuthCodeRequest">
             인증요청
         </v-btn>
 
-        <v-btn type="submit" class="login-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
+        <v-btn type="submit" class="join-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
             인증 후 회원가입
         </v-btn>
     </v-form>
@@ -295,12 +299,11 @@ watch (
 
 <style lang="scss" scoped>
 .join-form {
-
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: 1.5rem;
     height: 36rem;
-    justify-content: space-between;
 
     .join-content {
         display: flex;
@@ -313,7 +316,7 @@ watch (
           align-items: center;
           gap: 1.3rem;
           
-          .auth-code-filed {
+          .auth-code-field {
             height: 3rem;
           }
 
@@ -323,23 +326,20 @@ watch (
             color: white;
           }
         }
-        
-
 
         .success-message {
           padding-left: 1rem;
-          padding-top: 0.5rem;
+          padding-top: 0.3rem;
           font-size: 0.75rem;
           color: green;
         }
     }
 
-    .login-btn {
+    .join-btn{
       background-color: #c09370;
       color: white;
       font-size: 1rem;
       height: 2.5rem;
-      
     }
 }
 </style>

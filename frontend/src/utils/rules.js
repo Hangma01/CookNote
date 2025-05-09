@@ -1,12 +1,19 @@
 const checkUserIdReg = /^[a-z0-9]{5,20}$/;
-const checkPasswordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?])\S{10,20}$/;
+const checkPasswordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?])\S{8,16}$/;
 const checkNameReg = /^[a-zA-Z가-힣]{1,20}$/
-const checkNicknameReg = /^[^\s].{1,15}[^\s]$/
-const checkEmailReg = /^[^\s][a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]$/;
-
+const checkNicknameReg = /^(?!\s)(.{1,15})(?<!\s)$/
+const checkEmailReg = /^[^\s][a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{1,}[^\s]$/;
 
 export const required = (v) => {
-    return !!v || '필수 정보입니다.'
+    return !!v || '필수 입력 정보입니다.'
+}
+
+export const findNameRule = (v) => {
+    return !!v || '이름은 필수 입력 정보입니다.'
+}
+
+export const findIdRule = (v) => {
+    return !!v || '아이디는 필수 입력 정보입니다.'
 }
 
 export const userIdRule = (v) => {
@@ -51,7 +58,7 @@ export const nicknameRule = (v) => {
     }
 
     if (!checkNicknameReg.test(v)) {
-        return '1~15자 이내로 작성성해주세요.'
+        return '1~15자 이내로 작성해주세요. (앞 뒤 공백 불가)'
     }
 
     return true

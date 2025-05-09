@@ -12,6 +12,6 @@ import authHeader from '../components/header/authHeader/AuthHeader.vue'
 <style scoped>
 .user-auth-wrap{
     margin: 0 auto;
-    width: 24rem;
+    width: 22rem;
 }
 </style>

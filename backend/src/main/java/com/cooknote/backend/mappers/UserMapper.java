@@ -4,7 +4,7 @@ package com.cooknote.backend.mappers;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.cooknote.backend.domain.user.dto.User;
+import com.cooknote.backend.domain.user.entity.User;
 
 
 @Mapper
@@ -21,4 +21,10 @@ public interface UserMapper {
 
 	// 회원가입
 	void userJoin(User user);
+
+	// 아이디 찾기 - 요청
+	boolean userFindIdAuthRequest(User user);
+
+	// 아이디 찾기
+	User userFindId(User reqUser);
 }

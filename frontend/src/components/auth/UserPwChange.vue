@@ -6,33 +6,29 @@ import { commonValues } from '@/utils/commonValues';
 import { userFindId } from '@/services/userService';
 import { errorMessages } from '@/utils/errorMessages';
 import { HttpStatusCode } from 'axios';
-import { useRouter } from 'vue-router';
 
-const router = useRouter();
 
 // 유효성 겁사
-const formRef = ref(null);     // Form 유효성 검사
+const formRef = ref(null);                     // Form 유효성 검사
 
-let findId = null;             // 찾은 아이디
 
 // input-field
 const formValues = reactive({
-  userId: '',
+  name: '',
   email: '',
 })
 
-const handleSubmitFindPw = debounce(async () => {
+const handleSubmitFindId = debounce(async () => {
 
 	const isFormVal = await formRef.value.validate()
 	if (isFormVal.valid) {
 		try {
 				const res = await userFindId(formValues.name, formValues.email)
-                findId = res.data.userId;
+
 				if(res.status === HttpStatusCode.Ok) {
-						router.replace({ name: 'userPwChange', state: { userId: res.data.userId }});
+						console.log(res.data.userId)
 				}
 		} catch (e) {
-			console.log(e)
 			if(e.response &&
 				(e.response.data.status === HttpStatusCode.BadRequest || e.response.data.status === HttpStatusCode.NotFound)
 					&& e.response.data.message
@@ -47,12 +43,12 @@ const handleSubmitFindPw = debounce(async () => {
 </script>
 
 <template>
-	<v-form ref="formRef" class="find-id-form" @submit.prevent="handleSubmitFindPw">
+	<v-form ref="formRef" class="find-id-form" @submit.prevent="handleSubmitFindId">
 		<div class="find-id-content">
 			<v-text-field
 				v-model="formValues.name"
 				type="text"
-				label="아이디"
+				label="이름"
 				variant="solo"
 				density="comfortable"
 				hide-details="auto"
@@ -70,11 +66,9 @@ const handleSubmitFindPw = debounce(async () => {
 			/>
 		</div>
 
-
-
-        <v-btn type="submit" class="find-pw-btn">
-            인증요청
-        </v-btn>
+			<v-btn type="submit" class="find-id-btn">
+				아이디 찾기
+			</v-btn>
 	</v-form>
 
 
@@ -94,9 +88,16 @@ const handleSubmitFindPw = debounce(async () => {
 		display: flex;
 		flex-direction: column;
 		gap: 1.8rem;
+
+		.find-id-btn {
+				margin-top: 2rem;
+				font-size: 1rem;
+				height: 2.5rem;
+				font-weight: 700;
+		}
 	}
 
-	.find-pw-btn{
+	.find-id-btn{
 		background-color: #c09370;
 		color: white;
 		font-size: 1rem;

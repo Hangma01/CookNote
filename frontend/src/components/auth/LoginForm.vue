@@ -42,13 +42,13 @@ const isFormValid = computed(() => {
     <div class="find-wrap">
         <ul class="find-box">
             <li>
-                <router-link :to="{ name: 'userjoin' }" class="find-text">
+                <router-link :to="{ name: 'userFindPw' }" class="find-text">
                     비밀번호 찾기
                 </router-link>
             </li>
 
             <li>
-                <router-link :to="{ name: 'userjoin' }" class="find-text">
+                <router-link :to="{ name: 'userFindId' }" class="find-text">
                     아이디 찾기
                 </router-link>
             </li>
@@ -77,8 +77,10 @@ const isFormValid = computed(() => {
         gap: 1.8rem;
 
         .login-btn {
-            height: 3rem;
-            font-weight: 900;
+            margin-top: 2rem;
+            font-size: 1rem;
+            height: 2.5rem;
+            font-weight: 700;
         }
 
         .login-btn:not(:disabled) {
@@ -95,6 +97,7 @@ const isFormValid = computed(() => {
 
     li {
         position: relative;
+        font-size: 0.75rem;
   
         .find-text{
             color: #888;
@@ -104,11 +107,11 @@ const isFormValid = computed(() => {
     li + li::before {
         content: '|';
         position: absolute;
-        left: -50%;
+        left: -65%;
         top: 50%;
         transform: translateY(-50%);
         color: #dadada;
-        font-size: 0.9rem;
+        font-size: 0.7rem;
     }
 }
 

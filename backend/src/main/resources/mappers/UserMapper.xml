@@ -18,7 +18,8 @@
 
 	<!-- 아이디 중복 체크 -->
 	<select id="getCheckUserId" resultType="boolean">
-		SELECT EXISTS (SELECT 1 FROM USER WHERE USER_ID = #{userId})
+		SELECT 
+			EXISTS (SELECT 1 FROM USER WHERE USER_ID = #{userId})
 	</select>
 	
 	<!-- 닉네임 중복 체크 -->
@@ -33,10 +34,32 @@
 
 	<!-- 회원 가입 -->
 	<insert id="userJoin" parameterType="User">
-		INSERT INTO user (
-        	login_id, password, name, nickname, email
+		INSERT INTO USER (
+        	USER_ID, 
+        	PASSWORD, 
+        	NAME, 
+        	NICKNAME, 
+			EMAIL, 
+			PROFILE_IMAGE
     	) VALUES (
-        	#{loginId}, #{password}, #{name}, #{nickname}, #{email}
+        	#{userId}, 
+        	#{password}, 
+        	#{name}, 
+        	#{nickname}, 
+        	#{email},
+        	'FEFE.PNG'
     	)
 	</insert>
+	
+	<!-- 아이디 찾기 - 요청 -->
+	<select id="userFindIdAuthRequest" parameterType="User" resultType="boolean">
+		SELECT EXISTS (SELECT 1 FROM USER WHERE NAME = #{name} AND EMAIL = #{email})
+	</select>
+	
+	<!-- 아이디 찾기 -->
+	<select id="userFindId" parameterType="User" resultMap="userResultMap">
+		SELECT USER_ID
+		FROM USER
+		WHERE NAME = #{name} AND EMAIL = #{email}
+	</select>
 </mapper>

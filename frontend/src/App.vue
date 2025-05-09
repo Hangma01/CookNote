@@ -50,5 +50,14 @@ input[type="number"] {
 .v-field--error:not(.v-field--disabled) .v-label.v-field-label {
   color: #ff3f3f !important; /* Tomato 색상 (예시) */
 }
+
+.v-label.v-field-label {
+  font-size: 0.85rem;
+}
+
+
+.v-field__input {
+  font-size: 0.9rem;
+}
 </style>
 

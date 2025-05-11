@@ -23,7 +23,7 @@ export const checkEmail = async (email) => {
 export const userJoin = async (formValues) => {
     const res = await api.post(`/user/join`, formValues)
     return res;
-} 
+}
 
 // 아이디 찾기 - 요청
 export const userFindIdAuth = async (formValues) => {
@@ -31,8 +31,20 @@ export const userFindIdAuth = async (formValues) => {
     return res;
 }
 
-// 아이디 찾기 - 검증
+// 아이디 찾기
 export const userFindId = async (name, email) => {
-    const res = await api.post(`/user/find-id`)
+    const res = await api.get(`/user/find-id?name=${name}&email=${email}`)
+    return res;
+}
+
+// 아이디 찾기 - 요청
+export const userFindPwAuth = async (formValues) => {
+    const res = await api.post(`/user/find-pw/auth`, formValues)
+    return res;
+}
+
+// 아이디 찾기 - 검증
+export const userFindPw = async (name, email) => {
+    const res = await api.get(`/user/find-pw?name=${name}&email=${email}`)
     return res;
 }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
 
 	private String userId;
@@ -20,19 +21,4 @@ public class User {
 	private String profileImage;
 	private LocalDate createAt;
 	private LocalDate updateAt;
-	
-	@Builder
-	public User(String userId, String password, String name, String nickname, String email) {
-		this.userId = userId;
-		this.password = password;
-		this.name = name;
-		this.nickname = nickname;
-		this.email = email;
-	}
-	
-	@Builder
-	public User(String name, String email) {
-		this.name = name;
-		this.email = email;
-	}
 }

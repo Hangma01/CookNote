@@ -4,9 +4,9 @@ import Logo from "../Logo.vue";
 
 <template>
     <header class="user-header">
-        <h1 class="user-logo">
-            <Logo />
-        </h1>
+        <div class="user-logo">
+            <Logo/>
+        </div>
     </header>
 </template>
 

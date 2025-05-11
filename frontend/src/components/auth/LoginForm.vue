@@ -1,5 +1,7 @@
 <script setup>
 import { computed, reactive } from 'vue';
+import Logo from '../header/Logo.vue';
+import AuthHeader from '../header/authHeader/AuthHeader.vue';
 
 
 const formValues = reactive({
@@ -13,6 +15,7 @@ const isFormValid = computed(() => {
 </script>
 
 <template>
+    <AuthHeader />
     <v-form class="login-form">
         <div class="login-content">
             <v-text-field

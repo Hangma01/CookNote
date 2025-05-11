@@ -1,17 +1,25 @@
 package com.cooknote.backend.domain.user.service;
 
+import java.util.UUID;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cooknote.backend.domain.mail.dto.response.VerifyAuthCodeResponseDTO;
+import com.cooknote.backend.domain.mail.service.MailService;
 import com.cooknote.backend.domain.user.dto.request.UserFindIdAuthRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserFindPwAuthRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserFindPwChangeRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFindIdResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
-import com.cooknote.backend.global.infra.mail.service.MailService;
-import com.cooknote.backend.global.infra.utils.DateFormatUtil;
+import com.cooknote.backend.global.util.format.DateFormatUtil;
+import com.cooknote.backend.global.util.message.SuccessMessageUtil;
+import com.cooknote.backend.global.util.redis.RedisUtil;
 import com.cooknote.backend.mappers.UserMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +31,8 @@ public class UserService {
 	private final UserMapper userMapper;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final MailService mailService;
+	private final RedisUtil redisUtil;
+	private final int changePwTokenExpire = 300;
 	
 	
 	// 아이디 중복 체크
@@ -76,7 +86,7 @@ public class UserService {
 		Boolean isExistsUser = userMapper.userFindIdAuthRequest(reqUser);
 	
 		if(!isExistsUser) {
-			throw new CustomException(ErrorCode.NOT_FOUND_USER_ID_EXCEPTION);
+			throw new CustomException(ErrorCode.NOT_FOUND_USER_EXCEPTION);
 		}
 		
 		mailService.sendAuthCode(userFindIdAuthRequestDTO.getEmail());
@@ -94,7 +104,6 @@ public class UserService {
 		User rspUser = userMapper.userFindId(reqUser);
 		
 		if(rspUser == null) {
-			// 잘못된 요처응로 바꿔야함
 			throw new CustomException(ErrorCode.INVALID_STATE_EXCEPTION);
 		}
 		
@@ -103,5 +112,55 @@ public class UserService {
 																		.build();
 		
 		return userFindIdResponseDTO;
+	}
+	
+	// 비밀번호 찾기 - 요청
+	public UserFindPwResponseDTO userFindPwAuthRequest(UserFindPwAuthRequestDTO userFindPwAuthRequestDTO) {
+		
+		User reqUser = User.builder()
+				.userId(userFindPwAuthRequestDTO.getUserId())
+				.email(userFindPwAuthRequestDTO.getEmail())
+				.build();
+		
+		User rspUser = userMapper.userFindPw(reqUser);
+	
+		if(rspUser == null) {
+			throw new CustomException(ErrorCode.NOT_FOUND_USER_EXCEPTION);
+		}
+		
+		String changePwToken = UUID.randomUUID().toString();
+		
+		redisUtil.setDataExpire(changePwToken, rspUser.getUserId(), changePwTokenExpire);
+		
+		UserFindPwResponseDTO userFindPwResponseDTO = UserFindPwResponseDTO.builder()
+																		.changePwToken(changePwToken)
+																		.build();
+		
+		mailService.sendAuthCode(userFindPwAuthRequestDTO.getEmail());
+		
+		return userFindPwResponseDTO;
+	}
+	
+	// 비밀번호 찾기
+	@Transactional
+	public void userFindPwChange(UserFindPwChangeRequestDTO userFindPwChangeRequestDTO) {
+		
+		// 비밀번호 일치 확인
+		if(userFindPwChangeRequestDTO.getChangePw().equals(userFindPwChangeRequestDTO.getChangePwCheck())) {
+			
+		}
+		
+		String userId = redisUtil.getData(userFindPwChangeRequestDTO.getChangePwToken());
+		
+		if(userId == null){ 										// 인증 시간 만료
+			throw new CustomException(ErrorCode.PW_AUTH_EXPIRE_EXCEPTION);
+	    }
+		
+		User reqUser = User.builder()
+				.userId(userId)
+				.password(userFindPwChangeRequestDTO.getChangePw())
+				.build();
+		
+		userMapper.updatePwChange(reqUser);
 	}
 }

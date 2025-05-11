@@ -2,14 +2,15 @@
 import { reactive, ref, watch } from 'vue';
 import { userIdRule, passwordRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
 import { checkUserId, checkNickname, checkEmail, userJoin } from '@/services/userService';
-import { sendAuthCode, verifyAuthCode } from '@/services/mailService';
-import { checkDuplicate, handleInputHangle } from '@/utils/commonFunction';
+import { sendAuthCode } from '@/services/mailService';
+import { commonCheckDuplicate, commonInputHangle, commonVerifyAuthCode } from '@/utils/commonFunction';
 import { commonValues } from '@/utils/commonValues';
 import { errorMessages } from '@/utils/errorMessages';
 import { successMessage } from '@/utils/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash'
+import LogoMini from '../header/LogoMini.vue';
 
 const router = useRouter();
 
@@ -46,15 +47,15 @@ const authCodeValue = ref('')                 // 메일 인증 input-field
 
 
 // 이름 20자 제한 (한글)
-const handleNameInput = (e) => handleInputHangle(e, 20, (value) => formValues.name = value)
+const handleNameInput = (e) => commonInputHangle(e, 20, (value) => formValues.name = value)
 
 // 닉네임 15자 제한 (한글)
-const handleNicknameInput = (e) => handleInputHangle(e, 15, (value) => formValues.nickname = value)
+const handleNicknameInput = (e) => commonInputHangle(e, 15, (value) => formValues.nickname = value)
 
 
 // 아이디 중복 체크
 const checkUserIdDuplicate = async () => {
-  await checkDuplicate({
+  await commonCheckDuplicate({
     value: formValues.userId,               
     validatorRef: ruleUserIdRef,            
     errorMsgRef: errorMsgUserIdDuplicate,   
@@ -66,7 +67,7 @@ const checkUserIdDuplicate = async () => {
 
 // 닉네임 중복 체크
 const checkNicknameDuplicate = async () => {
-  await checkDuplicate({
+  await commonCheckDuplicate({
     value: formValues.nickname,             
     validatorRef: ruleNicknameRef,          
     errorMsgRef: errorMsgNicknameDuplicate, 
@@ -78,7 +79,7 @@ const checkNicknameDuplicate = async () => {
 
 // 이메일 중복 체크
 const checkEmailDuplicate = async () => {
-  await checkDuplicate({
+  await commonCheckDuplicate({
     value: formValues.email,             
     validatorRef: ruleEmailRef,          
     errorMsgRef: errorMsgEmailDuplicate, 
@@ -126,25 +127,16 @@ const handleSendAuthCodeRetry = async () => {
 
 // 인증 코드 검증하기
 const handleVerifyAuthCode = debounce(async () => {
-  try {
-    const res = await verifyAuthCode(formValues.email, authCodeValue.value);
-
-    if (res.data.result) {  // 인증 성공
-      isSuccessAuthCode.value = res.data.result;
-      errorMsgAuthCode.value = '';
-    } else {                // 인증 실패
-      isSuccessAuthCode.value = res.data.result;
-      errorMsgAuthCode.value = res.data.message;
-    }
-  } catch (e) {
-    if (e.response && e.response.data.status === HttpStatusCode.Gone) { // 인증 번호 만료
-      alert(e.response.data.message);
-    } else {
-      alert(errorMessages.badRequest);
-      router.replace('/login');
-    }
-  }
-}, commonValues.defaultDebounce)
+  await commonVerifyAuthCode(
+    formValues.email,
+    authCodeValue.value,
+    (result, message) => {
+      isSuccessAuthCode.value = result;
+      errorMsgAuthCode.value = message;
+    },
+    router
+  );
+}, commonValues.defaultDebounce);
 
 
 // 회원 가입 하기
@@ -191,6 +183,11 @@ watch (
 </script>
 
 <template>
+    <div class="title-wrap">
+      <LogoMini />
+      <h1 class="title">회원가입</h1>
+    </div>
+
     <v-form ref="formRef" class="join-form" @submit.prevent="handleSubmitJoin">
         <div class="join-content">
             <v-text-field
@@ -298,6 +295,22 @@ watch (
 
 
 <style lang="scss" scoped>
+.title-wrap{
+	display: flex;
+	align-items: end;
+	margin-top: 6rem;
+	margin-bottom: 3rem;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 1rem;
+	gap: 4rem;
+
+	.title {
+		font-size: 1.5rem;
+		color: #2c2c30;
+		font-weight: 600;
+	}
+}
+
 .join-form {
     display: flex;
     flex-direction: column;

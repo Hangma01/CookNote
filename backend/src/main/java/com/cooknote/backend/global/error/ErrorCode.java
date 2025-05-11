@@ -20,8 +20,10 @@ public enum ErrorCode {
 	// 유효성 검사
 	VALIDATION_EXCEPTION(HttpStatus.BAD_REQUEST, "잘못된 입력을 요청하셨습니다. 잠시 후 다시 시도해주세요."),
 	
-	NOT_FOUND_USER_ID_EXCEPTION(HttpStatus.NOT_FOUND, "이름 또는 이메일을 잘못 입력하셨습니다."),
-	INVALID_STATE_EXCEPTION(HttpStatus.NOT_FOUND, "정상적인 요청이 아닙니다.");
+	NOT_FOUND_USER_EXCEPTION(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
+	INVALID_STATE_EXCEPTION(HttpStatus.NOT_FOUND, "정상적인 요청이 아닙니다."),
+	
+	PW_AUTH_EXPIRE_EXCEPTION(HttpStatus.GONE, "비밀번호 변경 시간이 만료되었습니다. 다시 시도해주세요.");
 	
 	private final HttpStatus httpStatus;
 	private final String message;

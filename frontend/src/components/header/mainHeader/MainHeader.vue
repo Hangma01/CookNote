@@ -8,7 +8,9 @@ import NavMenu from "./NavMenu.vue";
 <template>
     <header>
         <div class="header-bottom">
-            <Logo />
+            <router-link :to="{ name: 'mainPage' }">
+                <Logo />
+            </router-link>
             <SearchBar />
             <UserMenu />
         </div>

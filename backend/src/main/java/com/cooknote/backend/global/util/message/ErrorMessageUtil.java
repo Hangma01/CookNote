@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.infra.utils.message;
+package com.cooknote.backend.global.util.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

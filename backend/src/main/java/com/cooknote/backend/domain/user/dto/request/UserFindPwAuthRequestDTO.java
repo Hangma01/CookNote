@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserFindIdAuthRequestDTO {
-	private String name;
+public class UserFindPwAuthRequestDTO {
+	private String userId;
 	private String email;
 }

@@ -4,15 +4,18 @@ import { debounce } from 'lodash';
 import { required, findNameRule, emailRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
 import { userFindIdAuth, userFindId } from '@/services/userService';
-import { sendAuthCode, verifyAuthCode } from '@/services/mailService';
+import { sendAuthCode } from '@/services/mailService';
 import { errorMessages } from '@/utils/errorMessages';
+import { successMessage } from '@/utils/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
+import { commonVerifyAuthCode } from '@/utils/commonFunction';
+import LogoMini from '../header/LogoMini.vue';
 
 const router = useRouter();
 
 // 유효성 겁사
-const formRef = ref(null);      						// Form 유효성 검사
+const formRef = ref(null);      			// Form 유효성 검사
 
 // 에러 메시지
 const errorMsgAuthCode = ref('')            // 메일 인증 코드 에러 메시지
@@ -43,10 +46,8 @@ const handleUserFindIdRequest = async () => {
   if (isFormVal.valid) { 
 		try {
 			const res = await userFindIdAuth({ ...formValues })
-			console.log(res)
 			isAuthCodeRequest.value = true;
 		} catch (e) {
-			console.log(e)
 			if(e.response &&
 					(e.response.data.status === HttpStatusCode.NotFound && e.response.data.message)
 			){
@@ -74,25 +75,18 @@ const handleSendAuthCodeRetry = async () => {
 
 // 인증 코드 검증하기
 const handleVerifyAuthCode = debounce(async () => {
-  try {
-    const res = await verifyAuthCode(formValues.email, authCodeValue.value);
+  await commonVerifyAuthCode(
+    formValues.email,
+    authCodeValue.value,
+    (result, message) => {
+      isSuccessAuthCode.value = result;
+      errorMsgAuthCode.value = message;
+    },
+    router
+  );
+}, commonValues.defaultDebounce);
 
-    if (res.data.result) {  // 인증 성공
-      isSuccessAuthCode.value = res.data.result;
-      errorMsgAuthCode.value = '';
-    } else {                // 인증 실패
-      isSuccessAuthCode.value = res.data.result;
-      errorMsgAuthCode.value = res.data.message;
-    }
-  } catch (e) {
-    if (e.response && e.response.data.status === HttpStatusCode.Gone) { // 인증 번호 만료
-      alert(e.response.data.message);
-    } else {
-      alert(errorMessages.badRequest);
-      router.replace('/login');
-    }
-  }
-}, commonValues.defaultDebounce)
+
 
 // 아이디 찾기
 const handleFindId = debounce(async () => {
@@ -107,7 +101,6 @@ const handleFindId = debounce(async () => {
 						router.replace({ name: 'userFindIdResult', state: { userId: res.data.userId }});
 				}
 		} catch (e) {
-			console.log(e)
 			if(e.response &&
 				(e.response.data.status === HttpStatusCode.BadRequest || e.response.data.status === HttpStatusCode.NotFound)
 					&& e.response.data.message
@@ -140,6 +133,11 @@ watch (
 </script>
 
 <template>
+	<div class="title-wrap">
+		<LogoMini />
+		<h1 class="title">아이디 찾기</h1>
+	</div>
+	
 	<v-form ref="formRef" class="find-id-form" @submit.prevent="handleFindId">
 		<div class="find-id-content">
 			<v-text-field
@@ -206,12 +204,28 @@ watch (
 
 
 <style lang="scss" scoped>
+.title-wrap{
+	display: flex;
+	align-items: end;
+	margin-top: 6rem;
+	margin-bottom: 3rem;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 1rem;
+	gap: 4rem;
+
+	.title {
+		font-size: 1.5rem;
+		color: #2c2c30;
+		font-weight: 600;
+	}
+}
+
 .find-id-form{
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	gap: 1.5rem;
-	height: 15rem;
+	height: 18rem;
 
 	.find-id-content {
 		display: flex;

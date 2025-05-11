@@ -26,5 +26,10 @@ public interface UserMapper {
 	boolean userFindIdAuthRequest(User user);
 
 	// 아이디 찾기
-	User userFindId(User reqUser);
+	User userFindId(User user);
+
+	// 비밀번호 찾기
+	User userFindPw(User User);
+
+	void updatePwChange(User User);
 }

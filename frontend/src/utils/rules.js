@@ -12,7 +12,7 @@ export const findNameRule = (v) => {
     return !!v || '이름은 필수 입력 정보입니다.'
 }
 
-export const findIdRule = (v) => {
+export const findUserIdRule = (v) => {
     return !!v || '아이디는 필수 입력 정보입니다.'
 }
 

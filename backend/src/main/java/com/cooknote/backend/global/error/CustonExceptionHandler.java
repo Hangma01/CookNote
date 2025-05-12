@@ -10,6 +10,11 @@ public class CustonExceptionHandler {
 	// 발생한 CustomException 예외를 잡아서 하나의 메소드에서 공통 처리한다.
 	@ExceptionHandler(CustomException.class)
 	protected ResponseEntity<ErrorResponseEntity> handleCustomException(CustomException e) {
-		return ErrorResponseEntity.toResponseEntity(e.getErrorCode());
+		
+		if(e.getErrorCode() != null) {
+			return ErrorResponseEntity.toResponseEntity(e.getErrorCode());
+		} else {
+			return ErrorResponseEntity.toResponseEntity(e.getJwtErrorCode());
+		}
 	}
 }

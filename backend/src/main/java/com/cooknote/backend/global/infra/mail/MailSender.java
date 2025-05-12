@@ -13,7 +13,7 @@ import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.message.SuccessMessage;
-import com.cooknote.backend.global.util.redis.RedisUtil;
+import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

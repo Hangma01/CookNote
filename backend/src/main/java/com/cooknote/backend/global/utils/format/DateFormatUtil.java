@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.util.format;
+package com.cooknote.backend.global.utils.format;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

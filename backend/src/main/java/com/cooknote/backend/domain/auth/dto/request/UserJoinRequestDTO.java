@@ -1,4 +1,4 @@
-package com.cooknote.backend.domain.user.dto.request;
+package com.cooknote.backend.domain.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

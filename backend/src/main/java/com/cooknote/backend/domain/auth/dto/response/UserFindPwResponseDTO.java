@@ -1,6 +1,4 @@
-package com.cooknote.backend.domain.user.dto.response;
-
-import java.time.LocalDate;
+package com.cooknote.backend.domain.auth.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserFindIdResponseDTO {
-	private String userId;
+public class UserFindPwResponseDTO {
+	private String pwResetToken;
 }

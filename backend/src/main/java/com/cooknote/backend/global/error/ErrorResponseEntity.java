@@ -23,4 +23,14 @@ public class ErrorResponseEntity {
 						.message(e.getMessage())
 						.build());
 	}
+
+	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(JwtErrorCode e) {
+		return ResponseEntity
+				.status(e.getHttpStatus())
+				.body(ErrorResponseEntity.builder()
+						.status(e.getHttpStatus().value())
+						.name(e.name())
+						.message(e.getMessage())
+						.build());
+	}
 }

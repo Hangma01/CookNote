@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.util.random;
+package com.cooknote.backend.global.utils.random;
 
 import java.security.SecureRandom;
 

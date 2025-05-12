@@ -10,9 +10,9 @@ import com.cooknote.backend.global.error.ErrorCode;
 import com.cooknote.backend.global.infra.mail.MailSender;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.message.SuccessMessage;
-import com.cooknote.backend.global.util.content.MailContent;
-import com.cooknote.backend.global.util.random.RandomAuthCodeUtil;
-import com.cooknote.backend.global.util.redis.RedisUtil;
+import com.cooknote.backend.global.utils.content.MailContent;
+import com.cooknote.backend.global.utils.random.RandomAuthCodeUtil;
+import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
 

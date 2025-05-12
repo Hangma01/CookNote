@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.util.content;
+package com.cooknote.backend.global.utils.content;
 
 public class MailContent {
     

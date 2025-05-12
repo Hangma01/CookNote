@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue';
 import { debounce } from 'lodash';
 import { pwRule, newPwConfirmRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
-import { userFindPwRest } from '@/services/userService';
+import { userFindPwRest } from '@/services/authService';
 import { HttpStatusCode } from 'axios';
 import { errorMessages } from '@/utils/errorMessages';
 import { useRouter } from 'vue-router';

@@ -2,6 +2,7 @@ package com.cooknote.backend.domain.auth.service;
 
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,20 +18,31 @@ import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
+import com.cooknote.backend.global.utils.auth.JwtUtil;
+import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 import com.cooknote.backend.mappers.AuthMapper;
-import com.cooknote.backend.mappers.UserMapper;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 	
 	private final AuthMapper authMapper;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final MailService mailService;
 	private final RedisUtil redisUtil;
+	private final JwtUtil jwtUtil;
 	
 	// 아이디 중복 체크
 	public boolean getCheckUserId(String loginId) {
@@ -172,5 +184,71 @@ public class AuthService {
 				.build();
 		
 		authMapper.updatePwReset(reqUser);	
+	}
+
+
+	// accessToken 재발급
+	public HttpServletResponse reissue(HttpServletRequest request, HttpServletResponse response) {
+
+		String refreshToken = null;
+        
+        Cookie[] cookies = request.getCookies();
+        
+        // 쿠키가 없으면 다음 필터로 넘김
+        if (cookies == null) {
+        	
+        	// 배드 리퀘스트
+        	return null;
+        }
+
+        // accessToekn 가져오기
+        for(Cookie cookie : cookies) {
+            if(cookie.getName().equals(Constans.REFRESH_TOKEN_NAME)) {
+
+            	refreshToken = cookie.getValue();
+            }
+        }
+
+
+        // accessToken 유효성 검사
+        if(refreshToken != null 
+        		&& jwtUtil.getCategory(refreshToken).equals(Constans.REFRESH_TOKEN_NAME)) {
+        	
+        	try {
+        		if(jwtUtil.isValidToken(refreshToken) ) {
+        			String userId = jwtUtil.getUserId(refreshToken);
+                	String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId;
+        			String refreshTokenReidsValue = redisUtil.getData(refreshTokenRedisKey);
+        			
+        			if(refreshToken.equals(refreshTokenReidsValue)) {
+        				User user = User.builder()
+			                    .userId(userId)
+			                    .build();
+        	
+			        	String newAccessToken = jwtUtil.createTokenJwt(Constans.ACCESS_TOKEN_NAME, userId, Constans.ACCESS_TOKEN_EXPIRED_MS);
+			    		String newRefreshToken = jwtUtil.createTokenJwt(Constans.REFRESH_TOKEN_NAME, userId, Constans.REFRESH_TOKEN_EXPIRED_MS);
+			    		System.out.println("타니?");
+			    		response.addCookie(CookieUtil.createCookie(Constans.ACCESS_TOKEN_NAME, newAccessToken));
+			    		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, newRefreshToken));
+			    	 
+			    		redisUtil.setDataExpire(refreshTokenRedisKey, newRefreshToken, Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS);
+        			}else {
+        				// 배드 리퀘스트
+        			}
+        		}
+        	} catch (SecurityException | MalformedJwtException | SignatureException e) {
+    	        log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+    	    } catch (ExpiredJwtException e) {
+    	        log.error("Expired JWT token, 만료된 JWT token 입니다.");
+    	    } catch (UnsupportedJwtException e) {
+    	        log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
+    	    } catch (IllegalArgumentException e) {
+    	        log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+    	    }
+        } else {
+        	// 배드 리퀘스트
+        }
+        
+        return response;
 	}
 }

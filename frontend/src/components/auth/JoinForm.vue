@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { userIdRule, pwRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
-import { checkUserId, checkNickname, checkEmail, userJoin } from '@/services/userService';
+import { checkUserId, checkNickname, checkEmail, userJoin } from '@/services/authService';
 import { sendAuthCode } from '@/services/mailService';
 import { commonCheckDuplicate, commonInputHangle, commonVerifyAuthCode } from '@/utils/commonFunction';
 import { commonValues } from '@/utils/commonValues';
@@ -106,6 +106,7 @@ const handleSendAuthCode = async () => {
         const res = await sendAuthCode(formValues.email);
         isAuthCodeRequest.value = true;
       } catch (e) {
+        console.log(e)
         alert(errorMessages.badRequest);
         router.replace({ name: 'login'});
       }

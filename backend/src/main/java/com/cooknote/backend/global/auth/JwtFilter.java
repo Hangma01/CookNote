@@ -9,7 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
-import com.cooknote.backend.global.utils.auth.JWTUtil;
+import com.cooknote.backend.global.utils.auth.JwtUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
-	private final JWTUtil jwtUtil;
+	private final JwtUtil jwtUtil;
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -52,37 +52,35 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-
+        System.out.println("Fef: " + accessToken);
         // accessToken 유효성 검사
-        if(accessToken != null 
-        		&& jwtUtil.getCategory(Constans.ACCESS_TOKEN_NAME).equals(Constans.ACCESS_TOKEN_NAME)) {
+        try {
+        	if(accessToken != null 
+        		&& jwtUtil.isValidToken(accessToken)
+        		&& jwtUtil.getCategory(accessToken).equals(Constans.ACCESS_TOKEN_NAME)){
+    			String userId = jwtUtil.getUserId(accessToken);
+            	
+            	User user = User.builder()
+    			                    .userId(userId)
+    			                    .build();
+            	
+            	CustomUserDetails customUserDetails = new CustomUserDetails(user);
+            	
+            	Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, null);
+    			
+    			// 현재 Security Context에 설정
+            	SecurityContextHolder.getContext().setAuthentication(authentication);
+    		}
         	
-        	try {
-        		if(jwtUtil.isValidToken(accessToken) ) {
-        			String userId = jwtUtil.getUserId(accessToken);
-                	
-                	User user = User.builder()
-        			                    .userId(userId)
-        			                    .build();
-                	
-                	CustomUserDetails customUserDetails = new CustomUserDetails(user);
-                	
-                	Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, null);
-        			
-        			// 현재 Security Context에 설정
-                	SecurityContextHolder.getContext().setAuthentication(authentication);
-        		}
-        			
-        	} catch (SecurityException | MalformedJwtException | SignatureException e) {
-    	        log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
-    	    } catch (ExpiredJwtException e) {
-    	        log.error("Expired JWT token, 만료된 JWT token 입니다.");
-    	    } catch (UnsupportedJwtException e) {
-    	        log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
-    	    } catch (IllegalArgumentException e) {
-    	        log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
-    	    }
-        }
+        } catch (SecurityException | MalformedJwtException | SignatureException e) {
+	        log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+	    } catch (ExpiredJwtException e) {
+	        log.error("Expired JWT token, 만료된 JWT token 입니다.");
+	    } catch (UnsupportedJwtException e) {
+	        log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
+	    } catch (IllegalArgumentException e) {
+	        log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+	    }
         
         filterChain.doFilter(request, response);
 	}

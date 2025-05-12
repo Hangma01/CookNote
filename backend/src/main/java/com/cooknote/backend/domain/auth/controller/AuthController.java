@@ -1,6 +1,5 @@
 package com.cooknote.backend.domain.auth.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +18,7 @@ import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
 import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
-import com.cooknote.backend.global.utils.auth.JWTUtil;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -32,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	private final JWTUtil jwtUtil;
+//	private final JWTUtil jwtUtil;
 	private final AuthService authService;
 	
 	// 아이디 중복 체크
@@ -129,73 +126,12 @@ public class AuthController {
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	@PostMapping("/reissue")
 	 public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
-        //get refresh token
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
+		authService.reissue(request, response);
 
-            if (cookie.getName().equals("refresh")) {
-
-                refresh = cookie.getValue();
-            }
-        }
-
-        if (refresh == null) {
-
-            //response status code
-            return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
-        }
-
-        //expired check
-
-
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-        String category = jwtUtil.getCategory(refresh);
-
-        if (!category.equals("refresh")) {
-
-            //response status code
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
-        }
-
-        String userId = jwtUtil.getUserId(refresh);;
-
-        //make new JWT
-        String newAccess = jwtUtil.createTokenJwt("access", userId, 600000L);
-
-        //response
-        response.setHeader("access", newAccess);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+		return ResponseEntity.ok().build();
     }
 }

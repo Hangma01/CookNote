@@ -1,6 +1,5 @@
 package com.cooknote.backend.global.auth;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,8 +8,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.cooknote.backend.global.constants.Constans;
-import com.cooknote.backend.global.utils.auth.JWTUtil;
+import com.cooknote.backend.global.utils.auth.JwtUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
+import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,14 +22,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 	
-    @Value("${jwt.expiredMs.accessToken}")
-    private long accessTokenExpiredMs;
-
-    @Value("${jwt.expiredMs.refreshToken}")
-    private long refreshTokenExpiredMs;
 	
 	private final AuthenticationManager authenticationManager;
-	private final JWTUtil jwtUtil;
+	private final JwtUtil jwtUtil;
+	private final RedisUtil redisUtil;
 	
 	 @Override
 	 public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -52,11 +48,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		
 		String userId = authentication.getName();
 		
-		String accessToken = jwtUtil.createTokenJwt(Constans.ACCESS_TOKEN_NAME, userId, accessTokenExpiredMs);
-		String refreshToen = jwtUtil.createTokenJwt(Constans.REFRESH_TOKEN_NAME, userId, refreshTokenExpiredMs);
+		String accessToken = jwtUtil.createTokenJwt(Constans.ACCESS_TOKEN_NAME, userId, Constans.ACCESS_TOKEN_EXPIRED_MS);
+		String refreshToKen = jwtUtil.createTokenJwt(Constans.REFRESH_TOKEN_NAME, userId, Constans.REFRESH_TOKEN_EXPIRED_MS);
 		
 		response.addCookie(CookieUtil.createCookie(Constans.ACCESS_TOKEN_NAME, accessToken));
-		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, refreshToen));
+		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, refreshToKen));
+		
+		String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId; 
+		redisUtil.setDataExpire(refreshTokenRedisKey, refreshToKen, Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS);
 		
 		response.setStatus(HttpStatus.OK.value());
 	}

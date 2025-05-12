@@ -19,7 +19,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.cooknote.backend.global.auth.JwtFilter;
 import com.cooknote.backend.global.auth.LoginFilter;
-import com.cooknote.backend.global.utils.auth.JWTUtil;
+import com.cooknote.backend.global.utils.auth.JwtUtil;
+import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class WebSecurityConfig {
 	
 	private final AuthenticationConfiguration authenticationConfiguration;
-	private final JWTUtil jwtUtil;
+	private final JwtUtil jwtUtil;
+	private final RedisUtil redisUtil;
 	
     //AuthenticationManager Bean 등록
     @Bean
@@ -85,7 +87,7 @@ public class WebSecurityConfig {
 		// 경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-						.requestMatchers("/login", "/logout").permitAll()
+						.requestMatchers("/login", "/logout", "api/auth/**", "api/mail/**").permitAll()
 						.anyRequest().authenticated());
 
 		
@@ -96,7 +98,7 @@ public class WebSecurityConfig {
 	    
 		// 필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager()는 직접 new로 만들 수 없어서 authenticationConfiguration가 필요함)
 		http
-			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
 
 		
 		// 세션 설정

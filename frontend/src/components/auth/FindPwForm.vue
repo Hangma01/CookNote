@@ -9,7 +9,7 @@ import { successMessage } from '@/utils/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
 import { commonVerifyAuthCode } from '@/utils/commonFunction';
-import { userFindPwAuth } from '@/services/userService';
+import { userFindPwAuth } from '@/services/authService';
 
 const router = useRouter();
 

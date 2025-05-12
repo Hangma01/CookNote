@@ -3,7 +3,7 @@ import { reactive, ref, watch } from 'vue';
 import { debounce } from 'lodash';
 import { required, findNameRule, emailRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
-import { userFindIdAuth, userFindId } from '@/services/userService';
+import { userFindIdAuth, userFindId } from '@/services/authService';
 import { sendAuthCode } from '@/services/mailService';
 import { errorMessages } from '@/utils/errorMessages';
 import { successMessage } from '@/utils/successMessage';

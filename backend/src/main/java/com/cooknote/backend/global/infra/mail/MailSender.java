@@ -9,8 +9,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.mail.dto.response.VerifyAuthCodeResponseDTO;
-import com.cooknote.backend.global.error.exceptionCode.ErrorCode;
-import com.cooknote.backend.global.error.excption.CustomException;
+import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
+import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.message.SuccessMessage;
 import com.cooknote.backend.global.utils.redis.RedisUtil;

@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum JwtErrorCode {
-	PW_AUTH_EXPIRE_EXCEPTION(HttpStatus.GONE, "비밀번호 변경 시간이 만료되었습니다. 다시 시도해주세요.");
+	REFRESH_TOKEN_EXPIRED_EXCEPTION(HttpStatus.UNAUTHORIZED, "로그인 시간이 만료되었습니다. 다시 로그인 해주세요.");
 	
 	
 	private final HttpStatus httpStatus;

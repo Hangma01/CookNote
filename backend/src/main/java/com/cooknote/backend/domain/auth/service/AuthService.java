@@ -16,8 +16,12 @@ import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.mail.service.MailService;
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
-import com.cooknote.backend.global.error.exceptionCode.ErrorCode;
-import com.cooknote.backend.global.error.excption.CustomException;
+import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
+import com.cooknote.backend.global.error.excption.CustomAuthException;
+import com.cooknote.backend.global.error.excption.CustomCommonException;
+import com.cooknote.backend.global.error.excption.CustomJwtException;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
@@ -35,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthService {
 	
 	private final AuthMapper authMapper;
@@ -95,7 +98,7 @@ public class AuthService {
 		Boolean isExistsUser = authMapper.userFindIdAuthRequest(reqUser);
 	
 		if(!isExistsUser) {
-			throw new CustomException(ErrorCode.NOT_FOUND_USER_EXCEPTION);
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
 		}
 		
 		mailService.sendAuthCode(userFindIdAuthRequestDTO.getEmail());
@@ -113,7 +116,7 @@ public class AuthService {
 		User rspUser = authMapper.userFindId(reqUser);
 		
 		if(rspUser == null) {
-			throw new CustomException(ErrorCode.INVALID_STATE_EXCEPTION);
+			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
 		}
 		
 		UserFindIdResponseDTO userFindIdResponseDTO = UserFindIdResponseDTO.builder()
@@ -134,7 +137,7 @@ public class AuthService {
 		User rspUser = authMapper.userFindPw(reqUser);
 	
 		if(rspUser == null) {
-			throw new CustomException(ErrorCode.NOT_FOUND_USER_EXCEPTION);
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
 		}
 		
 		// 메일로 인증코드 송신
@@ -162,7 +165,7 @@ public class AuthService {
 		
 		// 비밀번호 일치 확인
 		if(!userFindPwResetRequestDTO.getNewPw().equals(userFindPwResetRequestDTO.getNewPwConfirm())) {
-			throw new CustomException(ErrorCode.INVALID_STATE_EXCEPTION);
+			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
 		}
 		
 		// 비밀번호 재설정 키 확인
@@ -171,7 +174,7 @@ public class AuthService {
 		String userId = redisUtil.getData(pwResetRedisKey);
 		
 		if(userId == null){ 										// 인증 시간 만료
-			throw new CustomException(ErrorCode.PW_AUTH_EXPIRE_EXCEPTION);
+			throw new CustomAuthException(AuthErrorCode.PW_AUTH_EXPIRE_EXCEPTION);
 	    }
 		
 		String encodePw = bCryptPasswordEncoder.encode(userFindPwResetRequestDTO.getNewPw());
@@ -187,21 +190,19 @@ public class AuthService {
 	}
 
 
-	// accessToken 재발급
-	public HttpServletResponse reissue(HttpServletRequest request, HttpServletResponse response) {
+	// token 재발급
+	public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
 		String refreshToken = null;
         
         Cookie[] cookies = request.getCookies();
         
-        // 쿠키가 없으면 다음 필터로 넘김
         if (cookies == null) {
-        	
-        	// 배드 리퀘스트
-        	return null;
+
+        	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
         }
 
-        // accessToekn 가져오기
+        // refreshToekn 가져오기
         for(Cookie cookie : cookies) {
             if(cookie.getName().equals(Constans.REFRESH_TOKEN_NAME)) {
 
@@ -227,28 +228,20 @@ public class AuthService {
         	
 			        	String newAccessToken = jwtUtil.createTokenJwt(Constans.ACCESS_TOKEN_NAME, userId, Constans.ACCESS_TOKEN_EXPIRED_MS);
 			    		String newRefreshToken = jwtUtil.createTokenJwt(Constans.REFRESH_TOKEN_NAME, userId, Constans.REFRESH_TOKEN_EXPIRED_MS);
-			    		System.out.println("타니?");
+			    		
 			    		response.addCookie(CookieUtil.createCookie(Constans.ACCESS_TOKEN_NAME, newAccessToken));
 			    		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, newRefreshToken));
 			    	 
 			    		redisUtil.setDataExpire(refreshTokenRedisKey, newRefreshToken, Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS);
         			}else {
-        				// 배드 리퀘스트
+        				throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
         			}
         		}
-        	} catch (SecurityException | MalformedJwtException | SignatureException e) {
-    	        log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
-    	    } catch (ExpiredJwtException e) {
-    	        log.error("Expired JWT token, 만료된 JWT token 입니다.");
-    	    } catch (UnsupportedJwtException e) {
-    	        log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
-    	    } catch (IllegalArgumentException e) {
-    	        log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
-    	    }
+        	} catch (Exception e) {
+        		throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
+    	    } 
         } else {
-        	// 배드 리퀘스트
+        	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
         }
-        
-        return response;
 	}
 }

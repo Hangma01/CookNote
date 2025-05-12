@@ -2,7 +2,8 @@ package com.cooknote.backend.global.error.entity;
 
 import org.springframework.http.ResponseEntity;
 
-import com.cooknote.backend.global.error.exceptionCode.ErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
 
 import lombok.Builder;
@@ -17,7 +18,7 @@ public class ErrorResponseEntity {
 	private String name;
 	private String message;
 	
-	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(ErrorCode e) {
+	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(AuthErrorCode e) {
 		return ResponseEntity
 				.status(e.getHttpStatus())
 				.body(ErrorResponseEntity.builder()
@@ -28,6 +29,16 @@ public class ErrorResponseEntity {
 	}
 
 	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(JwtErrorCode e) {
+		return ResponseEntity
+				.status(e.getHttpStatus())
+				.body(ErrorResponseEntity.builder()
+						.status(e.getHttpStatus().value())
+						.name(e.name())
+						.message(e.getMessage())
+						.build());
+	}
+	
+	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(CommonErrorCode e) {
 		return ResponseEntity
 				.status(e.getHttpStatus())
 				.body(ErrorResponseEntity.builder()

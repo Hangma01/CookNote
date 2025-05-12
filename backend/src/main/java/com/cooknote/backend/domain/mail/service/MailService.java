@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.mail.dto.response.VerifyAuthCodeResponseDTO;
 import com.cooknote.backend.global.constants.Constans;
-import com.cooknote.backend.global.error.exceptionCode.ErrorCode;
-import com.cooknote.backend.global.error.excption.CustomException;
+import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
+import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.infra.mail.MailSender;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.message.SuccessMessage;
@@ -46,7 +46,7 @@ public class MailService {
 
 	
 		if(redisAuthCode == null){ 										// 인증 번호 시간 만료
-			throw new CustomException(ErrorCode.MAIL_AUTH_CODE_EXPIRE_EXCEPTION);
+			throw new CustomAuthException(AuthErrorCode.MAIL_AUTH_CODE_EXPIRE_EXCEPTION);
 	    } else if(redisAuthCode.equals(authCode)) {						// 인증 번호 일치
 	        return VerifyAuthCodeResponseDTO.builder()
 	        		.result(true)

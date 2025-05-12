@@ -62,8 +62,6 @@ public class WebSecurityConfig {
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
 					configuration.setMaxAge(3600L);
 
-//						configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-
 					return configuration;
 				}
 			}));
@@ -87,7 +85,7 @@ public class WebSecurityConfig {
 		// 경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-						.requestMatchers("/login", "/logout", "api/auth/**", "api/mail/**").permitAll()
+						.requestMatchers("/login", "/logout", "/api/auth/**", "/api/mail/**").permitAll()
 						.anyRequest().authenticated());
 
 		
@@ -98,16 +96,12 @@ public class WebSecurityConfig {
 	    
 		// 필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager()는 직접 new로 만들 수 없어서 authenticationConfiguration가 필요함)
 		http
-			.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
+			.addFilterBefore(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
 
 		
 		// 세션 설정
 		http
 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-
-				// LogoutFilter() 전에 CustomLogoutFilter() 추가
-//				.addFilterBefore(new CustomLogoutFilter(jwtUtil, redisRepository), LogoutFilter.class)
 
 
 		return http.build();

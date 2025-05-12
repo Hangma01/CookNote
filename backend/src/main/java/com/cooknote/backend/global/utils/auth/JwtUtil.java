@@ -16,7 +16,6 @@ import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Slf4j
 public class JwtUtil {
 	
 	private final SecretKey secretKey;
@@ -42,7 +41,6 @@ public class JwtUtil {
     }
 
 
-    
    //JWT 토큰 생성
     public String createTokenJwt(String category, String userId, long expiredMs) {
     	

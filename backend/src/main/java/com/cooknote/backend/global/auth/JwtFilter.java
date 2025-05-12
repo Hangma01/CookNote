@@ -1,6 +1,8 @@
 package com.cooknote.backend.global.auth;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.PrintWriter;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -9,6 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
+import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -52,7 +55,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        System.out.println("Fef: " + accessToken);
+        
         // accessToken 유효성 검사
         try {
         	if(accessToken != null 
@@ -73,13 +76,20 @@ public class JwtFilter extends OncePerRequestFilter {
     		}
         	
         } catch (SecurityException | MalformedJwtException | SignatureException e) {
-	        log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+        	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
 	    } catch (ExpiredJwtException e) {
-	        log.error("Expired JWT token, 만료된 JWT token 입니다.");
+	    	PrintWriter writer = response.getWriter();
+            writer.print(ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE);
+
+	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	    	return;
 	    } catch (UnsupportedJwtException e) {
-	        log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
+	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	    	return;
 	    } catch (IllegalArgumentException e) {
-	        log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	    	return;
 	    }
         
         filterChain.doFilter(request, response);

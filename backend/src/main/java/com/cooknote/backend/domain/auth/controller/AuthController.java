@@ -16,8 +16,10 @@ import com.cooknote.backend.domain.auth.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
-import com.cooknote.backend.global.error.exceptionCode.ErrorCode;
-import com.cooknote.backend.global.error.excption.CustomException;
+import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
+import com.cooknote.backend.global.error.excption.CustomAuthException;
+import com.cooknote.backend.global.error.excption.CustomCommonException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,14 +31,13 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-//	private final JWTUtil jwtUtil;
 	private final AuthService authService;
 	
 	// 아이디 중복 체크
 	@GetMapping("/check-user-id")
 	public ResponseEntity<Void> getCheckUserId(@RequestParam("user_id") String userId) {
 
-		checkDuplicate(authService.getCheckUserId(userId), ErrorCode.DUPLICATE_USERID_EXCEPTION);
+		checkDuplicate(authService.getCheckUserId(userId), AuthErrorCode.DUPLICATE_USERID_EXCEPTION);
 
 		return ResponseEntity.ok().build();
 	}
@@ -45,7 +46,7 @@ public class AuthController {
 	@GetMapping("/check-nickname")
 	public ResponseEntity<Void> getCheckNickname(@RequestParam("nickname") String nickname) {
 
-		checkDuplicate(authService.getCheckNickname(nickname), ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+		checkDuplicate(authService.getCheckNickname(nickname), AuthErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
 
 		return ResponseEntity.ok().build();
 	}
@@ -54,7 +55,7 @@ public class AuthController {
 	@GetMapping("/check-email")
 	public ResponseEntity<Void> getCheckEmail(@RequestParam("email") String email) {
 
-		checkDuplicate(authService.getCheckEmail(email), ErrorCode.DUPLICATE_EMAIL_EXCEPTION);
+		checkDuplicate(authService.getCheckEmail(email), AuthErrorCode.DUPLICATE_EMAIL_EXCEPTION);
 
 		return ResponseEntity.ok().build();
 	}
@@ -65,13 +66,13 @@ public class AuthController {
 
 		// 유효성 검사 확인
 		if (bindingResult.hasErrors()) {
-			throw new CustomException(ErrorCode.VALIDATION_EXCEPTION);
+			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
 
 		// 중복 검사
-		checkDuplicate(authService.getCheckUserId(userJoinRequestDTO.getUserId()), ErrorCode.DUPLICATE_USERID_EXCEPTION);
-		checkDuplicate(authService.getCheckNickname(userJoinRequestDTO.getNickname()), ErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
-		checkDuplicate(authService.getCheckEmail(userJoinRequestDTO.getEmail()), ErrorCode.DUPLICATE_EMAIL_EXCEPTION);
+		checkDuplicate(authService.getCheckUserId(userJoinRequestDTO.getUserId()), AuthErrorCode.DUPLICATE_USERID_EXCEPTION);
+		checkDuplicate(authService.getCheckNickname(userJoinRequestDTO.getNickname()), AuthErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+		checkDuplicate(authService.getCheckEmail(userJoinRequestDTO.getEmail()), AuthErrorCode.DUPLICATE_EMAIL_EXCEPTION);
 
 		// 회원 가입
 		authService.userJoin(userJoinRequestDTO);
@@ -109,7 +110,7 @@ public class AuthController {
 
 		// 유효성 검사 확인
 		if (bindingResult.hasErrors()) {
-			throw new CustomException(ErrorCode.VALIDATION_EXCEPTION);
+			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
 		
 		authService.userFindPwReset(userFindPwResetRequestDTO);
@@ -119,14 +120,14 @@ public class AuthController {
 	
 	
 	// 중복 체크
-	private void checkDuplicate(boolean isDuplicate, ErrorCode errorCode) {
+	private void checkDuplicate(boolean isDuplicate, AuthErrorCode errorCode) {
 		if (isDuplicate) {
-			throw new CustomException(errorCode);
+			throw new CustomAuthException(errorCode);
 		}
 	}
 	
 	
-
+	// 토큰 재발급
 	@PostMapping("/reissue")
 	 public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 

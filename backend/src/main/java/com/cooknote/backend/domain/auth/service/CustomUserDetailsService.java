@@ -1,4 +1,4 @@
-package com.cooknote.backend.domain.user.service;
+package com.cooknote.backend.domain.auth.service;
 
 import java.util.Collection;
 

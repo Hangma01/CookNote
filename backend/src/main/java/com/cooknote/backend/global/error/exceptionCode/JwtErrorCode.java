@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.error;
+package com.cooknote.backend.global.error.exceptionCode;
 
 import org.springframework.http.HttpStatus;
 

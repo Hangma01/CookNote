@@ -16,8 +16,8 @@ import com.cooknote.backend.domain.auth.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
-import com.cooknote.backend.global.error.CustomException;
-import com.cooknote.backend.global.error.ErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.ErrorCode;
+import com.cooknote.backend.global.error.excption.CustomException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

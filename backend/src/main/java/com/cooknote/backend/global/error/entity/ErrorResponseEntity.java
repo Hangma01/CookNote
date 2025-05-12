@@ -1,6 +1,9 @@
-package com.cooknote.backend.global.error;
+package com.cooknote.backend.global.error.entity;
 
 import org.springframework.http.ResponseEntity;
+
+import com.cooknote.backend.global.error.exceptionCode.ErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
 
 import lombok.Builder;
 import lombok.Getter;

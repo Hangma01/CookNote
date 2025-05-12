@@ -1,16 +1,15 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { debounce } from 'lodash';
-import { required, findNameRule, emailRule } from '@/utils/rules';
+import { required, findUserIdRule, emailRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
-import { userFindIdAuth, userFindId } from '@/services/userService';
 import { sendAuthCode } from '@/services/mailService';
 import { errorMessages } from '@/utils/errorMessages';
 import { successMessage } from '@/utils/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
 import { commonVerifyAuthCode } from '@/utils/commonFunction';
-import LogoMini from '../header/LogoMini.vue';
+import { userFindPwAuth } from '@/services/userService';
 
 const router = useRouter();
 
@@ -29,23 +28,24 @@ const isAuthCodeRequest = ref(false)      	// 메일 인증 요청 토글
 
 // input-field
 const formValues = reactive({             	// Form input-field 
-  name: '',
+  userId: '',
   email: '',
 })
 
 const authCodeValue = ref('')             	// 메일 인증 input-field
+let pwResetToken = null;										// 비밀번호 변경 토큰
 
 
-
-// 아이디 찾기 - 요청
-const handleUserFindIdRequest = async () => {
+// 비밀번호 찾기 - 요청
+const handleUserFindPwRequest = async () => {
 
   const isFormVal = await formRef.value.validate()
 
   // 유효성 검사 통과 시 메일 인증 코드 발송
   if (isFormVal.valid) { 
 		try {
-			const res = await userFindIdAuth({ ...formValues })
+			const res = await userFindPwAuth({ ...formValues })
+			pwResetToken = res.data.pwResetToken;
 			isAuthCodeRequest.value = true;
 		} catch (e) {
 			if(e.response &&
@@ -88,28 +88,13 @@ const handleVerifyAuthCode = debounce(async () => {
 
 
 
-// 아이디 찾기
-const handleFindId = debounce(async () => {
+// 비밀번호 찾기 - 변경 페이지로 이동
+const handleFindPw = debounce(async () => {
 	
 	const isFormVal = await formRef.value.validate()
 
 	if (isFormVal.valid && isSuccessAuthCode) {
-		try {
-				const res = await userFindId(formValues.name, formValues.email)
-				
-				if(res.status === HttpStatusCode.Ok) {
-						router.replace({ name: 'userFindIdResult', state: { userId: res.data.userId }});
-				}
-		} catch (e) {
-			if(e.response &&
-				(e.response.data.status === HttpStatusCode.BadRequest || e.response.data.status === HttpStatusCode.NotFound)
-					&& e.response.data.message
-			){
-				alert(e.response.data.message);
-			} else {
-				alert(errorMessages.badRequest);
-			}
-		}
+		router.replace({ name: 'pwReset', state: { pwResetToken: pwResetToken }});
 	}
 }, commonValues.defaultDebounce);
 
@@ -133,21 +118,16 @@ watch (
 </script>
 
 <template>
-	<div class="title-wrap">
-		<LogoMini />
-		<h1 class="title">비밀번호 찾기</h1>
-	</div>
-	
-	<v-form ref="formRef" class="find-id-form" @submit.prevent="handleFindId">
-		<div class="find-id-content">
+	<v-form ref="formRef" class="find-pw-form" @submit.prevent="handleFindPw">
+		<div class="find-pw-content">
 			<v-text-field
-				v-model="formValues.name"
+				v-model="formValues.userId"
 				type="text"
-				label="이름"
+				label="아이디"
 				variant="solo"
 				density="comfortable"
 				hide-details="auto"
-				:rules="[findNameRule]"
+				:rules="[findUserIdRule]"
 			/>
 
 			<v-text-field
@@ -189,45 +169,26 @@ watch (
 			</div>
 		</div>
 
-		<v-btn type="button" class="find-id-btn" @click="handleUserFindIdRequest" v-show="!isAuthCodeRequest">
+		<v-btn type="button" class="find-pw-btn" @click="handleUserFindPwRequest" v-show="!isAuthCodeRequest">
 			인증요청
 		</v-btn>
 		
-		<v-btn type="submit" class="find-id-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
-			인증 후 아이디 찾기
+		<v-btn type="submit" class="find-pw-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
+			비밀번호 변경
 		</v-btn>
 	</v-form>
-
-
-    
 </template>
 
 
 <style lang="scss" scoped>
-.title-wrap{
-	display: flex;
-	align-items: end;
-	margin-top: 6rem;
-	margin-bottom: 3rem;
-	border-bottom: 1px solid #eee;
-	padding-bottom: 1rem;
-	gap: 4rem;
-
-	.title {
-		font-size: 1.5rem;
-		color: #2c2c30;
-		font-weight: 600;
-	}
-}
-
-.find-id-form{
+.find-pw-form{
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	gap: 1.5rem;
 	height: 18rem;
 
-	.find-id-content {
+	.find-pw-content {
 		display: flex;
 		flex-direction: column;
 		gap: 1.8rem;
@@ -255,7 +216,7 @@ watch (
 		color: green;
 	}
 
-	.find-id-btn{
+	.find-pw-btn{
 		background-color: #c09370;
 		color: white;
 		font-size: 1rem;

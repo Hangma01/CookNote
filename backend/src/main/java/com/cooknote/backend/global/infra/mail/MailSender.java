@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import com.cooknote.backend.domain.mail.dto.response.VerifyAuthCodeResponseDTO;
 import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
-import com.cooknote.backend.global.util.message.ErrorMessageUtil;
-import com.cooknote.backend.global.util.message.SuccessMessageUtil;
+import com.cooknote.backend.global.message.ErrorMessage;
+import com.cooknote.backend.global.message.SuccessMessage;
 import com.cooknote.backend.global.util.redis.RedisUtil;
 
 import jakarta.mail.MessagingException;

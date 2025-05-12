@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cooknote.backend.domain.user.dto.request.UserFindIdAuthRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserFindPwAuthRequestDTO;
-import com.cooknote.backend.domain.user.dto.request.UserFindPwChangeRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserFindPwResetRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFindPwResponseDTO;
@@ -85,7 +85,7 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 
-	// 아이디 찾기
+	// 아이디 찾기 - 아이디 반환
 	@GetMapping("/find-id")
 	public ResponseEntity<UserFindIdResponseDTO> userFindId(@RequestParam("name") String name, @RequestParam("email") String email) {
 
@@ -99,11 +99,17 @@ public class UserController {
 		return ResponseEntity.ok(userService.userFindPwAuthRequest(userFindPwAuthRequestDTO));
 	}
 	
+	
 	// 비밀번호 찾기 - 변경
-	@PostMapping("/find-pw/change")
-	public ResponseEntity<Void> userFindPwChange(@RequestBody UserFindPwChangeRequestDTO userFindPwChangeRequestDTO) {
+	@PostMapping("/find-pw/reset")
+	public ResponseEntity<Void> userFindPwReset(@Valid @RequestBody UserFindPwResetRequestDTO userFindPwResetRequestDTO, BindingResult bindingResult) {
+
+		// 유효성 검사 확인
+		if (bindingResult.hasErrors()) {
+			throw new CustomException(ErrorCode.VALIDATION_EXCEPTION);
+		}
 		
-		userService.userFindPwChange(userFindPwChangeRequestDTO);
+		userService.userFindPwReset(userFindPwResetRequestDTO);
 		
 		return ResponseEntity.ok().build();
 	}

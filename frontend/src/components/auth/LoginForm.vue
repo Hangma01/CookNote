@@ -15,55 +15,54 @@ const isFormValid = computed(() => {
 </script>
 
 <template>
-    <AuthHeader />
-    <v-form class="login-form">
-        <div class="login-content">
-            <v-text-field
-                v-model="formValues.id"
-                type="text"
-                label="아이디"
-                variant="solo"
-                density="comfortable"
-                hide-details="auto"
-            />
- 
-            <v-text-field
-                v-model="formValues.pw"
-                type="password"
-                label="비밀번호"
-                variant="solo"
-                density="comfortable"
-                hide-details="auto"
-            />
+  <AuthHeader />
+  <v-form class="login-form">
+    <div class="login-content">
+      <v-text-field
+          v-model="formValues.id"
+          type="text"
+          label="아이디"
+          variant="solo"
+          density="comfortable"
+          hide-details="auto"
+      />
 
-            <v-btn :disabled="!isFormValid" class="login-btn">
-                로그인
-            </v-btn>
-        </div>
-    </v-form>
+      <v-text-field
+          v-model="formValues.pw"
+          type="password"
+          label="비밀번호"
+          variant="solo"
+          density="comfortable"
+          hide-details="auto"
+      />
 
-    <div class="find-wrap">
-        <ul class="find-box">
-            <li>
-                <router-link :to="{ name: 'userFindPw' }" class="find-text">
-                    비밀번호 찾기
-                </router-link>
-            </li>
-
-            <li>
-                <router-link :to="{ name: 'userFindId' }" class="find-text">
-                    아이디 찾기
-                </router-link>
-            </li>
-
-            <li> 
-                <router-link :to="{ name: 'userjoin' }" class="find-text">
-                    회원가입
-                </router-link>
-            </li>
-        </ul>
+      <v-btn :disabled="!isFormValid" class="login-btn">
+          로그인
+      </v-btn>
     </div>
-    
+  </v-form>
+
+  <div class="find-wrap">
+    <ul class="find-box">
+      <li>
+        <router-link :to="{ name: 'userFindPw' }" class="find-text">
+            비밀번호 찾기
+        </router-link>
+      </li>
+
+      <li>
+        <router-link :to="{ name: 'userFindId' }" class="find-text">
+            아이디 찾기
+        </router-link>
+      </li>
+
+      <li> 
+        <router-link :to="{ name: 'userjoin' }" class="find-text">
+            회원가입
+        </router-link>
+      </li>
+    </ul>
+  </div>
 </template>
 
 

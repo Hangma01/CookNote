@@ -5,22 +5,21 @@ const userId = history.state.userId;
 </script>
 
 <template>
+  <div class="find-id-result-info">
+    <p>고객님의 아이디 찾기가 완료되었습니다.</p>
+    <p class="find-id-value">{{ userId }}</p>
+  </div>
 
-<div class="find-id-result-info">
-  <p>고객님의 아이디 찾기가 완료되었습니다.</p>
-  <p class="find-id-value">{{ userId }}</p>
-</div>
-
-<div class="page-router-btn-wrap">
-  
-  <router-link :to="{ name: 'login' }">
-    <v-btn class="page-router-btn login-page-router-btn">로그인하기</v-btn>
-  </router-link>
-  
-  <router-link :to="{ name: 'userFindPw' }">
-    <v-btn class="page-router-btn find-pw-page-router-btn">비밀번호 찾기</v-btn>
-  </router-link>
-</div>
+  <div class="page-router-btn-wrap">
+    
+    <router-link :to="{ name: 'login' }">
+      <v-btn class="page-router-btn login-page-router-btn">로그인하기</v-btn>
+    </router-link>
+    
+    <router-link :to="{ name: 'userFindPw' }">
+      <v-btn class="page-router-btn find-pw-page-router-btn">비밀번호 찾기</v-btn>
+    </router-link>
+  </div>
 </template>
 
 

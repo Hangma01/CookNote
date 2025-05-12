@@ -6,19 +6,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cooknote.backend.domain.mail.dto.response.VerifyAuthCodeResponseDTO;
 import com.cooknote.backend.domain.mail.service.MailService;
 import com.cooknote.backend.domain.user.dto.request.UserFindIdAuthRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserFindPwAuthRequestDTO;
-import com.cooknote.backend.domain.user.dto.request.UserFindPwChangeRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserFindPwResetRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.user.entity.User;
+import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.CustomException;
 import com.cooknote.backend.global.error.ErrorCode;
-import com.cooknote.backend.global.util.format.DateFormatUtil;
-import com.cooknote.backend.global.util.message.SuccessMessageUtil;
 import com.cooknote.backend.global.util.redis.RedisUtil;
 import com.cooknote.backend.mappers.UserMapper;
 
@@ -32,7 +30,6 @@ public class UserService {
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final MailService mailService;
 	private final RedisUtil redisUtil;
-	private final int changePwTokenExpire = 300;
 	
 	
 	// 아이디 중복 체크
@@ -60,12 +57,12 @@ public class UserService {
 	@Transactional
 	public void userJoin(UserJoinRequestDTO userJoinRequestDTO) {	
 	
-		String encodePassword = bCryptPasswordEncoder.encode(userJoinRequestDTO.getPassword());
+		String encodePw = bCryptPasswordEncoder.encode(userJoinRequestDTO.getPw());
 		
 		
 		User reqUser = User.builder()
 				.userId(userJoinRequestDTO.getUserId())
-				.password(encodePassword)
+				.password(encodePw)
 				.name(userJoinRequestDTO.getName())
 				.nickname(userJoinRequestDTO.getNickname())
 				.email(userJoinRequestDTO.getEmail())
@@ -93,7 +90,7 @@ public class UserService {
 	}
 
 	
-	// 아이디 찾기
+	// 아이디 찾기 - 아이디 반환
 	public UserFindIdResponseDTO userFindId(String name, String email) {
 		
 		User reqUser = User.builder()
@@ -128,39 +125,55 @@ public class UserService {
 			throw new CustomException(ErrorCode.NOT_FOUND_USER_EXCEPTION);
 		}
 		
-		String changePwToken = UUID.randomUUID().toString();
+		// 메일로 인증코드 송신
+		mailService.sendAuthCode(userFindPwAuthRequestDTO.getEmail());
+
+		// 비밀번호 재설정 토큰 추가
+		String pwResetToken = UUID.randomUUID().toString();
+		String pwResetRedisKey = Constans.PW_RESET_PREFIX + pwResetToken;
+		String userId = rspUser.getUserId();
 		
-		redisUtil.setDataExpire(changePwToken, rspUser.getUserId(), changePwTokenExpire);
+		redisUtil.setDataExpire(pwResetRedisKey, userId, Constans.PW_RESET_TOKEN_EXPIRE);
+		
 		
 		UserFindPwResponseDTO userFindPwResponseDTO = UserFindPwResponseDTO.builder()
-																		.changePwToken(changePwToken)
+																		.pwResetToken(pwResetToken)
 																		.build();
-		
-		mailService.sendAuthCode(userFindPwAuthRequestDTO.getEmail());
 		
 		return userFindPwResponseDTO;
 	}
 	
-	// 비밀번호 찾기
+	
+	// 비밀번호 찾기 - 변경
 	@Transactional
-	public void userFindPwChange(UserFindPwChangeRequestDTO userFindPwChangeRequestDTO) {
+	public void userFindPwReset(UserFindPwResetRequestDTO userFindPwResetRequestDTO) {
 		
 		// 비밀번호 일치 확인
-		if(userFindPwChangeRequestDTO.getChangePw().equals(userFindPwChangeRequestDTO.getChangePwCheck())) {
-			
+		if(!userFindPwResetRequestDTO.getNewPw().equals(userFindPwResetRequestDTO.getNewPwConfirm())) {
+			throw new CustomException(ErrorCode.INVALID_STATE_EXCEPTION);
 		}
 		
-		String userId = redisUtil.getData(userFindPwChangeRequestDTO.getChangePwToken());
+		// 비밀번호 재설정 키 확인
+		String pwResetRedisKey = Constans.PW_RESET_PREFIX + userFindPwResetRequestDTO.getPwResetToken();
+		
+		String userId = redisUtil.getData(pwResetRedisKey);
 		
 		if(userId == null){ 										// 인증 시간 만료
 			throw new CustomException(ErrorCode.PW_AUTH_EXPIRE_EXCEPTION);
 	    }
 		
+		String encodePw = bCryptPasswordEncoder.encode(userFindPwResetRequestDTO.getNewPw());
+		
+		
+		// 비밀번호 재설정
 		User reqUser = User.builder()
 				.userId(userId)
-				.password(userFindPwChangeRequestDTO.getChangePw())
+				.password(encodePw)
 				.build();
 		
-		userMapper.updatePwChange(reqUser);
+		userMapper.updatePwReset(reqUser);	
 	}
+
+
+
 }

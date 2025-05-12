@@ -31,5 +31,5 @@ public interface UserMapper {
 	// 비밀번호 찾기
 	User userFindPw(User User);
 
-	void updatePwChange(User User);
+	void updatePwReset(User User);
 }

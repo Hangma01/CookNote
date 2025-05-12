@@ -1,11 +1,11 @@
-package com.cooknote.backend.global.util.message;
+package com.cooknote.backend.global.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum ErrorMessageUtil {
+public enum ErrorMessage {
 	
 	// 메일 - 인증 코드 검증 에러 메시지
 	VERIFY_AUTH_CODE_EXPIRE("인증코드 시간이 만료되었습니다."),

@@ -1,5 +1,5 @@
 <template>
-    <mainHeader />
+  <mainHeader />
 </template>
 
 <script setup>

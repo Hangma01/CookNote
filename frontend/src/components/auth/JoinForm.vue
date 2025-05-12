@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
-import { userIdRule, passwordRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
+import { userIdRule, pwRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
 import { checkUserId, checkNickname, checkEmail, userJoin } from '@/services/userService';
 import { sendAuthCode } from '@/services/mailService';
 import { commonCheckDuplicate, commonInputHangle, commonVerifyAuthCode } from '@/utils/commonFunction';
@@ -12,6 +12,8 @@ import { useRouter } from 'vue-router';
 import { debounce } from 'lodash'
 import LogoMini from '../header/LogoMini.vue';
 
+
+// 화면 전환
 const router = useRouter();
 
 // 유효성 겁사
@@ -31,13 +33,13 @@ const isSuccessAuthCode = ref(false)          // 메일 인증 코드 성공 메
 
 // etc...
 const isAuthCodeRequest = ref(false)          // 메일 인증 요청 토글
-const passwordVisible = ref(false)            // 비밀번호 필드 토글
+const pwVisible = ref(false)            // 비밀번호 필드 토글
 
 
 // input-field
 const formValues = reactive({                 // Form input-field             
   userId: '',
-  password: '',
+  pw: '',
   name: '',
   nickname: '',
   email: ''
@@ -105,7 +107,7 @@ const handleSendAuthCode = async () => {
         isAuthCodeRequest.value = true;
       } catch (e) {
         alert(errorMessages.badRequest);
-        router.replace('/login');
+        router.replace({ name: 'login'});
       }
     }  
 }
@@ -120,7 +122,7 @@ const handleSendAuthCodeRetry = async () => {
     alert(successMessage.authMailRetry);
   } catch (e) {
     alert(errorMessages.badRequest);
-    router.replace('/login');
+    router.replace({ name: 'login'});
   }
 }
 
@@ -161,7 +163,7 @@ const handleSubmitJoin = debounce(async () => {
     alert(errorMessages.badRequest)
   }
 
-  router.replace('/login');
+  router.replace({ name: 'login'});
 }, commonValues.defaultDebounce)
 
 watch (
@@ -183,114 +185,114 @@ watch (
 </script>
 
 <template>
-    <div class="title-wrap">
-      <LogoMini />
-      <h1 class="title">회원가입</h1>
+  <div class="title-wrap">
+    <LogoMini />
+    <h1 class="title">회원가입</h1>
+  </div>
+
+  <v-form ref="formRef" class="join-form" @submit.prevent="handleSubmitJoin">
+    <div class="join-content">
+      <v-text-field
+          v-model="formValues.userId"
+          type="text"
+          label="아이디"
+          variant="solo"
+          density="comfortable"
+          hide-details="auto"
+          maxlength="20"
+          ref="ruleUserIdRef"
+          :rules="[userIdRule]"
+          :error-messages="errorMsgUserIdDuplicate"
+          @blur="checkUserIdDuplicate()"
+      />
+
+      <v-text-field
+          v-model="formValues.pw"
+          :type="pwVisible ? 'text' : 'password'"
+          label="비밀번호"
+          variant="solo"
+          density="comfortable"
+          hide-details="auto"
+          maxlength="16"
+          :rules="[pwRule]"
+          :append-inner-icon="pwVisible ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append-inner="pwVisible = !pwVisible"
+      />
+
+      <v-text-field
+          v-model="formValues.name"
+          @input="handleNameInput"
+          type="text"
+          label="이름"
+          variant="solo"
+          density="comfortable"
+          hide-details="auto"
+          :rules="[nameRule]"
+      />
+
+      <v-text-field
+          v-model="formValues.nickname"
+          @input="handleNicknameInput"
+          type="text"
+          label="닉네임"
+          variant="solo"
+          density="comfortable"
+          hide-details="auto"
+          ref="ruleNicknameRef"
+          :rules="[nicknameRule]"
+          :error-messages="errorMsgNicknameDuplicate"
+          @blur="checkNicknameDuplicate()"
+      />
+
+      <v-text-field
+          v-model="formValues.email"
+          type="email"
+          label="이메일"
+          variant="solo"
+          density="comfortable"
+          hide-details="auto"
+          maxlength="100"
+          :rules="[emailRule]"
+          :error-messages="errorMsgEmailDuplicate"
+          @blur="checkEmailDuplicate()"
+      />        
+      <div> 
+        <div class="auth-code-wrap">
+          <v-text-field
+            v-model="authCodeValue"
+            @input="handleVerifyAuthCode"
+            type="text"
+            label="인증번호"
+            variant="solo"
+            density="comfortable"
+            hide-details="auto"
+            maxlength="6"
+            v-if="isAuthCodeRequest"
+            :rules="[required]"
+            :error-messages="errorMsgAuthCode"
+            class="auth-code-field"
+          /> 
+          <v-btn type="button" class="auth-mail-retry" @click="handleSendAuthCodeRetry" v-if="isAuthCodeRequest">
+            재전송
+          </v-btn>
+        </div>     
+
+        <div v-if="isSuccessAuthCode" class="success-message">
+          <span>
+            인증에 성공했습니다.
+          </span>
+        </div>
+      </div>
     </div>
 
-    <v-form ref="formRef" class="join-form" @submit.prevent="handleSubmitJoin">
-        <div class="join-content">
-            <v-text-field
-                v-model="formValues.userId"
-                type="text"
-                label="아이디"
-                variant="solo"
-                density="comfortable"
-                hide-details="auto"
-                maxlength="20"
-                ref="ruleUserIdRef"
-                :rules="[userIdRule]"
-                :error-messages="errorMsgUserIdDuplicate"
-                @blur="checkUserIdDuplicate()"
-            />
+    <v-btn type="button" class="join-btn" @click="handleSendAuthCode" v-show="!isAuthCodeRequest">
+        인증요청
+    </v-btn>
 
-            <v-text-field
-                v-model="formValues.password"
-                :type="passwordVisible ? 'text' : 'password'"
-                label="비밀번호"
-                variant="solo"
-                density="comfortable"
-                hide-details="auto"
-                maxlength="16"
-                :rules="[passwordRule]"
-                :append-inner-icon="passwordVisible ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="passwordVisible = !passwordVisible"
-            />
-
-            <v-text-field
-                v-model="formValues.name"
-                @input="handleNameInput"
-                type="text"
-                label="이름"
-                variant="solo"
-                density="comfortable"
-                hide-details="auto"
-                :rules="[nameRule]"
-            />
-
-            <v-text-field
-                v-model="formValues.nickname"
-                @input="handleNicknameInput"
-                type="text"
-                label="닉네임"
-                variant="solo"
-                density="comfortable"
-                hide-details="auto"
-                ref="ruleNicknameRef"
-                :rules="[nicknameRule]"
-                :error-messages="errorMsgNicknameDuplicate"
-                @blur="checkNicknameDuplicate()"
-            />
-
-            <v-text-field
-                v-model="formValues.email"
-                type="email"
-                label="이메일"
-                variant="solo"
-                density="comfortable"
-                hide-details="auto"
-                maxlength="100"
-                :rules="[emailRule]"
-                :error-messages="errorMsgEmailDuplicate"
-                @blur="checkEmailDuplicate()"
-            />        
-            <div> 
-              <div class="auth-code-wrap">
-                <v-text-field
-                  v-model="authCodeValue"
-                  @input="handleVerifyAuthCode"
-                  type="text"
-                  label="인증번호"
-                  variant="solo"
-                  density="comfortable"
-                  hide-details="auto"
-                  maxlength="6"
-                  v-if="isAuthCodeRequest"
-                  :rules="[required]"
-                  :error-messages="errorMsgAuthCode"
-                  class="auth-code-field"
-                /> 
-                <v-btn type="button" class="auth-mail-retry" @click="handleSendAuthCodeRetry" v-if="isAuthCodeRequest">
-                  재전송
-                </v-btn>
-              </div>     
-
-              <div v-if="isSuccessAuthCode" class="success-message">
-                <span>
-                  인증에 성공했습니다.
-                </span>
-              </div>
-            </div>
-        </div>
-
-        <v-btn type="button" class="join-btn" @click="handleSendAuthCode" v-show="!isAuthCodeRequest">
-            인증요청
-        </v-btn>
-
-        <v-btn type="submit" class="join-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
-            인증 후 회원가입
-        </v-btn>
-    </v-form>
+    <v-btn type="submit" class="join-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
+        인증 후 회원가입
+    </v-btn>
+  </v-form>
 </template>
 
 

@@ -71,9 +71,9 @@
 	</select>
 	
 	<!-- 비밀번호 변경 -->
-	<update id="updatePwChange" parameterType="User">
+	<update id="updatePwReset" parameterType="User">
 		UPDATE USER
-		SET PASSWORD = ${password}
+		SET PASSWORD = #{password}
 		WHERE USER_ID = #{userId}
 	</update>
 </mapper>

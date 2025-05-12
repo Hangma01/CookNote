@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserFindPwResponseDTO {
-	private String changePwToken;
+	private String pwResetToken;
 }

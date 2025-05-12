@@ -9,15 +9,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserFindPwChangeRequestDTO {
+public class UserFindPwResetRequestDTO {
 
-	private String changePwToken;
+	private String pwResetToken;
 	
 	@NotBlank()
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\\-+=`|\\\\(){}\\[\\]:;\"'<>,.?])\\S{8,16}$")
-	private String changePw;
+	private String newPw;
 	
 	@NotBlank()
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\\-+=`|\\\\(){}\\[\\]:;\"'<>,.?])\\S{8,16}$")
-	private String changePwCheck;
+	private String newPwConfirm;
 }

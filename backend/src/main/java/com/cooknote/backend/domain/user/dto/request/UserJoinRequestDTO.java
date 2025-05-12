@@ -17,7 +17,7 @@ public class UserJoinRequestDTO {
 	
 	@NotBlank()
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\\-+=`|\\\\(){}\\[\\]:;\"'<>,.?])\\S{8,16}$")
-	private String password;
+	private String pw;
 	
 	@NotBlank()
 	@Pattern(regexp = "^[a-zA-Z가-힣]{1,20}$")

@@ -7,10 +7,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    let isAuthenticated = false
+  let isAuthenticated = false
 
-    if (to.meta.requiresAuth && to.name === 'myPage' && !isAuthenticated) next({ name: 'login' })  
-    else next()
+  if (to.meta.requiresAuth && to.name === 'myPage' && !isAuthenticated) next({ name: 'login' }) 
+//  else if (to.meta.requiresAuth && to.name === 'pwReset' && from.name !== 'userFindPw') next({ name: 'userFindPw' })  
+  else next()
 })
 
 export default router

@@ -95,11 +95,11 @@ const handleFindId = debounce(async () => {
 
 	if (isFormVal.valid && isSuccessAuthCode) {
 		try {
-				const res = await userFindId(formValues.name, formValues.email)
-				
-				if(res.status === HttpStatusCode.Ok) {
-						router.replace({ name: 'userFindIdResult', state: { userId: res.data.userId }});
-				}
+			const res = await userFindId(formValues.name, formValues.email)
+			
+			if(res.status === HttpStatusCode.Ok) {
+					router.replace({ name: 'userFindIdResult', state: { userId: res.data.userId }});
+			}
 		} catch (e) {
 			if(e.response &&
 				(e.response.data.status === HttpStatusCode.BadRequest || e.response.data.status === HttpStatusCode.NotFound)

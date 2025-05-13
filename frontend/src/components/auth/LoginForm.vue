@@ -38,7 +38,7 @@ const handleLogin = debounce(async () => {
       router.replace({name : "mainPage"})
     } catch (e) {
       if(e.status === HttpStatusCode.Unauthorized) {
-        alert(errorMessages.loginError)
+        alert(errorMessages.LOGINERROR)
       }
     }
 	}

@@ -49,7 +49,7 @@ const handleFindPwReset = debounce(async () => {
 					&& e.response.data.message){
 				alert(e.response.data.message);
 			} else {
-				alert(errorMessages.badRequest);
+				alert(errorMessages.BADREQUEST);
 			}
 
 			router.replace({ name: 'userFindPw' });

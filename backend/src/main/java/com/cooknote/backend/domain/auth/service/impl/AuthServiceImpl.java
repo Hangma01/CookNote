@@ -103,12 +103,8 @@ public class AuthServiceImpl implements AuthService{
 	// 아이디 찾기 - 메일 인증 요청
 	@Override
 	public void userFindIdAuthRequest(UserFindIdAuthRequestDTO userFindIdAuthRequestDTO) {
-		User reqUser = User.builder()
-				.name(userFindIdAuthRequestDTO.getName())
-				.email(userFindIdAuthRequestDTO.getEmail())
-				.build();
 		
-		Boolean isExistsUser = authMapper.userFindIdAuthRequest(reqUser);
+		Boolean isExistsUser = authMapper.userFindIdAuthRequest(userFindIdAuthRequestDTO);
 	
 		if(!isExistsUser) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
@@ -121,12 +117,8 @@ public class AuthServiceImpl implements AuthService{
 	// 아이디 찾기 - 아이디 반환
 	@Override
 	public UserFindIdResponseDTO userFindId(String name, String email) {
-		User reqUser = User.builder()
-				.name(name)
-				.email(email)
-				.build();
-		
-		User rspUser = authMapper.userFindId(reqUser);
+
+		User rspUser = authMapper.userFindId(name, email);
 		
 		if(rspUser == null) {
 			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
@@ -142,12 +134,8 @@ public class AuthServiceImpl implements AuthService{
 	// 비밀번호 찾기 - 비밀번호 요청
 	@Override
 	public UserFindPwResponseDTO userFindPwAuthRequest(UserFindPwAuthRequestDTO userFindPwAuthRequestDTO) {
-		User reqUser = User.builder()
-				.id(userFindPwAuthRequestDTO.getId())
-				.email(userFindPwAuthRequestDTO.getEmail())
-				.build();
 		
-		User rspUser = authMapper.userFindPw(reqUser);
+		User rspUser = authMapper.userFindPw(userFindPwAuthRequestDTO);
 	
 		if(rspUser == null) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
@@ -159,9 +147,9 @@ public class AuthServiceImpl implements AuthService{
 		// 비밀번호 재설정 토큰 추가
 		String pwResetToken = UUID.randomUUID().toString();
 		String pwResetRedisKey = Constans.PW_RESET_PREFIX + pwResetToken;
-		String userId = rspUser.getId();
+		String id = rspUser.getId();
 		
-		redisUtil.setDataExpire(pwResetRedisKey, userId, Constans.PW_RESET_TOKEN_EXPIRE);
+		redisUtil.setDataExpire(pwResetRedisKey, id, Constans.PW_RESET_TOKEN_EXPIRE);
 		
 		
 		UserFindPwResponseDTO userFindPwResponseDTO = UserFindPwResponseDTO.builder()
@@ -182,22 +170,16 @@ public class AuthServiceImpl implements AuthService{
 		// 비밀번호 재설정 키 확인
 		String pwResetRedisKey = Constans.PW_RESET_PREFIX + userFindPwResetRequestDTO.getPwResetToken();
 		
-		String userId = redisUtil.getData(pwResetRedisKey);
+		String id = redisUtil.getData(pwResetRedisKey);
 		
-		if(userId == null){ 										// 인증 시간 만료
+		if(id == null){ 										// 인증 시간 만료
 			throw new CustomAuthException(AuthErrorCode.PW_AUTH_EXPIRED_EXCEPTION);
 	    }
 		
 		String encodePw = bCryptPasswordEncoder.encode(userFindPwResetRequestDTO.getNewPw());
 		
 		
-		// 비밀번호 재설정
-		User reqUser = User.builder()
-				.id(userId)
-				.password(encodePw)
-				.build();
-		
-		authMapper.updatePwReset(reqUser);
+		authMapper.updatePwReset(id, encodePw);
 		
 		// 레디스에 저장된 비밀전호 재설정 key 삭제
 		redisUtil.deleteData(pwResetRedisKey);

@@ -46,15 +46,17 @@ const handleUserFindIdRequest = async () => {
   // 유효성 검사 통과 시 메일 인증 코드 발송
   if (isFormVal.valid) { 
 		try {
-			const res = await userFindIdAuth({ ...formValues })
 			isAuthCodeRequest.value = true;
+			const res = await userFindIdAuth({ ...formValues })
 		} catch (e) {
 			if(e.response &&
 					(e.response.data.status === HttpStatusCode.NotFound && e.response.data.message)
 			){
 				alert(e.response.data.message);
+				isAuthCodeRequest.value = false;
 			} else {
 				alert(errorMessages.BADREQUEST);
+				isAuthCodeRequest.value = false;
 			}
 		}
 	}  

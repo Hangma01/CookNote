@@ -10,13 +10,13 @@ public interface AuthMapper {
 
 	
 	// 아이디 중복 체크
-	boolean getCheckUserId(@Param("userId") String userId);
+	boolean getExistsUserId(@Param("userId") String userId);
 	
 	// 닉네임 중복 체크
-	boolean getCheckNickname(@Param("nickname") String nickname);
+	boolean getExistsNickname(@Param("nickname") String nickname);
 
 	// 이메일 중복 체크
-	boolean getCheckEmail(@Param("email") String email);
+	boolean getExistsEmail(@Param("email") String email);
 
 	// 회원가입
 	void userJoin(User user);

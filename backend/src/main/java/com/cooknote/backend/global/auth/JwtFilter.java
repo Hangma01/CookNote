@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
-@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
@@ -36,6 +35,15 @@ public class JwtFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 	
+		
+		// 토큰 재발급시 필터 패스
+	    if (request.getRequestURI().equals(Constans.REISSUE_URI)
+	    		&& request.getMethod().equals(Constans.METHOD_POST_TEXT)) {
+	        filterChain.doFilter(request, response);
+	        return;
+	    }
+		
+		
         String accessToken = null;
 
         Cookie[] cookies = request.getCookies();
@@ -43,14 +51,12 @@ public class JwtFilter extends OncePerRequestFilter {
         // 쿠키가 없으면 다음 필터로 넘김
         if (cookies == null) {
         	filterChain.doFilter(request, response);
-        	
         	return;
         }
 
         // accessToekn 가져오기
         for(Cookie cookie : cookies) {
             if(cookie.getName().equals(Constans.ACCESS_TOKEN_NAME)) {
-
             	accessToken = cookie.getValue();
             }
         }
@@ -74,23 +80,16 @@ public class JwtFilter extends OncePerRequestFilter {
     			// 현재 Security Context에 설정
             	SecurityContextHolder.getContext().setAuthentication(authentication);
     		}
-        	
-        } catch (SecurityException | MalformedJwtException | SignatureException e) {
-        	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-	    } catch (ExpiredJwtException e) {
+        } catch (ExpiredJwtException e) {				// Access Token 만료
 	    	PrintWriter writer = response.getWriter();
             writer.print(ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE);
 
 	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	    	return;
-	    } catch (UnsupportedJwtException e) {
+	    } catch (RuntimeException e) {
 	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	    	return;
-	    } catch (IllegalArgumentException e) {
-	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	    	return;
-	    }
+	    } 
         
         filterChain.doFilter(request, response);
 	}

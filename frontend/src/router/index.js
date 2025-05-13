@@ -10,7 +10,7 @@ router.beforeEach((to, from, next) => {
   let isAuthenticated = false
 
   if (to.meta.requiresAuth && to.name === 'myPage' && !isAuthenticated) next({ name: 'login' }) 
-//  else if (to.meta.requiresAuth && to.name === 'pwReset' && from.name !== 'userFindPw') next({ name: 'userFindPw' })  
+  else if (to.meta.requiresAuth && to.name === 'pwReset' && from.name !== 'userFindPw') next({ name: 'userFindPw' })  
   else next()
 })
 

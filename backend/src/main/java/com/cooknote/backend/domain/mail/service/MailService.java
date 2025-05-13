@@ -43,21 +43,29 @@ public class MailService {
 
 		String mailAuthRedisKey = Constans.MAIL_AUTH_PREFIX + email;
 		String redisAuthCode = redisUtil.getData(mailAuthRedisKey);
-
+		VerifyAuthCodeResponseDTO verifyAuthCodeResponseDTO = null;
 	
 		if(redisAuthCode == null){ 										// 인증 번호 시간 만료
-			throw new CustomAuthException(AuthErrorCode.MAIL_AUTH_CODE_EXPIRE_EXCEPTION);
-	    } else if(redisAuthCode.equals(authCode)) {						// 인증 번호 일치
-	        return VerifyAuthCodeResponseDTO.builder()
-	        		.result(true)
-	                .message(SuccessMessage.VERIFY_AUTH_CODE_SUCCESS.getMessage())  
-	                .build();
-	    } 
-	    
+			throw new CustomAuthException(AuthErrorCode.MAIL_AUTH_CODE_EXPIRED_EXCEPTION);
+	    } else if(redisAuthCode.equals(authCode)) {						// 인증 번호 일치		
+	    	verifyAuthCodeResponseDTO = VerifyAuthCodeResponseDTO.builder()
+													        		.result(true)
+													                .message(SuccessMessage.VERIFY_AUTH_CODE_SUCCESS.getMessage())  
+													                .build();
+	    } else {
+	    	verifyAuthCodeResponseDTO= VerifyAuthCodeResponseDTO.builder()							// 인증 번호 불일치
+													            .result(false)
+																.message(ErrorMessage.VERIFY_AUTH_CODE_NOT_MATCH.getMessage())
+													            .build();
+	    }
 		
-		return VerifyAuthCodeResponseDTO.builder()							// 인증 번호 불일치
-	            .result(false)
-				.message(ErrorMessage.VERIFY_AUTH_CODE_NOT_MATCH.getMessage())
-	            .build();
+		return verifyAuthCodeResponseDTO;
     }
+
+    // 인증번호 삭제
+	public void deleteAuthCode(String email) {
+		String mailAuthRedisKey = Constans.MAIL_AUTH_PREFIX + email;
+		redisUtil.deleteData(mailAuthRedisKey);
+		
+	}
 }

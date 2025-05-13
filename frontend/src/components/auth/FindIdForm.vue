@@ -1,21 +1,22 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { debounce } from 'lodash';
-import { required, findNameRule, emailRule } from '@/utils/rules';
+import { required, defaultNameRule, emailRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
 import { userFindIdAuth, userFindId } from '@/services/authService';
-import { sendAuthCode } from '@/services/mailService';
+import { deleteMailAuthCode, sendMailAuthCode } from '@/services/mailService';
 import { errorMessages } from '@/utils/errorMessages';
 import { successMessage } from '@/utils/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
-import { commonVerifyAuthCode } from '@/utils/commonFunction';
+import { commonVerifyMailAuthCode } from '@/utils/commonFunction';
 import LogoMini from '../header/LogoMini.vue';
 
+// 화면 전환
 const router = useRouter();
 
 // 유효성 겁사
-const formRef = ref(null);      			// Form 유효성 검사
+const formRef = ref(null);      						// Form 유효성 검사
 
 // 에러 메시지
 const errorMsgAuthCode = ref('')            // 메일 인증 코드 에러 메시지
@@ -25,7 +26,7 @@ const isSuccessAuthCode = ref(false)        // 메일 인증 코드 성공 메�
 
 // etc...
 const isAuthCodeRequest = ref(false)      	// 메일 인증 요청 토글
-
+const authCodeValue = ref('')             	// 메일 인증 input-field
 
 // input-field
 const formValues = reactive({             	// Form input-field 
@@ -33,7 +34,7 @@ const formValues = reactive({             	// Form input-field
   email: '',
 })
 
-const authCodeValue = ref('')             	// 메일 인증 input-field
+
 
 
 
@@ -61,10 +62,10 @@ const handleUserFindIdRequest = async () => {
 
 
 // 메일 재전송
-const handleSendAuthCodeRetry = async () => {
+const handleSendMailAuthCodeRetry = async () => {
 
   try {
-    const res = await sendAuthCode(formValues.email);
+    const res = await sendMailAuthCode(formValues.email);
     isSuccessAuthCode.value = false;
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
@@ -74,15 +75,15 @@ const handleSendAuthCodeRetry = async () => {
 }
 
 // 인증 코드 검증하기
-const handleVerifyAuthCode = debounce(async () => {
-  await commonVerifyAuthCode(
+const handleVerifyMailAuthCode = debounce(async () => {
+  await commonVerifyMailAuthCode(
     formValues.email,
-    authCodeValue.value,
+    authCodeValue,
+		isAuthCodeRequest,
     (result, message) => {
       isSuccessAuthCode.value = result;
       errorMsgAuthCode.value = message;
     },
-    router
   );
 }, commonValues.defaultDebounce);
 
@@ -95,10 +96,15 @@ const handleFindId = debounce(async () => {
 
 	if (isFormVal.valid && isSuccessAuthCode) {
 		try {
-			const res = await userFindId(formValues.name, formValues.email)
+			const userFindIdres = await userFindId(formValues.name, formValues.email)
 			
-			if(res.status === HttpStatusCode.Ok) {
-					router.replace({ name: 'userFindIdResult', state: { userId: res.data.userId }});
+			if(userFindIdres.status === HttpStatusCode.Ok) {
+				try {
+					const deleteRes = await deleteMailAuthCode(formValues.email)
+					router.replace({ name: 'userFindIdResult', state: { userId: userFindIdres.data.userId }});
+				}catch (e) {
+					alert(errorMessages.badRequest);
+				}
 			}
 		} catch (e) {
 			if(e.response &&
@@ -109,6 +115,11 @@ const handleFindId = debounce(async () => {
 			} else {
 				alert(errorMessages.badRequest);
 			}
+			
+			isAuthCodeRequest.value = false;
+			authCodeValue.value = '';
+			errorMsgAuthCode.value = '';
+			isSuccessAuthCode.value = false;
 		}
 	}
 }, commonValues.defaultDebounce);
@@ -147,7 +158,7 @@ watch (
 				variant="solo"
 				density="comfortable"
 				hide-details="auto"
-				:rules="[findNameRule]"
+				:rules="[defaultNameRule]"
 			/>
 
 			<v-text-field
@@ -164,7 +175,7 @@ watch (
 				<div class="auth-code-wrap">
 					<v-text-field
 						v-model="authCodeValue"
-						@input="handleVerifyAuthCode"
+						@input="handleVerifyMailAuthCode"
 						type="text"
 						label="인증번호"
 						variant="solo"
@@ -176,7 +187,7 @@ watch (
 						:error-messages="errorMsgAuthCode"
 						class="auth-code-field"
 					/> 
-					<v-btn type="button" class="auth-mail-retry" @click="handleSendAuthCodeRetry" v-if="isAuthCodeRequest">
+					<v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest">
 						재전송
 					</v-btn>
 				</div>     

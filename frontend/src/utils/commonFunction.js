@@ -1,5 +1,5 @@
 import { HttpStatusCode } from "axios";
-import { verifyAuthCode } from '@/services/mailService';
+import { verifyMailAuthCode } from '@/services/mailService';
 
 // 중복 체크 함수
 export const commonCheckDuplicate = async ({ value, validatorRef, errorMsgRef, apiCall, router }) => {
@@ -25,24 +25,26 @@ export const commonCheckDuplicate = async ({ value, validatorRef, errorMsgRef, a
 };
 
 // 메일 인증 코드 검증
-export const commonVerifyAuthCode = async (
-    email, authCode, setResultState, router
+export const commonVerifyMailAuthCode = async (
+    email, authCodeValue, isAuthCodeRequest, setResultState
 ) => {
   try {
-    const res = await verifyAuthCode(email, authCode);
+    const res = await verifyMailAuthCode(email, authCodeValue.value);
 
     if (res.data.result) {
-        setResultState(res.data.result, '');
+      setResultState(res.data.result, '');
     } else {
-        setResultState(res.data.result, res.data.message);
+      setResultState(res.data.result, res?.data.message);
     }
   } catch (e) {
     if (e.response && e.response.data.status === HttpStatusCode.Gone) {
-        alert(e.response.data.message);
+      alert(e.response.data.message);
     } else {
-        alert(errorMessages.badRequest);
-        router.replace({ name: 'login'});
-    }
+      alert(errorMessages.badRequest);
+    } 
+    isAuthCodeRequest.value = false;
+    authCodeValue.value= ''
+    setResultState(false, '');
   }
 };
 

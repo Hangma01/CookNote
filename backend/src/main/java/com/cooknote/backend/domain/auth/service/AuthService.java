@@ -1,5 +1,6 @@
 package com.cooknote.backend.domain.auth.service;
 
+import java.io.PrintWriter;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
+import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
@@ -48,23 +50,34 @@ public class AuthService {
 	private final JwtUtil jwtUtil;
 	
 	// 아이디 중복 체크
-	public boolean getCheckUserId(String loginId) {
-
-		return authMapper.getCheckUserId(loginId);
+	public void getExistsUserId(String loginId) {
+		
+		boolean isExists = authMapper.getExistsUserId(loginId);
+		
+		if(isExists) {
+			throw new CustomAuthException(AuthErrorCode.DUPLICATE_USERID_EXCEPTION);
+		}
 	}
-
 	
 	// 닉네임 중복 체크
-	public boolean getCheckNickname(String nickname) {
-
-		return authMapper.getCheckNickname(nickname);
+	public void getExistsNickname(String nickname) {
+		
+		boolean isExists = authMapper.getExistsNickname(nickname);
+		
+		if(isExists) {
+			throw new CustomAuthException(AuthErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+		}
 	}
 
 	
 	// 이메일 중복 체크
-	public boolean getCheckEmail(String email) {
-
-		return authMapper.getCheckEmail(email);
+	public void getExistsEmail(String email) {
+		
+		boolean isExists = authMapper.getExistsEmail(email);
+		
+		if(isExists) {
+			throw new CustomAuthException(AuthErrorCode.DUPLICATE_EMAIL_EXCEPTION);
+		}
 	}
 
 	
@@ -84,6 +97,9 @@ public class AuthService {
 				.build();
 		
 		authMapper.userJoin(reqUser);	
+		
+		String mailAuthRedisKey = Constans.MAIL_AUTH_PREFIX + userJoinRequestDTO.getEmail();
+		redisUtil.deleteData(mailAuthRedisKey);
 	}
 	
 	
@@ -174,7 +190,7 @@ public class AuthService {
 		String userId = redisUtil.getData(pwResetRedisKey);
 		
 		if(userId == null){ 										// 인증 시간 만료
-			throw new CustomAuthException(AuthErrorCode.PW_AUTH_EXPIRE_EXCEPTION);
+			throw new CustomAuthException(AuthErrorCode.PW_AUTH_EXPIRED_EXCEPTION);
 	    }
 		
 		String encodePw = bCryptPasswordEncoder.encode(userFindPwResetRequestDTO.getNewPw());
@@ -186,7 +202,10 @@ public class AuthService {
 				.password(encodePw)
 				.build();
 		
-		authMapper.updatePwReset(reqUser);	
+		authMapper.updatePwReset(reqUser);
+		
+		// 레디스에 저장된 비밀전호 재설정 key 삭제
+		redisUtil.deleteData(pwResetRedisKey);
 	}
 
 
@@ -199,7 +218,7 @@ public class AuthService {
         
         if (cookies == null) {
 
-        	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
+        	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
         }
 
         // refreshToekn 가져오기
@@ -229,19 +248,22 @@ public class AuthService {
 			        	String newAccessToken = jwtUtil.createTokenJwt(Constans.ACCESS_TOKEN_NAME, userId, Constans.ACCESS_TOKEN_EXPIRED_MS);
 			    		String newRefreshToken = jwtUtil.createTokenJwt(Constans.REFRESH_TOKEN_NAME, userId, Constans.REFRESH_TOKEN_EXPIRED_MS);
 			    		
-			    		response.addCookie(CookieUtil.createCookie(Constans.ACCESS_TOKEN_NAME, newAccessToken));
-			    		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, newRefreshToken));
+			    		int accessTokenSecond = Constans.ACCESS_TOKEN_EXPIRED_MS / Constans.SECOND_MS;
+			    		int refreshTokenSecond = Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS;
+			    		
+			    		response.addCookie(CookieUtil.createCookie(Constans.ACCESS_TOKEN_NAME, newAccessToken, accessTokenSecond));
+			    		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, newRefreshToken, refreshTokenSecond));
 			    	 
-			    		redisUtil.setDataExpire(refreshTokenRedisKey, newRefreshToken, Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS);
+			    		redisUtil.setDataExpire(refreshTokenRedisKey, newRefreshToken, refreshTokenSecond);
         			}else {
-        				throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
+        				throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
         			}
         		}
-        	} catch (Exception e) {
-        		throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
+        	} catch (RuntimeException e) {
+        		throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
     	    } 
         } else {
-        	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_EXPIRED_EXCEPTION);
+        	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
         }
 	}
 }

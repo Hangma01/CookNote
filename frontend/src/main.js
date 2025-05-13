@@ -1,5 +1,13 @@
 import { createApp } from 'vue'
+
+// Pinia
 import { createPinia } from 'pinia'
+import piniaPersist from 'pinia-plugin-persistedstate';
+
+// Pinia 설정에 persist 플러그인 추가
+const pinia = createPinia();
+pinia.use(piniaPersist);
+
 
 // Vutify
 import vuetify from './plugin/vuetify'
@@ -22,7 +30,7 @@ import App from './App.vue'
 import router from './router'
 
 const app = createApp(App)
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.use(vuetify)
 //  - Vue 컴포넌트로 FontAwesomeIcon을 전역에 등록록

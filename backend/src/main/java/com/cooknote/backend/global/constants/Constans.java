@@ -18,6 +18,13 @@ public class Constans {
     public static final String CATEGORY_NAME = "category";
     public static final String USER_ID_NAME = "userId";
     
+    // URI
+    public static final String REISSUE_URI = "/auth/reissue";
+    public static final String LOGOUT_URI = "/logout";
+    
+    
+    // Method
+    public static final String METHOD_POST_TEXT = "POST";
     
     // ETC...
     public static final int SECOND_MS = 1000;

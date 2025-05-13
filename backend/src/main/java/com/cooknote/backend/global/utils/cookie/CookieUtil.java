@@ -3,9 +3,9 @@ package com.cooknote.backend.global.utils.cookie;
 import jakarta.servlet.http.Cookie;
 
 public class CookieUtil {
-    public static Cookie createCookie(String key, String value) {
+    public static Cookie createCookie(String key, String value, int maxAge) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60*60*24);
+        cookie.setMaxAge(maxAge);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
 

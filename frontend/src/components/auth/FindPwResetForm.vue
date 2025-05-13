@@ -3,18 +3,24 @@ import { reactive, ref } from 'vue';
 import { debounce } from 'lodash';
 import { pwRule, newPwConfirmRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
-import { userFindPwRest } from '@/services/authService';
+import { userFindPwReset } from '@/services/authService';
 import { HttpStatusCode } from 'axios';
 import { errorMessages } from '@/utils/errorMessages';
 import { useRouter } from 'vue-router';
+import { usePwResetTokenStore } from '@/stores/pwResetToken';
 
 // 화면 전환
 const router = useRouter();
 
+// 비밀번호 재설정 스토어
+const pwResetToken = usePwResetTokenStore();
 
 // 유효성 겁사
 const formRef = ref(null);                     // Form 유효성 검사
 
+// etc...
+const newPwVisible = ref(false)            		// 새 비밀번호 필드 토글
+const newPwConfirmVisible = ref(false)     		// 새 비밀번호 확인 필드 토글
 
 // input-field
 const formValues = reactive({
@@ -22,26 +28,20 @@ const formValues = reactive({
   newPwConfirm: '',
 })
 
-// history
-const pwResetToken = history.state.pwResetToken;
-
-// etc...
-const newPwVisible = ref(false)            		// 새 비밀번호 필드 토글
-const newPwConfirmVisible = ref(false)     		// 새 비밀번호 확인 필드 토글
-
-
+// 비밀번호 변경 요청
 const handleFindPwReset = debounce(async () => {
 	
 	const isFormVal = await formRef.value.validate()
-
+	pwResetToken.getPwResetToken
 	if (isFormVal.valid) {
 		try {
-			const res = await userFindPwRest({
+			const res = await userFindPwReset({
 				...formValues,
-				pwResetToken
+				'pwResetToken' : pwResetToken.getPwResetToken
 			})
 			
 			alert('성공적으로 비밀번호가 변경되었습니다.')
+			pwResetToken.deletePwResetToken()
 			router.replace({ name: 'login' });
 		} catch (e) {
 			if (e.response 

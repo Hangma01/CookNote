@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.auth.CustomUserDetails;
+import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.mappers.UserMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -26,12 +27,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 		// DB에서 유저 조회
 		User userData = userMapper.getUser(userId);
 
-		if(userData != null) {
+		if(userData == null) {
 
-			// UserDetails에 담아서 return 하면 AuthenticationManager가 검증함
-			return new CustomUserDetails(userData);
+			throw new UsernameNotFoundException(ErrorMessage.LOGIN_FAIL_MESSAGE.getMessage());
 		}
 		
-		return null;
+		// UserDetails에 담아서 return 하면 AuthenticationManager가 검증함
+		return new CustomUserDetails(userData);
 	}
 }

@@ -24,7 +24,6 @@
                     </router-link>
                 </ul>
             </div>
-           
         </li>
 
         <li class="nav-menu-item">
@@ -90,6 +89,7 @@
 
         .nav-category-item {
             position: absolute;
+            display: none;
             width: 100%;
             border: 1px solid #eee;
             background-color: #fff;

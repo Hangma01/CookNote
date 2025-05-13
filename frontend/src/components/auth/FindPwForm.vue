@@ -1,20 +1,25 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { debounce } from 'lodash';
-import { required, findUserIdRule, emailRule } from '@/utils/rules';
+import { required, defaultUserIdRule, emailRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
-import { sendAuthCode } from '@/services/mailService';
+import { deleteMailAuthCode, sendMailAuthCode } from '@/services/mailService';
 import { errorMessages } from '@/utils/errorMessages';
 import { successMessage } from '@/utils/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
-import { commonVerifyAuthCode } from '@/utils/commonFunction';
+import { commonVerifyMailAuthCode } from '@/utils/commonFunction';
 import { userFindPwAuth } from '@/services/authService';
+import { usePwResetTokenStore } from '@/stores/pwResetToken';
 
+// 화면 전환
 const router = useRouter();
 
+// 비밀번호 재설정 스토어
+const pwResetToken = usePwResetTokenStore();
+
 // 유효성 겁사
-const formRef = ref(null);      			// Form 유효성 검사
+const formRef = ref(null);      						// Form 유효성 검사
 
 // 에러 메시지
 const errorMsgAuthCode = ref('')            // 메일 인증 코드 에러 메시지
@@ -33,7 +38,6 @@ const formValues = reactive({             	// Form input-field
 })
 
 const authCodeValue = ref('')             	// 메일 인증 input-field
-let pwResetToken = null;										// 비밀번호 변경 토큰
 
 
 // 비밀번호 찾기 - 요청
@@ -45,7 +49,7 @@ const handleUserFindPwRequest = async () => {
   if (isFormVal.valid) { 
 		try {
 			const res = await userFindPwAuth({ ...formValues })
-			pwResetToken = res.data.pwResetToken;
+			pwResetToken.setPwResetToken(res.data.pwResetToken)
 			isAuthCodeRequest.value = true;
 		} catch (e) {
 			if(e.response &&
@@ -61,10 +65,10 @@ const handleUserFindPwRequest = async () => {
 
 
 // 메일 재전송
-const handleSendAuthCodeRetry = async () => {
+const handleSendMailAuthCodeRetry = async () => {
 
   try {
-    const res = await sendAuthCode(formValues.email);
+    const res = await sendMailAuthCode(formValues.email);
     isSuccessAuthCode.value = false;
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
@@ -74,15 +78,15 @@ const handleSendAuthCodeRetry = async () => {
 }
 
 // 인증 코드 검증하기
-const handleVerifyAuthCode = debounce(async () => {
-  await commonVerifyAuthCode(
+const handleVerifyMailAuthCode = debounce(async () => {
+  await commonVerifyMailAuthCode(
     formValues.email,
-    authCodeValue.value,
+    authCodeValue,
+		isAuthCodeRequest,
     (result, message) => {
       isSuccessAuthCode.value = result;
       errorMsgAuthCode.value = message;
     },
-    router
   );
 }, commonValues.defaultDebounce);
 
@@ -94,7 +98,12 @@ const handleFindPw = debounce(async () => {
 	const isFormVal = await formRef.value.validate()
 
 	if (isFormVal.valid && isSuccessAuthCode) {
-		router.replace({ name: 'pwReset', state: { pwResetToken: pwResetToken }});
+		try {
+			const res = await deleteMailAuthCode(formValues.email)
+			router.replace({ name: 'pwReset' });
+		}catch (e) {
+			alert(errorMessages.badRequest);
+		}
 	}
 }, commonValues.defaultDebounce);
 
@@ -127,7 +136,7 @@ watch (
 				variant="solo"
 				density="comfortable"
 				hide-details="auto"
-				:rules="[findUserIdRule]"
+				:rules="[defaultUserIdRule]"
 			/>
 
 			<v-text-field
@@ -144,7 +153,7 @@ watch (
 				<div class="auth-code-wrap">
 					<v-text-field
 						v-model="authCodeValue"
-						@input="handleVerifyAuthCode"
+						@input="handleVerifyMailAuthCode"
 						type="text"
 						label="인증번호"
 						variant="solo"
@@ -156,7 +165,7 @@ watch (
 						:error-messages="errorMsgAuthCode"
 						class="auth-code-field"
 					/> 
-					<v-btn type="button" class="auth-mail-retry" @click="handleSendAuthCodeRetry" v-if="isAuthCodeRequest">
+					<v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest">
 						재전송
 					</v-btn>
 				</div>     

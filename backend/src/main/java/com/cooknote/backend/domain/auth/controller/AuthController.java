@@ -1,8 +1,11 @@
 package com.cooknote.backend.domain.auth.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,34 +31,34 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
 	private final AuthService authService;
 	
 	// 아이디 중복 체크
-	@GetMapping("/check-user-id")
-	public ResponseEntity<Void> getCheckUserId(@RequestParam("user_id") String userId) {
+	@GetMapping("/exists/id")
+	public ResponseEntity<Void> getExistsUserId(@RequestParam("user_id") String userId) {
 
-		checkDuplicate(authService.getCheckUserId(userId), AuthErrorCode.DUPLICATE_USERID_EXCEPTION);
+		authService.getExistsUserId(userId);
 
 		return ResponseEntity.ok().build();
 	}
 
 	// 닉네임 중복 체크
-	@GetMapping("/check-nickname")
-	public ResponseEntity<Void> getCheckNickname(@RequestParam("nickname") String nickname) {
+	@GetMapping("/exists/nickname")
+	public ResponseEntity<Void> getExistsNickname(@RequestParam("nickname") String nickname) {
 
-		checkDuplicate(authService.getCheckNickname(nickname), AuthErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
+		authService.getExistsNickname(nickname);
 
 		return ResponseEntity.ok().build();
 	}
 
 	// 이메일 중복 체크
-	@GetMapping("/check-email")
-	public ResponseEntity<Void> getCheckEmail(@RequestParam("email") String email) {
+	@GetMapping("/exists/email")
+	public ResponseEntity<Void> getExistsEmail(@RequestParam("email") String email) {
 
-		checkDuplicate(authService.getCheckEmail(email), AuthErrorCode.DUPLICATE_EMAIL_EXCEPTION);
+		authService.getExistsEmail(email);
 
 		return ResponseEntity.ok().build();
 	}
@@ -70,14 +73,14 @@ public class AuthController {
 		}
 
 		// 중복 검사
-		checkDuplicate(authService.getCheckUserId(userJoinRequestDTO.getUserId()), AuthErrorCode.DUPLICATE_USERID_EXCEPTION);
-		checkDuplicate(authService.getCheckNickname(userJoinRequestDTO.getNickname()), AuthErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
-		checkDuplicate(authService.getCheckEmail(userJoinRequestDTO.getEmail()), AuthErrorCode.DUPLICATE_EMAIL_EXCEPTION);
+		authService.getExistsUserId(userJoinRequestDTO.getUserId());
+		authService.getExistsNickname(userJoinRequestDTO.getNickname());
+		authService.getExistsEmail(userJoinRequestDTO.getEmail());
 
 		// 회원 가입
 		authService.userJoin(userJoinRequestDTO);
 
-		return ResponseEntity.ok().build();
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	// 아이디 찾기 - 요청
@@ -105,7 +108,7 @@ public class AuthController {
 	
 	
 	// 비밀번호 찾기 - 변경
-	@PostMapping("/find-pw/reset")
+	@PatchMapping("/find-pw")
 	public ResponseEntity<Void> userFindPwReset(@Valid @RequestBody UserFindPwResetRequestDTO userFindPwResetRequestDTO, BindingResult bindingResult) {
 
 		// 유효성 검사 확인
@@ -117,16 +120,7 @@ public class AuthController {
 		
 		return ResponseEntity.ok().build();
 	}
-	
-	
-	// 중복 체크
-	private void checkDuplicate(boolean isDuplicate, AuthErrorCode errorCode) {
-		if (isDuplicate) {
-			throw new CustomAuthException(errorCode);
-		}
-	}
-	
-	
+		
 	// 토큰 재발급
 	@PostMapping("/reissue")
 	 public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {

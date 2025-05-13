@@ -1,9 +1,9 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { userIdRule, pwRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
-import { checkUserId, checkNickname, checkEmail, userJoin } from '@/services/authService';
-import { sendAuthCode } from '@/services/mailService';
-import { commonCheckDuplicate, commonInputHangle, commonVerifyAuthCode } from '@/utils/commonFunction';
+import { existsUserId, existsNickname, existsEmail, userJoin } from '@/services/authService';
+import { sendMailAuthCode } from '@/services/mailService';
+import { commonCheckDuplicate, commonInputHangle, commonVerifyMailAuthCode } from '@/utils/commonFunction';
 import { commonValues } from '@/utils/commonValues';
 import { errorMessages } from '@/utils/errorMessages';
 import { successMessage } from '@/utils/successMessage';
@@ -56,42 +56,42 @@ const handleNicknameInput = (e) => commonInputHangle(e, 15, (value) => formValue
 
 
 // 아이디 중복 체크
-const checkUserIdDuplicate = async () => {
+const handleExistsUserId = async () => {
   await commonCheckDuplicate({
     value: formValues.userId,               
     validatorRef: ruleUserIdRef,            
     errorMsgRef: errorMsgUserIdDuplicate,   
-    apiCall: checkUserId,
+    apiCall: existsUserId,
     router : router  
   });
 };
 
 
 // 닉네임 중복 체크
-const checkNicknameDuplicate = async () => {
+const handleExistsNickname = async () => {
   await commonCheckDuplicate({
     value: formValues.nickname,             
     validatorRef: ruleNicknameRef,          
     errorMsgRef: errorMsgNicknameDuplicate, 
-    apiCall: checkNickname,
+    apiCall: existsNickname,
     router : router
   });
 };
 
 
 // 이메일 중복 체크
-const checkEmailDuplicate = async () => {
+const handleExistsEmail = async () => {
   await commonCheckDuplicate({
     value: formValues.email,             
     validatorRef: ruleEmailRef,          
     errorMsgRef: errorMsgEmailDuplicate, 
-    apiCall: checkEmail,
+    apiCall: existsEmail,
     router : router
   });
 }
 
 // 메일 인증 요청하기
-const handleSendAuthCode = async () => {
+const handleSendMailAuthCode = async () => {
 
   const isFormVal = await formRef.value.validate()
 
@@ -103,7 +103,7 @@ const handleSendAuthCode = async () => {
       !errorMsgEmailDuplicate.value
   ) { 
       try {
-        const res = await sendAuthCode(formValues.email);
+        const res = await sendMailAuthCode(formValues.email);
         isAuthCodeRequest.value = true;
       } catch (e) {
         console.log(e)
@@ -114,10 +114,10 @@ const handleSendAuthCode = async () => {
 }
 
 // 메일 재전송
-const handleSendAuthCodeRetry = async () => {
+const handleSendMailAuthCodeRetry = async () => {
 
   try {
-    const res = await sendAuthCode(formValues.email);
+    const res = await sendMailAuthCode(formValues.email);
     isSuccessAuthCode.value = false;
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
@@ -129,15 +129,15 @@ const handleSendAuthCodeRetry = async () => {
 
 
 // 인증 코드 검증하기
-const handleVerifyAuthCode = debounce(async () => {
-  await commonVerifyAuthCode(
+const handleVerifyMailAuthCode = debounce(async () => {
+  await commonVerifyMailAuthCode(
     formValues.email,
-    authCodeValue.value,
+    authCodeValue,
+		isAuthCodeRequest,
     (result, message) => {
       isSuccessAuthCode.value = result;
       errorMsgAuthCode.value = message;
     },
-    router
   );
 }, commonValues.defaultDebounce);
 
@@ -204,7 +204,7 @@ watch (
           ref="ruleUserIdRef"
           :rules="[userIdRule]"
           :error-messages="errorMsgUserIdDuplicate"
-          @blur="checkUserIdDuplicate()"
+          @blur="handleExistsUserId()"
       />
 
       <v-text-field
@@ -242,7 +242,7 @@ watch (
           ref="ruleNicknameRef"
           :rules="[nicknameRule]"
           :error-messages="errorMsgNicknameDuplicate"
-          @blur="checkNicknameDuplicate()"
+          @blur="handleExistsNickname()"
       />
 
       <v-text-field
@@ -255,13 +255,13 @@ watch (
           maxlength="100"
           :rules="[emailRule]"
           :error-messages="errorMsgEmailDuplicate"
-          @blur="checkEmailDuplicate()"
+          @blur="handleExistsEmail()"
       />        
       <div> 
         <div class="auth-code-wrap">
           <v-text-field
             v-model="authCodeValue"
-            @input="handleVerifyAuthCode"
+            @input="handleVerifyMailAuthCode"
             type="text"
             label="인증번호"
             variant="solo"
@@ -273,7 +273,7 @@ watch (
             :error-messages="errorMsgAuthCode"
             class="auth-code-field"
           /> 
-          <v-btn type="button" class="auth-mail-retry" @click="handleSendAuthCodeRetry" v-if="isAuthCodeRequest">
+          <v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest">
             재전송
           </v-btn>
         </div>     
@@ -286,7 +286,7 @@ watch (
       </div>
     </div>
 
-    <v-btn type="button" class="join-btn" @click="handleSendAuthCode" v-show="!isAuthCodeRequest">
+    <v-btn type="button" class="join-btn" @click="handleSendMailAuthCode" v-show="!isAuthCodeRequest">
         인증요청
     </v-btn>
 

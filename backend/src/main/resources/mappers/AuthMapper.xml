@@ -18,18 +18,18 @@
  
 
 	<!-- 아이디 중복 체크 -->
-	<select id="getCheckUserId" resultType="boolean">
+	<select id="getExistsUserId" resultType="boolean">
 		SELECT 
 			EXISTS (SELECT 1 FROM USER WHERE USER_ID = #{userId})
 	</select>
 	
 	<!-- 닉네임 중복 체크 -->
-	<select id="getCheckNickname" resultType="boolean">
+	<select id="getExistsNickname" resultType="boolean">
 		SELECT EXISTS (SELECT 1 FROM USER WHERE NICKNAME = #{nickname})
 	</select>
 	
 	<!-- 이메일 중복 체크 -->
-	<select id="getCheckEmail" resultType="boolean">
+	<select id="getExistsEmail" resultType="boolean">
 		SELECT EXISTS (SELECT 1 FROM USER WHERE EMAIL = #{email})
 	</select>
 

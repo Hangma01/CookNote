@@ -1,15 +1,15 @@
-import api from '@/api/axios'
+import publicAPI from '@/api/publicAPI'
 
 
 // 인증 번호 메일 보내기기
-export const sendAuthCode = async (email) => {
-    const res = await api.post(`/mail/send/authcode`, { 'email': email });
+export const sendMailAuthCode = async (email) => {
+    const res = await publicAPI.post(`/mail/send/authcode`, { 'email': email });
     return res;
 };
 
 // 인증 번호 검증
-export const verifyAuthCode = async (email, authCode) => {
-    const res = await api.post(`/mail/verify`,
+export const verifyMailAuthCode = async (email, authCode) => {
+    const res = await publicAPI.post(`/mail/verify`,
         { 'email': email, 'authCode': authCode },
         {
             headers: {
@@ -18,3 +18,9 @@ export const verifyAuthCode = async (email, authCode) => {
         });
     return res;
 };
+
+export const deleteMailAuthCode = async (email) => {
+    console.log(email)
+      const res = await publicAPI.delete(`/mail/authCode`, { params: { email } });
+    return res;
+}

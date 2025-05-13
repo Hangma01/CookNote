@@ -62,6 +62,7 @@ public class WebSecurityConfig {
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
 					configuration.setMaxAge(3600L);
 
+
 					return configuration;
 				}
 			}));
@@ -85,7 +86,7 @@ public class WebSecurityConfig {
 		// 경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-						.requestMatchers("/login", "/logout", "/api/auth/**", "/api/mail/**").permitAll()
+						.requestMatchers("/login", "/logout", "/auth/**", "/mail/**").permitAll()
 						.anyRequest().authenticated());
 
 		

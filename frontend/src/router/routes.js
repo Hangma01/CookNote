@@ -1,15 +1,15 @@
 export const routes = [
-  { 
+  {
     path: '/',
     // name으로 하면 path 경로 바뀌어도 괜찮음
     name: 'mainPage',
-    component: () => import('../views/MainView.vue') 
+    component: () => import('../views/MainView.vue')
   },
-  { 
+  {
     path: '/recipes-search',
     // name으로 하면 path 경로 바뀌어도 괜찮음
     name: 'recipesSearch',
-    component: () => import('../views/RecipesView.vue') ,
+    component: () => import('../views/RecipesView.vue'),
   },
   {
     path: '/login',
@@ -39,25 +39,25 @@ export const routes = [
         path: 'userfindpw',
         component: () => import('../components/auth/FindPw.vue'),
         children: [
-            {
-              path: '',
-              name: 'userFindPw',
-              component: () => import('../components/auth/FindPwForm.vue'),
-            },
-            {
-              path: 'pwreset',
-              name: 'pwReset',
-              component: () => import('../components/auth/FindPwResetForm.vue'),
-              meta: { requiresAuth: true },
-            },
+          {
+            path: '',
+            name: 'userFindPw',
+            component: () => import('../components/auth/FindPwForm.vue'),
+          },
+          {
+            path: 'pwreset',
+            name: 'pwReset',
+            component: () => import('../components/auth/FindPwResetForm.vue'),
+            // meta: { requiresAuth: true },
+          },
         ]
       },
     ]
   },
   {
-      path: '/mypage',
-      name: 'myPage',
-      component: () => import('../views/MyPageView.vue'),
-      meta: { requiresAuth: true },
+    path: '/mypage',
+    name: 'myPage',
+    component: () => import('../views/MyPageView.vue'),
+    meta: { requiresAuth: true },
   }
 ]

@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import AuthHeader from '../header/authHeader/AuthHeader.vue';
-import { defaultPwRule, defaultUserIdRule } from '@/utils/rules';
+import { defaultPwRule, defaultIdRule } from '@/utils/rules';
 import { debounce } from 'lodash';
 import { commonValues } from '@/utils/commonValues';
 import { HttpStatusCode } from 'axios';
@@ -21,7 +21,7 @@ const formRef = ref(null);      						// Form 유효성 검사
 
 // input-field
 const formValues = reactive({             	// Form input-field 
-  userId: '',
+  id: '',
   password: '',
 })
 
@@ -50,13 +50,13 @@ const handleLogin = debounce(async () => {
   <v-form ref="formRef" class="login-form" @submit.prevent="handleLogin">
     <div class="login-content">
       <v-text-field
-        v-model="formValues.userId"
+        v-model="formValues.id"
         type="text"
         label="아이디"
         variant="solo"
         density="comfortable"
         hide-details="auto"
-        :rules="[defaultUserIdRule]"
+        :rules="[defaultIdRule]"
       />
 
       <v-text-field

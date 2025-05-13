@@ -36,34 +36,31 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 	 @Override
 	 public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 		 
-		 // 클라이언트 요청에서 userId, password 추출
-//		 setUsernameParameter(Constans.USER_ID_NAME);
-//		 String userId = obtainUsername(request);
-//		 String password = obtainPassword(request);
 		
-		 // JSON => Java로 역직렬화
-        ObjectMapper objectMapper = new ObjectMapper();
-        UserLoginRequestDTO loginRequest = null;
-        
+		// JSON => Java로 역직렬화
+		ObjectMapper objectMapper = new ObjectMapper();
+		UserLoginRequestDTO loginRequest = null;
+		
 		try {
 			loginRequest = objectMapper.readValue(request.getInputStream(), UserLoginRequestDTO.class);
 		} catch (IOException e) {
 			log.error("로그인 JSON 파싱 오류: {}", e.getMessage());
 		}
-
-        String userId = loginRequest.getUserId();
-        String password = loginRequest.getPassword();
-
-		 // SpringSecurity에서 userId와 password를 검증하기 위해 token에 정보 담기
-		 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userId, password, null);
+		
+		String id = loginRequest.getId();
+		String password = loginRequest.getPassword();
+		
+		// SpringSecurity에서 userId와 password를 검증하기 위해 token에 정보 담기
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(id, password, null);
 		 
-		 // 검증을 위해 AuthenticationManager에 authToken 전달
-		 return authenticationManager.authenticate(authToken);
+		// 검증을 위해 AuthenticationManager에 authToken 전달
+		return authenticationManager.authenticate(authToken);
 	 }
 	 
 	// 로그인 성공 시 실행하는 메서드
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+		
 		
 		String userId = authentication.getName();
 		

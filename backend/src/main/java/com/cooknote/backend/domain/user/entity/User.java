@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class User {
 
-	private String userId;
+	private Long userId;
+	private String id;
 	private String name;
 	private String password;
 	private String email;
@@ -21,4 +22,5 @@ public class User {
 	private String profileImage;
 	private LocalDate createAt;
 	private LocalDate updateAt;
+	private boolean isDelete;
 }

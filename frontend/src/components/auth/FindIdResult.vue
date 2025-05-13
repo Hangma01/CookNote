@@ -1,13 +1,13 @@
 <script setup>
 
-const userId = history.state.userId;
+const id = history.state.id;
 
 </script>
 
 <template>
   <div class="find-id-result-info">
     <p>고객님의 아이디 찾기가 완료되었습니다.</p>
-    <p class="find-id-value">{{ userId }}</p>
+    <p class="find-id-value">{{ id }}</p>
   </div>
 
   <div class="page-router-btn-wrap">

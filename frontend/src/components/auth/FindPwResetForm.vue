@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { debounce } from 'lodash';
 import { pwRule, newPwConfirmRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
@@ -56,6 +56,13 @@ const handleFindPwReset = debounce(async () => {
 		}
 	}
 }, commonValues.defaultDebounce);
+
+
+watch(() => formValues.newPw, () => {
+  if (formRef.value) {
+    formRef.value.validate();
+  }
+});
 </script>
 
 <template>
@@ -71,7 +78,7 @@ const handleFindPwReset = debounce(async () => {
 				maxlength="16"
 				:rules="[pwRule]"
 				:append-inner-icon="newPwVisible ? 'mdi-eye-off' : 'mdi-eye'"
-        @click:append-inner="newPwVisible = !newPwVisible"
+        		@click:append-inner="newPwVisible = !newPwVisible"
 			/>
 
 			<v-text-field
@@ -83,7 +90,7 @@ const handleFindPwReset = debounce(async () => {
 				hide-details="auto"
 				:rules="[newPwConfirmRule(() => formValues.newPw)]"
 				:append-inner-icon="newPwConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
-        @click:append-inner="newPwConfirmVisible = !newPwConfirmVisible"
+        		@click:append-inner="newPwConfirmVisible = !newPwConfirmVisible"
 			/>
 		</div>
 		

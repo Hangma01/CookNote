@@ -3,6 +3,9 @@ package com.cooknote.backend.mappers;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.cooknote.backend.domain.auth.dto.request.UserFindIdAuthRequestDTO;
+import com.cooknote.backend.domain.auth.dto.request.UserFindPwAuthRequestDTO;
+import com.cooknote.backend.domain.auth.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.user.entity.User;
 
 @Mapper
@@ -10,7 +13,7 @@ public interface AuthMapper {
 
 	
 	// 아이디 중복 체크
-	boolean getExistsUserId(@Param("userId") String userId);
+	boolean getExistsId(@Param("id") String id);
 	
 	// 닉네임 중복 체크
 	boolean getExistsNickname(@Param("nickname") String nickname);
@@ -28,7 +31,7 @@ public interface AuthMapper {
 	User userFindId(User user);
 
 	// 비밀번호 찾기
-	User userFindPw(User User);
+	User userFindPw(User user);
 
-	void updatePwReset(User User);
+	void updatePwReset(User user);
 }

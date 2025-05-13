@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserFindIdResponseDTO {
-	private String userId;
+	private String id;
 }

@@ -30,7 +30,7 @@ public class CustomUserDetails implements UserDetails {
 	@Override
 	public String getUsername() {
 		
-		return user.getUserId();
+		return user.getId();
 	}
 	
 	// 계정 만료 여부

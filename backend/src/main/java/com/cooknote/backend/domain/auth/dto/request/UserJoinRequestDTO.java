@@ -13,7 +13,7 @@ public class UserJoinRequestDTO {
 	
 	@NotBlank()
 	@Pattern(regexp = "^[a-z0-9]{5,20}$")
-	private String userId;
+	private String id;
 	
 	@NotBlank()
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\\-+=`|\\\\(){}\\[\\]:;\"'<>,.?])\\S{8,16}$")

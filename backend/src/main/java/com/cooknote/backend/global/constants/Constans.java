@@ -3,9 +3,9 @@ package com.cooknote.backend.global.constants;
 public class Constans {
     
 	// PREFIX
-	public static final String PW_RESET_PREFIX = "pwReset";
-    public static final String MAIL_AUTH_PREFIX = "authMail";
-    public static final String REFRESH_TOKEN_PREFIX = "refreshToken";
+	public static final String PW_RESET_PREFIX = "pwReset:";
+    public static final String MAIL_AUTH_PREFIX = "authMail:";
+    public static final String REFRESH_TOKEN_PREFIX = "refreshToken:";
     
     
     // TOKEN

@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
-import { userIdRule, pwRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
-import { existsUserId, existsNickname, existsEmail, userJoin } from '@/services/authService';
+import { idRule, pwRule, nameRule, nicknameRule, emailRule, required } from '@/utils/rules';
+import { existsId, existsNickname, existsEmail, userJoin } from '@/services/authService';
 import { sendMailAuthCode } from '@/services/mailService';
 import { commonCheckDuplicate, commonInputHangle, commonVerifyMailAuthCode } from '@/utils/commonFunction';
 import { commonValues } from '@/utils/commonValues';
@@ -18,12 +18,12 @@ const router = useRouter();
 
 // 유효성 겁사
 const formRef = ref(null)                     // Form 유효성 검사
-const ruleUserIdRef = ref(null)               // 아이디 유효성 검사
+const ruleIdRef = ref(null)                 // 아이디 유효성 검사
 const ruleNicknameRef = ref(null)             // 닉네임 유효성 검사
 const ruleEmailRef = ref(null)                // 이메일 유효성 검사
 
 // 에러 메시지
-const errorMsgUserIdDuplicate = ref('')       // 아이디 중복 시 에러 메시지
+const errorMsgIdDuplicate = ref('')       // 아이디 중복 시 에러 메시지
 const errorMsgNicknameDuplicate = ref('')     // 닉네임 중복 시 에러 메시지
 const errorMsgEmailDuplicate = ref('')        // 이메일 중복 시 에러 메시지
 const errorMsgAuthCode = ref('')              // 메일 인증 코드 에러 메시지
@@ -38,7 +38,7 @@ const pwVisible = ref(false)            // 비밀번호 필드 토글
 
 // input-field
 const formValues = reactive({                 // Form input-field             
-  userId: '',
+  id: '',
   pw: '',
   name: '',
   nickname: '',
@@ -56,12 +56,12 @@ const handleNicknameInput = (e) => commonInputHangle(e, 15, (value) => formValue
 
 
 // 아이디 중복 체크
-const handleExistsUserId = async () => {
+const handleExistsId = async () => {
   await commonCheckDuplicate({
-    value: formValues.userId,               
-    validatorRef: ruleUserIdRef,            
-    errorMsgRef: errorMsgUserIdDuplicate,   
-    apiCall: existsUserId,
+    value: formValues.id,               
+    validatorRef: ruleIdRef,            
+    errorMsgRef: errorMsgIdDuplicate,   
+    apiCall: existsId,
     router : router  
   });
 };
@@ -98,7 +98,7 @@ const handleSendMailAuthCode = async () => {
   // 유효성 검사 통과 시 메일 인증 코드 발송
   if (
       isFormVal.valid &&
-      !errorMsgUserIdDuplicate.value &&
+      !errorMsgIdDuplicate.value &&
       !errorMsgNicknameDuplicate.value &&
       !errorMsgEmailDuplicate.value
   ) { 
@@ -107,7 +107,7 @@ const handleSendMailAuthCode = async () => {
         isAuthCodeRequest.value = true;
       } catch (e) {
         console.log(e)
-        alert(errorMessages.badRequest);
+        alert(errorMessages.BADREQUEST);
         router.replace({ name: 'login'});
       }
     }  
@@ -122,7 +122,7 @@ const handleSendMailAuthCodeRetry = async () => {
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
   } catch (e) {
-    alert(errorMessages.badRequest);
+    alert(errorMessages.BADREQUEST);
     router.replace({ name: 'login'});
   }
 }
@@ -158,10 +158,10 @@ const handleSubmitJoin = debounce(async () => {
         alert(e.response.data.message)
       }
 
-      alert(errorMessages.badRequest);
+      alert(errorMessages.BADREQUEST);
     }
   } else {
-    alert(errorMessages.badRequest)
+    alert(errorMessages.BADREQUEST)
   }
 
   router.replace({ name: 'login'});
@@ -194,17 +194,17 @@ watch (
   <v-form ref="formRef" class="join-form" @submit.prevent="handleSubmitJoin">
     <div class="join-content">
       <v-text-field
-          v-model="formValues.userId"
+          v-model="formValues.id"
           type="text"
           label="아이디"
           variant="solo"
           density="comfortable"
           hide-details="auto"
           maxlength="20"
-          ref="ruleUserIdRef"
-          :rules="[userIdRule]"
-          :error-messages="errorMsgUserIdDuplicate"
-          @blur="handleExistsUserId()"
+          ref="ruleIdRef"
+          :rules="[idRule]"
+          :error-messages="errorMsgIdDuplicate"
+          @blur="handleExistsId()"
       />
 
       <v-text-field

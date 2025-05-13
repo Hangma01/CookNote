@@ -5,7 +5,9 @@
 <mapper namespace="com.cooknote.backend.mappers.UserMapper">
 
 	<resultMap type="User" id="userResultMap">
+		
 		<id property="userId" column="user_id" />
+		<result property="id" column="id" />
 	    <result property="name" column="name" />
 	    <result property="password" column="password" />
 	    <result property="email" column="email" />
@@ -19,6 +21,6 @@
 	<select id="getUser" resultMap="userResultMap">
 		SELECT *
 		FROM USER
-		WHERE USER_ID = #{userId}
+		WHERE ID = #{id}
 	</select>   
 </mapper>

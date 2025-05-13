@@ -1,4 +1,4 @@
-const checkUserIdReg = /^[a-z0-9]{5,20}$/;
+const checkIdReg = /^[a-z0-9]{5,20}$/;
 const checkPasswordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?])\S{8,16}$/;
 const checkNameReg = /^[a-zA-Z가-힣]{1,20}$/
 const checkNicknameReg = /^(?!\s)(.{1,15})(?<!\s)$/
@@ -9,14 +9,14 @@ export const required = (v) => {
 }
 
 
-export const defaultUserIdRule = (v) => {
+export const defaultIdRule = (v) => {
   return !!v || '아이디는 필수 입력 정보입니다.'
 }
 
-export const userIdRule = (v) => {
+export const idRule = (v) => {
   if (!v) return '아이디는 필수 입력 정보입니다.'
-  
-  if (!checkUserIdReg.test(v)) return '5~20자의 영문 소문자, 숫자만 사용 가능합니다.'
+
+  if (!checkIdReg.test(v)) return '5~20자의 영문 소문자, 숫자만 사용 가능합니다.'
 
   return true
 }
@@ -35,10 +35,10 @@ export const pwRule = (v) => {
   return true
 }
 
-export const newPwConfirmRule = (getNewPw) =>(v) => {
+export const newPwConfirmRule = (getNewPw) => (v) => {
   if (!v) return '비밀번호 확인은 필수 입력 정보입니다.'
 
-  if(v !== getNewPw()) return "비밀번호가 일치하지 않습니다."
+  if (v !== getNewPw()) return "비밀번호가 일치하지 않습니다."
 
   return true
 }

@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { debounce } from 'lodash';
-import { required, defaultUserIdRule, emailRule } from '@/utils/rules';
+import { required, defaultIdRule, emailRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
 import { deleteMailAuthCode, sendMailAuthCode } from '@/services/mailService';
 import { errorMessages } from '@/utils/errorMessages';
@@ -33,7 +33,7 @@ const isAuthCodeRequest = ref(false)      	// 메일 인증 요청 토글
 
 // input-field
 const formValues = reactive({             	// Form input-field 
-  userId: '',
+  id: '',
   email: '',
 })
 
@@ -57,7 +57,7 @@ const handleUserFindPwRequest = async () => {
 			){
 				alert(e.response.data.message);
 			} else {
-				alert(errorMessages.badRequest);
+				alert(errorMessages.BADREQUEST);
 			}
 		}
 	}  
@@ -73,7 +73,7 @@ const handleSendMailAuthCodeRetry = async () => {
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
   } catch (e) {
-    alert(errorMessages.badRequest);
+    alert(errorMessages.BADREQUEST);
   }
 }
 
@@ -130,13 +130,13 @@ watch (
 	<v-form ref="formRef" class="find-pw-form" @submit.prevent="handleFindPw">
 		<div class="find-pw-content">
 			<v-text-field
-				v-model="formValues.userId"
+				v-model="formValues.id"
 				type="text"
 				label="아이디"
 				variant="solo"
 				density="comfortable"
 				hide-details="auto"
-				:rules="[defaultUserIdRule]"
+				:rules="[defaultIdRule]"
 			/>
 
 			<v-text-field

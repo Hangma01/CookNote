@@ -3,7 +3,7 @@ import publicAPI from '@/api/publicAPI'
 
 // 인증 번호 메일 보내기기
 export const sendMailAuthCode = async (email) => {
-    const res = await publicAPI.post(`/mail/send/authcode`, { 'email': email });
+    const res = await publicAPI.post(`/mail/sendAuthcode`, { 'email': email });
     return res;
 };
 
@@ -21,6 +21,6 @@ export const verifyMailAuthCode = async (email, authCode) => {
 
 export const deleteMailAuthCode = async (email) => {
     console.log(email)
-      const res = await publicAPI.delete(`/mail/authCode`, { params: { email } });
+    const res = await publicAPI.delete(`/mail/authCode`, { params: { email } });
     return res;
 }

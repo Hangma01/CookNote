@@ -6,6 +6,7 @@
 
 	<resultMap type="User" id="userResultMap">
 		<id property="userId" column="user_id" />
+		<result property="id" column="id" />
 	    <result property="name" column="name" />
 	    <result property="password" column="password" />
 	    <result property="email" column="email" />
@@ -18,9 +19,9 @@
  
 
 	<!-- 아이디 중복 체크 -->
-	<select id="getExistsUserId" resultType="boolean">
+	<select id="getExistsId" resultType="boolean">
 		SELECT 
-			EXISTS (SELECT 1 FROM USER WHERE USER_ID = #{userId})
+			EXISTS (SELECT 1 FROM USER WHERE USER_ID = #{id})
 	</select>
 	
 	<!-- 닉네임 중복 체크 -->
@@ -36,14 +37,14 @@
 	<!-- 회원 가입 -->
 	<insert id="userJoin" parameterType="User">
 		INSERT INTO USER (
-        	USER_ID, 
+        	ID, 
         	PASSWORD, 
         	NAME, 
         	NICKNAME, 
 			EMAIL, 
 			PROFILE_IMAGE
     	) VALUES (
-        	#{userId}, 
+        	#{id}, 
         	#{password}, 
         	#{name}, 
         	#{nickname}, 
@@ -59,22 +60,22 @@
 	
 	<!-- 아이디 찾기 -->
 	<select id="userFindId" parameterType="User" resultMap="userResultMap">
-		SELECT USER_ID
+		SELECT ID
 		FROM USER
 		WHERE NAME = #{name} AND EMAIL = #{email}
 	</select>
 	
 	<!-- 비밀번호 찾기 - 요청 -->
 	<select id="userFindPw" parameterType="User" resultMap="userResultMap">
-		SELECT USER_ID
+		SELECT ID
 		FROM USER
-		WHERE USER_ID = #{userId} AND EMAIL = #{email}
+		WHERE ID = #{id} AND EMAIL = #{email}
 	</select>
 	
 	<!-- 비밀번호 변경 -->
 	<update id="updatePwReset" parameterType="User">
 		UPDATE USER
 		SET PASSWORD = #{password}
-		WHERE USER_ID = #{userId}
+		WHERE ID = #{id}
 	</update>
 </mapper>

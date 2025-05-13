@@ -19,6 +19,7 @@ import com.cooknote.backend.domain.auth.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
+import com.cooknote.backend.domain.auth.service.impl.AuthServiceImpl;
 import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
@@ -37,16 +38,16 @@ public class AuthController {
 	private final AuthService authService;
 	
 	// 아이디 중복 체크
-	@GetMapping("/exists/id")
-	public ResponseEntity<Void> getExistsUserId(@RequestParam("user_id") String userId) {
+	@GetMapping("/existsId")
+	public ResponseEntity<Void> getExistsId(@RequestParam("id") String id) {
 
-		authService.getExistsUserId(userId);
+		authService.getExistsId(id);
 
 		return ResponseEntity.ok().build();
 	}
 
 	// 닉네임 중복 체크
-	@GetMapping("/exists/nickname")
+	@GetMapping("/existsNickname")
 	public ResponseEntity<Void> getExistsNickname(@RequestParam("nickname") String nickname) {
 
 		authService.getExistsNickname(nickname);
@@ -55,7 +56,7 @@ public class AuthController {
 	}
 
 	// 이메일 중복 체크
-	@GetMapping("/exists/email")
+	@GetMapping("/existsEmail")
 	public ResponseEntity<Void> getExistsEmail(@RequestParam("email") String email) {
 
 		authService.getExistsEmail(email);
@@ -73,18 +74,18 @@ public class AuthController {
 		}
 
 		// 중복 검사
-		authService.getExistsUserId(userJoinRequestDTO.getUserId());
+		authService.getExistsId(userJoinRequestDTO.getId());
 		authService.getExistsNickname(userJoinRequestDTO.getNickname());
 		authService.getExistsEmail(userJoinRequestDTO.getEmail());
 
 		// 회원 가입
 		authService.userJoin(userJoinRequestDTO);
 
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+		return ResponseEntity.ok().build();
 	}
 
 	// 아이디 찾기 - 요청
-	@PostMapping("/find-id")
+	@PostMapping("/findId")
 	public ResponseEntity<Void> userFindIdAuthRequest(@RequestBody UserFindIdAuthRequestDTO userFindIdAuthRequestDTO) {
 
 		authService.userFindIdAuthRequest(userFindIdAuthRequestDTO);
@@ -93,14 +94,14 @@ public class AuthController {
 	}
 
 	// 아이디 찾기 - 아이디 반환
-	@GetMapping("/find-id")
+	@GetMapping("/findId")
 	public ResponseEntity<UserFindIdResponseDTO> userFindId(@RequestParam("name") String name, @RequestParam("email") String email) {
 
 		return ResponseEntity.ok(authService.userFindId(name, email));
 	}
 
 	// 비밀번호 찾기 - 요청
-	@PostMapping("/find-pw")
+	@PostMapping("/findPw")
 	public ResponseEntity<UserFindPwResponseDTO> userFindPwAuthRequest(@RequestBody UserFindPwAuthRequestDTO userFindPwAuthRequestDTO) {
 		
 		return ResponseEntity.ok(authService.userFindPwAuthRequest(userFindPwAuthRequestDTO));
@@ -108,7 +109,7 @@ public class AuthController {
 	
 	
 	// 비밀번호 찾기 - 변경
-	@PatchMapping("/find-pw")
+	@PatchMapping("/findPw")
 	public ResponseEntity<Void> userFindPwReset(@Valid @RequestBody UserFindPwResetRequestDTO userFindPwResetRequestDTO, BindingResult bindingResult) {
 
 		// 유효성 검사 확인

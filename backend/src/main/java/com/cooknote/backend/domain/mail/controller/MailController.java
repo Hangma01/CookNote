@@ -12,7 +12,7 @@ import com.cooknote.backend.domain.mail.dto.request.AuthCodeRequestDTO;
 import com.cooknote.backend.domain.mail.dto.request.DeleteAuthCodeRequestDTO;
 import com.cooknote.backend.domain.mail.dto.request.VerifyAuthCodeRequestDTO;
 import com.cooknote.backend.domain.mail.dto.response.VerifyAuthCodeResponseDTO;
-import com.cooknote.backend.domain.mail.service.MailService;
+import com.cooknote.backend.domain.mail.service.Impl.MailServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,10 +21,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MailController {
 
-	private final MailService mailService;
+	private final MailServiceImpl mailService;
 
 	// 인증 번호 발송
-	@PostMapping("/send/authcode")
+	@PostMapping("/sendAuthcode")
 	public ResponseEntity<Void> sendAuthCode(@RequestBody AuthCodeRequestDTO authCodeRequestDTO) {
 		mailService.sendAuthCode(authCodeRequestDTO.getEmail());
 		

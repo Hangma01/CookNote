@@ -70,7 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
     			String userId = jwtUtil.getUserId(accessToken);
             	
             	User user = User.builder()
-    			                    .userId(userId)
+    			                    .id(userId)
     			                    .build();
             	
             	CustomUserDetails customUserDetails = new CustomUserDetails(user);

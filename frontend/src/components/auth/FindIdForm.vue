@@ -54,7 +54,7 @@ const handleUserFindIdRequest = async () => {
 			){
 				alert(e.response.data.message);
 			} else {
-				alert(errorMessages.badRequest);
+				alert(errorMessages.BADREQUEST);
 			}
 		}
 	}  
@@ -70,7 +70,7 @@ const handleSendMailAuthCodeRetry = async () => {
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
   } catch (e) {
-    alert(errorMessages.badRequest);
+    alert(errorMessages.BADREQUEST);
   }
 }
 
@@ -101,9 +101,9 @@ const handleFindId = debounce(async () => {
 			if(userFindIdres.status === HttpStatusCode.Ok) {
 				try {
 					const deleteRes = await deleteMailAuthCode(formValues.email)
-					router.replace({ name: 'userFindIdResult', state: { userId: userFindIdres.data.userId }});
+					router.replace({ name: 'userFindIdResult', state: { id: userFindIdres.data.id }});
 				}catch (e) {
-					alert(errorMessages.badRequest);
+					alert(errorMessages.BADREQUEST);
 				}
 			}
 		} catch (e) {
@@ -113,7 +113,7 @@ const handleFindId = debounce(async () => {
 			){
 				alert(e.response.data.message);
 			} else {
-				alert(errorMessages.badRequest);
+				alert(errorMessages.BADREQUEST);
 			}
 			
 			isAuthCodeRequest.value = false;

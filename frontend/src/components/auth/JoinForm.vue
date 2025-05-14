@@ -5,8 +5,8 @@ import { existsId, existsNickname, existsEmail, userJoin } from '@/services/auth
 import { sendMailAuthCode } from '@/services/mailService';
 import { commonCheckDuplicate, commonInputHangle, commonVerifyMailAuthCode } from '@/utils/commonFunction';
 import { commonValues } from '@/utils/commonValues';
-import { errorMessages } from '@/utils/errorMessages';
-import { successMessage } from '@/utils/successMessage';
+import { errorMessages } from '@/utils/messages/errorMessages';
+import { successMessage } from '@/utils/messages/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash'

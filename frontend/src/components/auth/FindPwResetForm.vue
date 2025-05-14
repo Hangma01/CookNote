@@ -5,7 +5,7 @@ import { pwRule, newPwConfirmRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
 import { userFindPwReset } from '@/services/authService';
 import { HttpStatusCode } from 'axios';
-import { errorMessages } from '@/utils/errorMessages';
+import { errorMessages } from '@/utils/messages/errorMessages';
 import { useRouter } from 'vue-router';
 import { usePwResetTokenStore } from '@/stores/pwResetToken';
 

@@ -4,23 +4,33 @@
 
 <mapper namespace="com.cooknote.backend.mappers.UserMapper">
 
-	<resultMap type="User" id="userResultMap">
-		
-		<id property="userId" column="user_id" />
-		<result property="id" column="id" />
-	    <result property="name" column="name" />
-	    <result property="password" column="password" />
-	    <result property="email" column="email" />
-	    <result property="nickname" column="nickname" />
-	    <result property="profileImage" column="profile_image" />
-	    <result property="createAt" column="create_at" />
-	    <result property="updateAt" column="update_at" />
-	</resultMap>
-
+	<resultMap id="UserResultMap" type="User">
+        <id property="userId" column="USER_ID"/>
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="email" column="EMAIL"/>
+        <result property="nickname" column="NICKNAME"/>
+        <result property="profileImage" column="PROFILE_IMAGE"/>
+        <result property="createAt" column="CREATE_AT"/>
+        <result property="updateAt" column="UPDATE_AT"/>
+        <result property="isDelete" column="IS_DELETE"/>
+    </resultMap>
+    
+    
 	<!-- 회원 정보 가져오기 -->
-	<select id="getUser" resultMap="userResultMap">
-		SELECT *
-		FROM USER
+	<select id="getUser" resultMap="UserResultMap">
+		SELECT 
+			USER_ID,
+			ID,
+			NAME,
+			PASSWORD,
+			EMAIL,
+			NICKNAME,
+			PROFILE_IMAGE,
+			CREATE_AT,
+			UPDATE_AT
+		FROM USERS
 		WHERE ID = #{id}
 	</select>   
 </mapper>

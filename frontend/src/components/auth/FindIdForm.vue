@@ -5,8 +5,8 @@ import { required, defaultNameRule, emailRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
 import { userFindIdAuth, userFindId } from '@/services/authService';
 import { deleteMailAuthCode, sendMailAuthCode } from '@/services/mailService';
-import { errorMessages } from '@/utils/errorMessages';
-import { successMessage } from '@/utils/successMessage';
+import { errorMessages } from '@/utils/messages/errorMessages';
+import { successMessage } from '@/utils/messages/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
 import { commonVerifyMailAuthCode } from '@/utils/commonFunction';
@@ -46,17 +46,15 @@ const handleUserFindIdRequest = async () => {
   // 유효성 검사 통과 시 메일 인증 코드 발송
   if (isFormVal.valid) { 
 		try {
-			isAuthCodeRequest.value = true;
 			const res = await userFindIdAuth({ ...formValues })
+			isAuthCodeRequest.value = true;
 		} catch (e) {
 			if(e.response &&
 					(e.response.data.status === HttpStatusCode.NotFound && e.response.data.message)
 			){
 				alert(e.response.data.message);
-				isAuthCodeRequest.value = false;
 			} else {
 				alert(errorMessages.BADREQUEST);
-				isAuthCodeRequest.value = false;
 			}
 		}
 	}  

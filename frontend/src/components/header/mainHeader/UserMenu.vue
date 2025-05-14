@@ -1,4 +1,6 @@
 <script setup>
+import privateAPI from '@/api/privateAPI';
+import { logout } from '@/services/authService';
 import { useUserStore } from '@/stores/user';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -24,9 +26,27 @@ const closeMyPageItem = (event) => {
 // 마이 페이지 아이템 창 토글
 const handleToggleMyPageItem = (event) => {
     showMyPageItem.value = !showMyPageItem.value
-     event.stopPropagation();
+    event.stopPropagation();
 }
 
+// 로그아웃
+const handleLogout = async () => {
+    try {
+        const res = await logout()
+    } catch (e) {
+    }
+    userStore.logout()
+    await router.push({ name: 'login' })
+}
+
+const fe = async () => {
+    try {
+        const res = await privateAPI.get('/users/mypage');
+        console.log(res)
+    } catch(e){
+        console.log(e)
+    }
+}
 // 전체 페이지 클릭 이벤트를 추가
 onMounted(() => {
     document.addEventListener('click', closeMyPageItem);
@@ -63,7 +83,7 @@ onBeforeUnmount(() => {
                         </li>
                     </router-link>
                     
-                    <li class="mypage-item">
+                    <li class="mypage-item" @click="handleLogout">
                         로그아웃
                     </li>
                 </ul>
@@ -75,6 +95,7 @@ onBeforeUnmount(() => {
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
         </li>
+        <v-btn @click="fe"> fdd</v-btn>
     </ul>
 </template>
 
@@ -108,7 +129,7 @@ onBeforeUnmount(() => {
                 justify-content: center;
                 align-items: center;
                 padding: 6px 0;
-                
+                cursor: pointer;
             }
 
             .mypage-item:hover{

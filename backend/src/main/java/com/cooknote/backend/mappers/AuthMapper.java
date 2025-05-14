@@ -25,13 +25,13 @@ public interface AuthMapper {
 	void userJoin(User user);
 
 	// 아이디 찾기 - 요청
-	boolean userFindIdAuthRequest(UserFindIdAuthRequestDTO userFindIdAuthRequestDTO);
+	boolean userFindIdAuthRequest(@Param("name") String name,@Param("email") String email);
 
 	// 아이디 찾기
-	User userFindId(@Param("name") String name,@Param("email") String email);
+	User userFindId(@Param("name") String name, @Param("email") String email);
 
 	// 비밀번호 찾기
-	User userFindPw(UserFindPwAuthRequestDTO userFindPwAuthRequestDTO);
+	User userFindPw(@Param("id") String id, @Param("email") String email);
 
-	void updatePwReset(@Param("id") String id, @Param("encodePw") String encodePw);
+	void updatePwReset(@Param("userId") long userId, @Param("password") String password);
 }

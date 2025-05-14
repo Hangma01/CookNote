@@ -10,6 +10,13 @@ export const login = async (formValues) => {
   return res;
 }
 
+// 로그아웃 요청
+export const logout = async () => {
+  const res = await publicAPI.post(`/logout`, {}, {
+    withCredentials: true
+  })
+}
+
 // 아이디 중복 체크
 export const existsId = async (id) => {
   const res = await publicAPI.get(`/auth/existsId?id=${id}`);

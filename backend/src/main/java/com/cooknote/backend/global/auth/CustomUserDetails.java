@@ -33,6 +33,11 @@ public class CustomUserDetails implements UserDetails {
 		return user.getId();
 	}
 	
+	public long getUserId() {
+		
+		return user.getUserId();
+	}
+	
 	// 계정 만료 여부
     @Override
     public boolean isAccountNonExpired() {

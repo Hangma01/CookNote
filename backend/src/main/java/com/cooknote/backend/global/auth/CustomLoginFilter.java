@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 // 로그인 검증을 위한 커스텀
 @RequiredArgsConstructor
 @Slf4j
-public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 	
 	
 	private final AuthenticationManager authenticationManager;
@@ -40,19 +40,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		// JSON => Java로 역직렬화
 		ObjectMapper objectMapper = new ObjectMapper();
 		UserLoginRequestDTO loginRequest = null;
-		
 		try {
 			loginRequest = objectMapper.readValue(request.getInputStream(), UserLoginRequestDTO.class);
 		} catch (IOException e) {
 			log.error("로그인 JSON 파싱 오류: {}", e.getMessage());
 		}
-		
 		String id = loginRequest.getId();
 		String password = loginRequest.getPassword();
 		
 		// SpringSecurity에서 userId와 password를 검증하기 위해 token에 정보 담기
 		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(id, password, null);
-		 
+		
 		// 검증을 위해 AuthenticationManager에 authToken 전달
 		return authenticationManager.authenticate(authToken);
 	 }
@@ -62,20 +60,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
 		
 		
-		String userId = authentication.getName();
+		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+
+		// user 정보 가져오기
+        long userId = customUserDetails.getUserId();
+        String id = customUserDetails.getUsername();
 		
-		String accessToken = jwtUtil.createTokenJwt(Constans.ACCESS_TOKEN_NAME, userId, Constans.ACCESS_TOKEN_EXPIRED_MS);
-		String refreshToKen = jwtUtil.createTokenJwt(Constans.REFRESH_TOKEN_NAME, userId, Constans.REFRESH_TOKEN_EXPIRED_MS);
+        // 토큰 생성
+		String accessToken = jwtUtil.createTokenJwt(userId, id, Constans.ACCESS_TOKEN_EXPIRED_MS);
+		String refreshToKen = jwtUtil.createTokenJwt(userId, id, Constans.REFRESH_TOKEN_EXPIRED_MS);
 		
-		int accessTokenSecond = Constans.ACCESS_TOKEN_EXPIRED_MS / Constans.SECOND_MS;
 		int refreshTokenSecond = Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS;
 		
-
-		
+		// 레디스에 refresh 토큰 저장
 		String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId; 
-		redisUtil.setDataExpire(refreshTokenRedisKey, refreshToKen, accessTokenSecond);
+		redisUtil.setDataExpire(refreshTokenRedisKey, refreshToKen, refreshTokenSecond);
 		
-		response.addCookie(CookieUtil.createCookie(Constans.ACCESS_TOKEN_NAME, accessToken, accessTokenSecond));
+		// 쿠키 생성 및 응답 반환
+		response.addHeader(Constans.AUTHORIZATION_HEADER, Constans.BEARER_PREFIX + accessToken);
 		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, refreshToKen, refreshTokenSecond));
 		response.setStatus(HttpStatus.OK.value());
 	}

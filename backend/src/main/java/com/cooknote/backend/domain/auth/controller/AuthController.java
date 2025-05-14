@@ -19,10 +19,7 @@ import com.cooknote.backend.domain.auth.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
-import com.cooknote.backend.domain.auth.service.impl.AuthServiceImpl;
-import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
-import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -125,7 +122,6 @@ public class AuthController {
 	// 토큰 재발급
 	@PostMapping("/reissue")
 	 public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-
 		authService.reissue(request, response);
 
 		return ResponseEntity.ok().build();

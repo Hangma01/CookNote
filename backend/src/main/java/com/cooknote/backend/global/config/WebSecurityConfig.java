@@ -14,11 +14,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.cooknote.backend.global.auth.JwtFilter;
-import com.cooknote.backend.global.auth.LoginFilter;
+import com.cooknote.backend.global.auth.CustomLoginFilter;
+import com.cooknote.backend.global.auth.CustomLogoutFilter;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 
@@ -41,6 +43,7 @@ public class WebSecurityConfig {
         return configuration.getAuthenticationManager();
     }
 	
+    // 비밀번호 암호화
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -62,7 +65,8 @@ public class WebSecurityConfig {
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
 					configuration.setMaxAge(3600L);
 
-
+					configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+					
 					return configuration;
 				}
 			}));
@@ -78,6 +82,11 @@ public class WebSecurityConfig {
 			.formLogin(AbstractHttpConfigurer::disable);
 		
 		
+		// form 로그아웃 방식 disable
+		http
+			.logout(AbstractHttpConfigurer::disable);
+		
+		
 		// http basic 인증 방식 disable
 		http
 			.httpBasic(AbstractHttpConfigurer::disable);
@@ -90,16 +99,19 @@ public class WebSecurityConfig {
 						.anyRequest().authenticated());
 
 		
-		// 로그인 필터 전 JWTFilter 등ㄹ고
+		// 로그인 필터 전 JWTFilter 등록
 	    http
-           .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
+           .addFilterBefore(new JwtFilter(jwtUtil), CustomLoginFilter.class);
 	    
 	    
 		// 필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager()는 직접 new로 만들 수 없어서 authenticationConfiguration가 필요함)
 		http
-			.addFilterBefore(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
+			.addFilterBefore(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
 
 		
+		// 필터 추가 LogoutFilter
+		http
+			.addFilterBefore(new CustomLogoutFilter(jwtUtil, redisUtil), LogoutFilter.class);
 		// 세션 설정
 		http
 			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

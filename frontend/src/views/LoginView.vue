@@ -10,6 +10,6 @@
 <style scoped>
 .user-auth-wrap{
   margin: 0 auto;
-  width: 22rem;
+  width: 23rem;
 }
 </style>

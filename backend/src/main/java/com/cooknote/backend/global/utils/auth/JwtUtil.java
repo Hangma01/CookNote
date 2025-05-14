@@ -25,28 +25,32 @@ public class JwtUtil {
     	
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
-
-
-    public String getCategory(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
-    }
-
-    public String getUserId(String token) {
-        Claims claims = getClaims(token);
-        return claims.get(Constans.USER_ID_NAME, String.class);
-    }    
     
-    private Claims getClaims(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
+    // 토큰에서 userId 가져오기
+    public long getUserId(String token) {
+        Claims claims = getClaims(token);
+        return claims.get(Constans.USER_ID_NAME_TEXT, Long.class);
+    }    
+
+    // 토큰에서 아이디 가져오기
+    public String getId(String token) {
+    	 Claims claims = getClaims(token);
+         return claims.get(Constans.ID_NAME_TEXT, String.class);
     }
+    
+    // 토큰 만료시간 체크
+    public Boolean isExpired(String token) {
+    	 Claims claims = getClaims(token);
+         return claims.getExpiration().before(new Date());
+    }
+   
 
-
-   //JWT 토큰 생성
-    public String createTokenJwt(String category, String userId, long expiredMs) {
+    //JWT 토큰 생성
+    public String createTokenJwt(long userId, String id, long expiredMs) {
     	
 		return Jwts.builder()
-					.claim(Constans.CATEGORY_NAME, category)
-					.claim(Constans.USER_ID_NAME, userId)
+					.claim(Constans.USER_ID_NAME_TEXT, userId)
+					.claim(Constans.ID_NAME_TEXT, id)
 					.issuedAt(new Date(System.currentTimeMillis()))
 					.expiration(new Date(System.currentTimeMillis() + expiredMs))
 					.signWith(secretKey)
@@ -62,5 +66,10 @@ public class JwtUtil {
 				.parseSignedClaims(token);
         
         return true;
+    }
+    
+    
+    private Claims getClaims(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
     }
 }

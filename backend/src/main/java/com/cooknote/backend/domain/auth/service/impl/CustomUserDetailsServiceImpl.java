@@ -23,14 +23,15 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
 
 		// DB에서 유저 조회
-		User userData = userMapper.getUser(id);
+		User getUser = userMapper.getUser(id);
 
-		if(userData == null) {
+		// 유저 조회 실패
+		if(getUser == null) {
 
 			throw new UsernameNotFoundException(ErrorMessage.LOGIN_FAIL_MESSAGE.getMessage());
 		}
 		
 		// UserDetails에 담아서 return 하면 AuthenticationManager가 검증함
-		return new CustomUserDetails(userData);
+		return new CustomUserDetails(getUser);
 	}
 }

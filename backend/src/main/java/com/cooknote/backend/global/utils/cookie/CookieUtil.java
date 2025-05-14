@@ -11,4 +11,14 @@ public class CookieUtil {
 
         return cookie;
     }
+    
+    
+    public static Cookie deleteCookie(String key) {
+        Cookie cookie = new Cookie(key, null);
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+
+        return cookie;
+    }
 }

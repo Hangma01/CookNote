@@ -4,11 +4,25 @@
 
 <mapper namespace="com.cooknote.backend.mappers.AuthMapper">
 
+	<resultMap id="UserResultMap" type="User">
+        <id property="userId" column="USER_ID"/>
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="email" column="EMAIL"/>
+        <result property="nickname" column="NICKNAME"/>
+        <result property="profileImage" column="PROFILE_IMAGE"/>
+        <result property="createAt" column="CREATE_AT"/>
+        <result property="updateAt" column="UPDATE_AT"/>
+        <result property="isDelete" column="IS_DELETE"/>
+    </resultMap>
+
+
 	<!-- 아이디 중복 체크 -->
 	<select id="getExistsId" resultType="boolean">
 		SELECT 
 			EXISTS (SELECT 1 
-					FROM USER 
+					FROM USERS 
 					WHERE ID = #{id}
 					AND IS_DELETE = FALSE)
 	</select>
@@ -17,7 +31,7 @@
 	<select id="getExistsNickname" resultType="boolean">
 		SELECT 
 			EXISTS (SELECT 1 
-					FROM USER 
+					FROM USERS 
 					WHERE NICKNAME = #{nickname}
 					AND IS_DELETE = FALSE)
 	</select>
@@ -26,14 +40,14 @@
 	<select id="getExistsEmail" resultType="boolean">
 		SELECT 
 			EXISTS (SELECT 1 
-					FROM USER 
+					FROM USERS 
 					WHERE EMAIL = #{email}
 					AND IS_DELETE = FALSE)
 	</select>
 
 	<!-- 회원 가입 -->
 	<insert id="userJoin" parameterType="User">
-		INSERT INTO USER (
+		INSERT INTO USERS (
         	ID, 
         	PASSWORD, 
         	NAME, 
@@ -51,38 +65,38 @@
 	</insert>
 	
 	<!-- 아이디 찾기 - 요청 -->
-	<select id="userFindIdAuthRequest" parameterType="UserFindIdAuthRequestDTO" resultType="boolean">
+	<select id="userFindIdAuthRequest" resultType="boolean">
 		SELECT 
 			EXISTS (SELECT 1 
-					FROM USER 
+					FROM USERS
 					WHERE NAME = #{name} 
 					AND EMAIL = #{email}
 					AND IS_DELETE = FALSE)
 	</select>
 	
 	<!-- 아이디 찾기 -->
-	<select id="userFindId" parameterType="String" resultType="User">
+	<select id="userFindId" resultType="User">
 		SELECT ID
-		FROM USER
+		FROM USERS
 		WHERE NAME = #{name} 
 		AND EMAIL = #{email}
 		AND IS_DELETE = FALSE
 	</select>
 	
 	<!-- 비밀번호 찾기 - 요청 -->
-	<select id="userFindPw" parameterType="UserFindPwAuthRequestDTO" resultType="User">
-		SELECT ID
-		FROM USER
+	<select id="userFindPw" resultMap="UserResultMap">
+		SELECT USER_ID
+		FROM USERS
 		WHERE ID = #{id} 
 		AND EMAIL = #{email}
 		AND IS_DELETE = FALSE
 	</select>
 	
 	<!-- 비밀번호 변경 -->
-	<update id="updatePwReset" parameterType="User">
-		UPDATE USER
-		SET PASSWORD = #{encodePw}
-		WHERE ID = #{id}
+	<update id="updatePwReset">
+		UPDATE USERS
+		SET PASSWORD = #{password}
+		WHERE USER_ID = #{userId}
 		AND IS_DELETE = FALSE
 	</update>
 </mapper>

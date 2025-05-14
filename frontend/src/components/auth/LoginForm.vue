@@ -5,7 +5,7 @@ import { defaultPwRule, defaultIdRule } from '@/utils/rules';
 import { debounce } from 'lodash';
 import { commonValues } from '@/utils/commonValues';
 import { HttpStatusCode } from 'axios';
-import { errorMessages } from '@/utils/errorMessages';
+import { errorMessages } from '@/utils/messages/errorMessages';
 import { useRouter } from 'vue-router';
 import { login } from '@/services/authService';
 import { useUserStore } from '@/stores/user';
@@ -34,12 +34,13 @@ const handleLogin = debounce(async () => {
 	if (isFormVal.valid) {
     try {
 		  const res = await login({...formValues})
-      userStore.login()
+      const accessToken = res.headers[commonValues.AUTHORIZATION_HEADER]
+  
+      userStore.login(accessToken)
+  
       router.replace({name : "mainPage"})
     } catch (e) {
-      if(e.status === HttpStatusCode.Unauthorized) {
-        alert(errorMessages.LOGINERROR)
-      }
+      alert(errorMessages.LOGIN_ERROR)
     }
 	}
 }, commonValues.defaultDebounce);

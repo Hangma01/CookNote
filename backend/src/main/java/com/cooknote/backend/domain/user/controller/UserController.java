@@ -19,7 +19,7 @@ public class UserController {
 	
 	@GetMapping("/mypage")
 	public ResponseEntity<String> MyPage() {
-		System.out.println("?");
+		System.out.println("mypage 탐");
 		
 		return ResponseEntity.ok("성공");
 	}

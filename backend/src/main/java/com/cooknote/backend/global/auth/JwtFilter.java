@@ -7,12 +7,14 @@ import java.io.PrintWriter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
+import com.cooknote.backend.global.utils.response.ResponseUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -30,47 +32,32 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
+    
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 	
-		
-		// 토큰 재발급시 필터 패스
-	    if (request.getRequestURI().equals(Constans.REISSUE_URI)
-	    		&& request.getMethod().equals(Constans.METHOD_POST_TEXT)) {
-	        filterChain.doFilter(request, response);
-	        return;
+
+		// 필터 패스 조건		
+	    String accessToken= resolveToken(request);
+	    if (accessToken == null) {
+	    	filterChain.doFilter(request, response);
+				
+            return;
 	    }
-		
-		
-        String accessToken = null;
 
-        Cookie[] cookies = request.getCookies();
-        
-        // 쿠키가 없으면 다음 필터로 넘김
-        if (cookies == null) {
-        	filterChain.doFilter(request, response);
-        	return;
-        }
-
-        // accessToekn 가져오기
-        for(Cookie cookie : cookies) {
-            if(cookie.getName().equals(Constans.ACCESS_TOKEN_NAME)) {
-            	accessToken = cookie.getValue();
-            }
-        }
-
-        
         // accessToken 유효성 검사
         try {
         	if(accessToken != null 
-        		&& jwtUtil.isValidToken(accessToken)
-        		&& jwtUtil.getCategory(accessToken).equals(Constans.ACCESS_TOKEN_NAME)){
-    			String userId = jwtUtil.getUserId(accessToken);
+        		&& jwtUtil.isValidToken(accessToken)){
+        		
+        		String id = jwtUtil.getId(accessToken);
+    			long userId = jwtUtil.getUserId(accessToken);
             	
             	User user = User.builder()
-    			                    .id(userId)
+            						.userId(userId)
+    			                    .id(id)
     			                    .build();
             	
             	CustomUserDetails customUserDetails = new CustomUserDetails(user);
@@ -81,10 +68,8 @@ public class JwtFilter extends OncePerRequestFilter {
             	SecurityContextHolder.getContext().setAuthentication(authentication);
     		}
         } catch (ExpiredJwtException e) {				// Access Token 만료
-	    	PrintWriter writer = response.getWriter();
-            writer.print(ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE);
-
-	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	    	ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE.getMessage());
+	    	
 	    	return;
 	    } catch (RuntimeException e) {
 	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -94,4 +79,10 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 	}
 
+    private String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(Constans.AUTHORIZATION_HEADER);
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(Constans.BEARER_PREFIX)) return bearerToken.substring(7);
+
+        return null;
+    }
 }

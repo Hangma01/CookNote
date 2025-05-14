@@ -83,12 +83,12 @@ public class AuthServiceImpl implements AuthService{
 	// 회원가입
 	@Override
 	public void userJoin(UserJoinRequestDTO userJoinRequestDTO) {
-		String encodePw = bCryptPasswordEncoder.encode(userJoinRequestDTO.getPw());
+		String password = bCryptPasswordEncoder.encode(userJoinRequestDTO.getPw());
 		
 		
 		User reqUser = User.builder()
 				.id(userJoinRequestDTO.getId())
-				.password(encodePw)
+				.password(password)
 				.name(userJoinRequestDTO.getName())
 				.nickname(userJoinRequestDTO.getNickname())
 				.email(userJoinRequestDTO.getEmail())
@@ -104,7 +104,8 @@ public class AuthServiceImpl implements AuthService{
 	@Override
 	public void userFindIdAuthRequest(UserFindIdAuthRequestDTO userFindIdAuthRequestDTO) {
 		
-		Boolean isExistsUser = authMapper.userFindIdAuthRequest(userFindIdAuthRequestDTO);
+		Boolean isExistsUser = authMapper.userFindIdAuthRequest(userFindIdAuthRequestDTO.getName(), 
+																userFindIdAuthRequestDTO.getEmail());
 	
 		if(!isExistsUser) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
@@ -135,8 +136,11 @@ public class AuthServiceImpl implements AuthService{
 	@Override
 	public UserFindPwResponseDTO userFindPwAuthRequest(UserFindPwAuthRequestDTO userFindPwAuthRequestDTO) {
 		
-		User rspUser = authMapper.userFindPw(userFindPwAuthRequestDTO);
-	
+
+		User rspUser = authMapper.userFindPw(userFindPwAuthRequestDTO.getId(), userFindPwAuthRequestDTO.getEmail());
+		
+		System.out.println(rspUser);
+		
 		if(rspUser == null) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
 		}
@@ -147,9 +151,9 @@ public class AuthServiceImpl implements AuthService{
 		// 비밀번호 재설정 토큰 추가
 		String pwResetToken = UUID.randomUUID().toString();
 		String pwResetRedisKey = Constans.PW_RESET_PREFIX + pwResetToken;
-		String id = rspUser.getId();
+		long userId = rspUser.getUserId();
 		
-		redisUtil.setDataExpire(pwResetRedisKey, id, Constans.PW_RESET_TOKEN_EXPIRE);
+		redisUtil.setDataExpire(pwResetRedisKey, String.valueOf(userId), Constans.PW_RESET_TOKEN_EXPIRE);
 		
 		
 		UserFindPwResponseDTO userFindPwResponseDTO = UserFindPwResponseDTO.builder()
@@ -170,16 +174,16 @@ public class AuthServiceImpl implements AuthService{
 		// 비밀번호 재설정 키 확인
 		String pwResetRedisKey = Constans.PW_RESET_PREFIX + userFindPwResetRequestDTO.getPwResetToken();
 		
-		String id = redisUtil.getData(pwResetRedisKey);
+		String getUserId = redisUtil.getData(pwResetRedisKey);
 		
-		if(id == null){ 										// 인증 시간 만료
+		if(getUserId == null){ 										// 인증 시간 만료
 			throw new CustomAuthException(AuthErrorCode.PW_AUTH_EXPIRED_EXCEPTION);
 	    }
 		
-		String encodePw = bCryptPasswordEncoder.encode(userFindPwResetRequestDTO.getNewPw());
+		String password = bCryptPasswordEncoder.encode(userFindPwResetRequestDTO.getNewPw());
+		long userId = Long.valueOf(getUserId);
 		
-		
-		authMapper.updatePwReset(id, encodePw);
+		authMapper.updatePwReset(userId, password);
 		
 		// 레디스에 저장된 비밀전호 재설정 key 삭제
 		redisUtil.deleteData(pwResetRedisKey);
@@ -206,40 +210,40 @@ public class AuthServiceImpl implements AuthService{
         }
 
 
-        // accessToken 유효성 검사
-        if(refreshToken != null 
-        		&& jwtUtil.getCategory(refreshToken).equals(Constans.REFRESH_TOKEN_NAME)) {
-        	
-        	try {
-        		if(jwtUtil.isValidToken(refreshToken) ) {
-        			String userId = jwtUtil.getUserId(refreshToken);
-                	String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId;
-        			String refreshTokenReidsValue = redisUtil.getData(refreshTokenRedisKey);
-        			
-        			if(refreshToken.equals(refreshTokenReidsValue)) {
-        				User user = User.builder()
-			                    .id(userId)
-			                    .build();
-        	
-			        	String newAccessToken = jwtUtil.createTokenJwt(Constans.ACCESS_TOKEN_NAME, userId, Constans.ACCESS_TOKEN_EXPIRED_MS);
-			    		String newRefreshToken = jwtUtil.createTokenJwt(Constans.REFRESH_TOKEN_NAME, userId, Constans.REFRESH_TOKEN_EXPIRED_MS);
-			    		
-			    		int accessTokenSecond = Constans.ACCESS_TOKEN_EXPIRED_MS / Constans.SECOND_MS;
-			    		int refreshTokenSecond = Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS;
-			    		
-			    		response.addCookie(CookieUtil.createCookie(Constans.ACCESS_TOKEN_NAME, newAccessToken, accessTokenSecond));
-			    		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, newRefreshToken, refreshTokenSecond));
-			    	 
-			    		redisUtil.setDataExpire(refreshTokenRedisKey, newRefreshToken, refreshTokenSecond);
-        			}else {
-        				throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
-        			}
-        		}
-        	} catch (RuntimeException e) {
-        		throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
-    	    } 
-        } else {
-        	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
-        }
+        // refreshToekn 유효성 검사
+    	try {
+    		if(refreshToken != null && jwtUtil.isValidToken(refreshToken)) {
+    			
+    			String id = jwtUtil.getId(refreshToken);
+    			long userId = jwtUtil.getUserId(refreshToken);
+    			
+    			
+
+            	String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId;
+    			String refreshTokenReidsValue = redisUtil.getData(refreshTokenRedisKey);
+    			
+    			// 레디스에 있는 RefreshToken과 비교하기    			
+    			if(refreshToken.equals(refreshTokenReidsValue)) {
+    				
+    				// 새로운 토큰 생성
+		        	String newAccessToken = jwtUtil.createTokenJwt(userId, id, Constans.ACCESS_TOKEN_EXPIRED_MS);
+		    		String newRefreshToken = jwtUtil.createTokenJwt(userId, id, Constans.REFRESH_TOKEN_EXPIRED_MS);
+		    		
+		    		int refreshTokenSecond = Constans.REFRESH_TOKEN_EXPIRED_MS / Constans.SECOND_MS;
+		    		
+		    		// 쿠키 변경
+		    		response.addHeader(Constans.AUTHORIZATION_HEADER, Constans.BEARER_PREFIX + newAccessToken);
+		    		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, newRefreshToken, refreshTokenSecond));
+		    	 
+		    		// 새로운 RefreshToken 레디스에 저장
+		    		redisUtil.setDataExpire(refreshTokenRedisKey, newRefreshToken, refreshTokenSecond);
+    			}else {
+    				throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
+    			}
+    		}
+    	} catch (RuntimeException e) {
+    		throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
+	    } 
+
 	}
 }

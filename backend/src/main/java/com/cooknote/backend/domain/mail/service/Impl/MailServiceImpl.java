@@ -16,9 +16,11 @@ import com.cooknote.backend.global.utils.random.RandomAuthCodeUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MailServiceImpl implements MailService {
 
     @Value("${spring.mail.properties.mail.smtp.auth-code-expire}")
@@ -29,16 +31,18 @@ public class MailServiceImpl implements MailService {
 	
     @Override
 	public void sendAuthCode(String email) {
-		
+    	long start = System.currentTimeMillis();
+    	
+    	
 		String authCode = RandomAuthCodeUtil.createAuthCode();
 		String content = MailContent.createAuthCodeContent(authCode);
 		String mailAuthRedisKey = Constans.MAIL_AUTH_PREFIX + email;
-		
+
 		mailSender.sendAuthCode(email, authCode, content);
-		
-    	// 레디스에 인증번호 저장
+
+		// 레디스에 인증번호 저장
     	redisUtil.setDataExpire(mailAuthRedisKey, authCode, authCodeExpire);
-	}
+    }
 	
     
     // 인증 번호 검증

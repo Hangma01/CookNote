@@ -10,17 +10,20 @@ const recipeSeqRef = ref(null)
 
 const handleRecipeSave = (type) => {
   const info = recipeInfoRef.value?.getData?.()
-  const ingredients = recipeIngredienRef.value?.getIngredients?.()
-  const seq = recipeSeqRef.value?.getSeqs?.()
+  const ingredients = recipeIngredienRef.value?.getData?.()
+  const seq = recipeSeqRef.value?.seqs
 
   // 예시: 모든 정보 통합
   const payload = {
-    info,
-    ingredients,
-    seq
+    title: info.title,
+    description: info.desciption,
+    videoId: info.videoId,
+    serving: info.serving,
+    level: info.level,
+    categories: info.categories,
+    thumbnail: info.thumbnail
   }
-
-  console.log('전체 저장 payload:', payload, type)
+  console.log(payload)
 }
 </script>
 

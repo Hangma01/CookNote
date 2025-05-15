@@ -1,10 +1,12 @@
 <script setup>
 import { ref } from 'vue'
+import { generateId } from '@/utils/commonFunction'
+
 
 const ingredients = ref([
-                        { name: '', quantity: '' , remark: ''},
-                        { name: '', quantity: '' , remark: ''},
-                        { name: '', quantity: '' , remark: ''},
+                        { id: generateId(), name: '', quantity: '' , remark: ''},
+                        { id: generateId(), name: '', quantity: '' , remark: ''},
+                        { id: generateId(), name: '', quantity: '' , remark: ''},
                       ])
 
 const addIngredient = () => {
@@ -19,9 +21,20 @@ const removeIngredient = (index) => {
   }
 }
 
-// ✅ 부모에 데이터를 넘기기 위해 expose
+const getData = () => {
+  return {
+    ingredients: ingredients.value.map(item => ({
+      id: generateId(),
+      name: item.remark,
+      quantity: item.quantity,
+      remark: item.remark
+    }))
+  }
+}
+
+// 부모가 사용할 수 있게 expose
 defineExpose({
-  getIngredients: () => ingredients.value
+  getData
 })
 </script>
 
@@ -29,44 +42,35 @@ defineExpose({
 <h2 class="sub-title">재료정보</h2>
 
   <ul class="ingredient-list">
-    <li v-for="(item, index) in ingredients" :key="index"  class="ingredient-item-wrap">
+    <li v-for="(item, index) in ingredients" :key="item.id"  class="ingredient-item-wrap">
       <div class="ingredient-item-box">
         <div class="ingredient-item-filed">
           <span class="ingredient-item-title">재료</span>
-          <v-text-field
+          <input
             v-model="item.name "
             type="text"
-            label=""
             placeholder="예) 청경체"
-            variant="outlined"
-            density="compact"
-            hide-details=true
+            class="input-filed"
           />
         </div>
 
         <div class="ingredient-item-filed">
           <span class="ingredient-item-title">수량</span>
-                    <v-text-field
+            <input
             v-model="item.amount "
             type="text"
-            label=""
             placeholder="200g"
-            variant="outlined"
-            density="compact"
-            hide-details=true
+            class="input-filed"
           />
         </div>
 
         <div class="ingredient-item-filed">
           <span class="ingredient-item-title">비고</span>
-          <v-text-field
-            v-model="item.amount "
+          <input
+            v-model="item.remark "
             type="text"
-            label=""
             placeholder="예) 비고"
-            variant="outlined"
-            density="compact"
-            hide-details=true
+            class="input-filed"
           />
         </div>
       </div>
@@ -115,14 +119,23 @@ defineExpose({
       display: flex;
       gap: 2rem;
 
-      .ingredient-item-title {
-        margin-right: 1rem;
-      }
 
       .ingredient-item-filed {
         display: flex;
         align-items: center;
         width: 18rem;
+
+        .ingredient-item-title {
+        margin-right: 1rem;
+      }
+
+
+        .input-filed {
+        border: 1px solid #e7e7e7;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+      }
+
       }
     }
 

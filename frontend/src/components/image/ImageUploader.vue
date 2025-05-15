@@ -26,6 +26,8 @@ const onFileChange = (files) => {
 
       // 미리보기 임시 주소 생성
       imagePreview.value = URL.createObjectURL(file)
+
+      emit('update:modelValue', imageFile.value);
     }
   }
 }

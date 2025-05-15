@@ -1,16 +1,18 @@
 <script setup>
 import ImageUploader from '@/components/image/ImageUploader.vue'
 import { ref } from 'vue'
+import { generateId } from '@/utils/commonFunction'
 
 const seqs = ref([
-                        { step: 1, description: '', image: null },
-                        { step: 2, description: '', image: null },
-                        { step: 3, description: '', image: null },
+                        { id:generateId() , step: 1, description: '', image: null },
+                        { id: generateId(), step: 2, description: '', image: null },
+                        { id: generateId(), step: 3, description: '', image: null },
                       ])
 
 const addRecipeSeq = () => {
   if (seqs.value.length < 50) {
     seqs.value.push({ 
+      id: generateId(),
       step: seqs.value.length + 1, 
       description: '' ,
       image: null
@@ -19,6 +21,12 @@ const addRecipeSeq = () => {
 }
 
 
+
+const removeIngredient = (index) => {
+  if (ingredients.value.length > 1) {
+    ingredients.value.splice(index, 1)
+  }
+}
 const removeSeq = (index) => {
   if (seqs.value.length > 1) {
     seqs.value.splice(index, 1)
@@ -26,9 +34,19 @@ const removeSeq = (index) => {
   }
 }
 
-// 부모에 데이터를 넘기기 위해 expose
+const getData = () => {
+  return {
+    seqs: seqs.value.map(item => ({
+      step: item.step,
+      description: item.description,
+      image: item.image
+    }))
+  }
+}
+
+// 부모가 사용할 수 있게 expose
 defineExpose({
-  getSeqs: () => seqs.value
+  seqs
 })
 </script>
 
@@ -36,20 +54,15 @@ defineExpose({
 <h2 class="sub-title">요리순서</h2>
 
   <ul class="seq-list">
-    <li v-for="(item, index) in seqs" :key="index"  class="seq-item-wrap">
+    <li v-for="(item, index) in seqs" :key="item.id"  class="seq-item-wrap">
       <div class="seq-item-box">
         <span class="seq-item-title">STEP {{ index + 1}}</span>
         <div class="seq-item-filed">
-          <v-textarea
-            v-model="item.description "
-            type="text"
-            label=""
-            placeholder="예) 청경체"
-            variant="outlined"
-            density="compact"
-            hide-details=true      
-            no-resize
-          />
+          <textarea
+            v-model="item.description"
+            placeholder="예) 청경체"      
+            class="textarea-filed"
+          ></textarea>
         </div>
 
         <div class="image-preview-wrap">
@@ -110,6 +123,15 @@ defineExpose({
       .seq-item-filed {
         display: flex;
         width: 33.6rem;
+
+        .textarea-filed {
+        width: 100%;
+        border: 1px solid #e7e7e7;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        resize: none;
+        }
+
       }
     }
 

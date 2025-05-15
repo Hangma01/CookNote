@@ -16,17 +16,17 @@ export const commonCheckDuplicate = async ({ value, validatorRef, errorMsgRef, a
   } catch (e) {
     console.log(e)
     if (e.response.data && e.response.data.status === HttpStatusCode.Conflict && e.response.data.message) {
-        errorMsgRef.value = e.response.data.message;
+      errorMsgRef.value = e.response.data.message;
     } else {
-        alert('서버와의 통신이 원활하지 않습니다. 잠시 후 다시 시도해주세요.');
-        router.replace('/login');
+      alert('서버와의 통신이 원활하지 않습니다. 잠시 후 다시 시도해주세요.');
+      router.replace('/login');
     }
   }
 };
 
 // 메일 인증 코드 검증
 export const commonVerifyMailAuthCode = async (
-    email, authCodeValue, isAuthCodeRequest, setResultState
+  email, authCodeValue, isAuthCodeRequest, setResultState
 ) => {
   try {
     const res = await verifyMailAuthCode(email, authCodeValue.value);
@@ -41,9 +41,9 @@ export const commonVerifyMailAuthCode = async (
       alert(e.response.data.message);
     } else {
       alert(errorMessages.badRequest);
-    } 
+    }
     isAuthCodeRequest.value = false;
-    authCodeValue.value= ''
+    authCodeValue.value = ''
     setResultState(false, '');
   }
 };
@@ -54,3 +54,4 @@ export const commonInputHangle = (e, maxLength, setValue) => {
   setValue(value.length > maxLength ? value.slice(0, maxLength) : value);
 };
 
+export const generateId = () => Date.now() + Math.random()

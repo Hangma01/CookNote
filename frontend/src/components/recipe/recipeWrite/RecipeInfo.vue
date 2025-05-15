@@ -8,12 +8,32 @@ const title = ref('')
 const desciption = ref('')
 const youtubeUrl = ref('')
 const videoId = ref(null)
+const serving = ref(null)
+const level = ref(null)
 
-// 부모 컴포넌트에서 접근 가능하도록 허용하는 함수
+const categories = ref({
+  type: null,
+  purpose: null
+})
+
+const getData = () => {
+  return {
+    title: title.value,
+    description: desciption.value,
+    videoId: videoId.value,
+    serving: serving.value,
+    level: level.value,
+    categories: {
+      type: categories.value.type?.no ?? null,
+      purpose: categories.value.purpose?.no ?? null
+    },
+    thumbnail: selectedFile.value
+  }
+}
+
+// 부모가 사용할 수 있게 expose
 defineExpose({
-  title,
-  desciption,
-  videoId,
+  getData
 })
 
   const select = shallowRef()
@@ -51,14 +71,11 @@ const handleYotubeURL = () => {
       </div>
 
       <div class="input-filed-wrap">
-        <v-text-field
+        <input
           v-model="title"
           type="text"
-          label=""
           placeholder="예) 된장찌개 끓이기"
-          variant="outlined"
-          density="compact"
-          hide-details=true
+          class="input-filed"
         />
       </div>
 
@@ -67,17 +84,13 @@ const handleYotubeURL = () => {
       </div>
 
       <div class="input-filed-wrap">
-        <v-textarea
+        <textarea
           v-model="desciption"
-          type="text"
-          label=""
           placeholder="예) 된장찌개 끓이기"
-          variant="outlined"
-          density="compact"
-          hide-details="auto"
           rows="4"
           no-resize
-        />
+          class="textarea-filed"
+        ></textarea>
       </div>
 
       <div class="input-filed-wrap">
@@ -86,14 +99,11 @@ const handleYotubeURL = () => {
           <p class="label-title-sub">ⓘ 레시피 동영상 등록은 Youtube만 가능합니다.</p>
         </div>
 
-        <v-text-field
+        <input
           v-model="youtubeUrl "
           type="text"
-          label=""
           placeholder="https://"
-          variant="outlined"
-          density="compact"
-          hide-details=true
+          class="input-filed"
           @input="handleYotubeURL"
         />
       </div>
@@ -107,7 +117,7 @@ const handleYotubeURL = () => {
         <div class="input-filed-wrap category-dropdown">
           <div class="category-item">
               <v-select
-                v-model="select"
+                v-model="categories.type"
                 :items="items"
                 item-title="state"
                 return-object
@@ -122,7 +132,7 @@ const handleYotubeURL = () => {
           <div class="category-item">
 
             <v-select
-              v-model="select"
+              v-model="categories.purpose"
               :items="items"
               item-title="state"
               return-object
@@ -136,7 +146,7 @@ const handleYotubeURL = () => {
 
           <div class="category-item">
             <v-select
-              v-model="select"
+              v-model="serving"
               :items="items"
               item-title="state"
               return-object
@@ -151,7 +161,7 @@ const handleYotubeURL = () => {
           <div class="category-item">
 
             <v-select
-              v-model="select"
+              v-model="level"
               :items="items"
               item-title="state"
               return-object
@@ -215,7 +225,20 @@ const handleYotubeURL = () => {
 
     .input-filed-wrap{
       padding-bottom: 2rem;
+
+      .input-filed, .textarea-filed {
+        width: 100%;
+        border: 1px solid #e7e7e7;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+      }
+
+      .textarea-filed {
+        resize: none;
+      }
     }
+
+
 
     .category-dropdown{
       display: flex;

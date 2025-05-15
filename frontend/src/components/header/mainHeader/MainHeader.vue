@@ -1,8 +1,9 @@
 <script setup>
-import Logo from "../Logo.vue";
+import Logo from "@/components/logo/Logo.vue";
 import SearchBar from "./SearchBar.vue";
 import UserMenu from "./UserMenu.vue";
 import NavMenu from "./NavMenu.vue";
+
 </script>
 
 <template>
@@ -27,7 +28,7 @@ import NavMenu from "./NavMenu.vue";
     display: flex;
     justify-content: space-between;
     align-items: end;
-    width: 75rem;
+    width: 70rem;
     margin: 0 auto;
     padding-top: 0.8rem;
     padding-bottom: 2rem;
@@ -35,6 +36,6 @@ import NavMenu from "./NavMenu.vue";
 
 .nav{
     background-color:#c09370 ;
-    height: 3.7rem;
+    height: 3rem;
 }
 </style>

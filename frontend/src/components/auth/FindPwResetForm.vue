@@ -78,7 +78,7 @@ watch(() => formValues.newPw, () => {
 				maxlength="16"
 				:rules="[pwRule]"
 				:append-inner-icon="newPwVisible ? 'mdi-eye-off' : 'mdi-eye'"
-        		@click:append-inner="newPwVisible = !newPwVisible"
+        @click:append-inner="newPwVisible = !newPwVisible"
 			/>
 
 			<v-text-field

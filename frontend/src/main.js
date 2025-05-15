@@ -17,13 +17,13 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 // fontawesome - 필요한 아이콘 라이브러리를 추가
-import { faPenToSquare, faMagnifyingGlass, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faMagnifyingGlass, faLock, faArrowUpFromBracket, faPlus, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faUser, faEnvelope } from '@fortawesome/free-regular-svg-icons';
 
 // fontawesome - 사용할 아이콘을 라이브러리에 추가
 library.add(
-    faPenToSquare, faMagnifyingGlass, faLock,
-    faUser, faEnvelope
+    faPenToSquare, faMagnifyingGlass, faLock, faArrowUpFromBracket, faPlus, faXmark,
+    faUser, faEnvelope, 
 );
 
 import App from './App.vue'

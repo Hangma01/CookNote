@@ -71,17 +71,17 @@ onBeforeUnmount(() => {
 
             <div class="user-menu-mypage-item" v-show="showMyPageItem" ref="myPageItemRef">
                 <ul>
-                    <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 1 } }">
+                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 1 } }"> -->
                         <li class="mypage-item">
                             홈
                         </li>
-                    </router-link>
+                    <!-- </router-link> -->
 
-                    <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 2 } }">
+                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 2 } }"> -->
                         <li class="mypage-item">
                             팔로워
                         </li>
-                    </router-link>
+                    <!-- </router-link> -->
                     
                     <li class="mypage-item" @click="handleLogout">
                         로그아웃
@@ -91,11 +91,10 @@ onBeforeUnmount(() => {
         </li>
 
         <li class="user-menu-item">
-            <router-link to="/add-recipe">
+            <router-link :to="{name : 'recipeWrite'}">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
         </li>
-        <v-btn @click="fe"> fdd</v-btn>
     </ul>
 </template>
 
@@ -107,7 +106,7 @@ onBeforeUnmount(() => {
 
     .user-menu-item{
         width: 3rem;
-        font-size: 1.7rem;
+        font-size: 1.5rem;
         border-radius: 100%;
         align-items: center;
         position: relative;

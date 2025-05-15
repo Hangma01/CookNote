@@ -1,11 +1,12 @@
 <script setup>
-import Logo from "../Logo.vue";
+import Logo from '@/components/logo/Logo.vue';
+
 </script>
 
 <template>
     <header class="user-header">
         <div class="user-logo">
-            <Logo/>
+            <Logo />
         </div>
     </header>
 </template>

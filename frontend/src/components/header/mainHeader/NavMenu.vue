@@ -11,35 +11,35 @@
             
             <div class="nav-category-item">
                 <ul>
-                    <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 1 } }">
+                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 1 } }"> -->
                         <li class="categoy-item">
                             한식
                         </li>
-                    </router-link>
+                    <!-- </router-link> -->
 
-                    <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 2 } }">
+                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 2 } }"> -->
                         <li class="categoy-item">
                             중식
                         </li>
-                    </router-link>
+                    <!-- </router-link> -->
                 </ul>
             </div>
         </li>
 
         <li class="nav-menu-item">
-            <router-link :to="{ name: 'recipesSearch',  query: { serving: 1 } }">
+            <!-- <router-link :to="{ name: 'recipesSearch',  query: { serving: 1 } }"> -->
                 <div class="menu-item">
                     혼밥 레시피
                 </div>
-            </router-link>
+            <!-- </router-link> -->
         </li>
 
         <li class="nav-menu-item">
-            <router-link :to="{ name: 'recipesSearch',  query: { categorypurpose: 2 } }">
+            <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorypurpose: 2 } }"> -->
                 <div class="menu-item">
                     다이어트 레시피
                 </div>
-            </router-link>
+            <!-- </router-link> -->
         </li>
 
         <li class="nav-menu-item">
@@ -68,7 +68,7 @@
 .nav-menu{
     display: flex;
     gap: 3rem;
-    width: 75rem;
+    width: 70rem;
     height: 100%;
     margin: 0 auto;
     box-sizing: border-box;

@@ -29,25 +29,25 @@ const handleInput = (e) => {
 <style lang="scss" scoped>
 .search-bar-container {
     width: 28rem;
-    height: 2.8rem;
-    border: 0.1rem solid #aaa;
+    height: 2.6rem;
+    border: 1px solid #aaa;
     border-radius: 1rem;
     display: flex;
     gap: 0.8rem;
     align-items: center;
-    padding: 0 1.2rem;
+    padding: 0rem 20px;
 
 
     &.focused {
-        border-width: 0.2rem;
+        border-width: 3px;
         border-color: #c09370;
-        padding: 0 1.1rem;
+        padding: 0 18px;
     }
 
     .search-bar-input-field {
-        height: 2rem;
-        width: 24rem;
-        font-size: 1.1rem;
+        height: 1rem;
+        width: 23rem;
+        font-size: 1rem;
     }
 
     .search-bar-icon {

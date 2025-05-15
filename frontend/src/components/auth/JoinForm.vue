@@ -10,7 +10,7 @@ import { successMessage } from '@/utils/messages/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash'
-import LogoMini from '../header/LogoMini.vue';
+import LogoMini from '../logo/LogoMini.vue';
 
 
 // 화면 전환

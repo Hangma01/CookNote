@@ -5,12 +5,7 @@ export const routes = [
     name: 'mainPage',
     component: () => import('../views/MainView.vue')
   },
-  {
-    path: '/recipes-search',
-    // name으로 하면 path 경로 바뀌어도 괜찮음
-    name: 'recipesSearch',
-    component: () => import('../views/RecipesView.vue'),
-  },
+  // 로그인 관련련
   {
     path: '/login',
     component: () => import('../views/LoginView.vue'),
@@ -51,6 +46,23 @@ export const routes = [
             // meta: { requiresAuth: true },
           },
         ]
+      },
+    ]
+  },
+  // 레시피 관련
+  {  
+    path: '/recipe',
+    component: () => import('../views/RecipeView.vue'),
+    children: [
+      {
+        path: '',
+        name: 'recipeDetail',
+        component: () => import('../components/recipe/recipeDetail/RecipeDetail.vue'),
+      },
+      {
+        path: 'write',
+        name: 'recipeWrite',
+        component: () => import('../components/recipe/recipeWrite/RecipeWrite.vue'),
       },
     ]
   },

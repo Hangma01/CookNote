@@ -1,14 +1,13 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import AuthHeader from '../header/authHeader/AuthHeader.vue';
-import { defaultPwRule, defaultIdRule } from '@/utils/rules';
 import { debounce } from 'lodash';
 import { commonValues } from '@/utils/commonValues';
-import { HttpStatusCode } from 'axios';
 import { errorMessages } from '@/utils/messages/errorMessages';
 import { useRouter } from 'vue-router';
 import { login } from '@/services/authService';
 import { useUserStore } from '@/stores/user';
+import { defaultIdRule, defaultPwRule } from '@/utils/rules';
 
 // 화면 전환
 const router = useRouter();
@@ -24,6 +23,9 @@ const formValues = reactive({             	// Form input-field
   id: '',
   password: '',
 })
+
+// etc...
+const pwVisible = ref(false)            		// 새 비밀번호 필드 토글
 
 
 // 로그인 요청
@@ -61,13 +63,14 @@ const handleLogin = debounce(async () => {
       />
 
       <v-text-field
-          v-model="formValues.password"
-          type="password"
-          label="비밀번호"
-          variant="solo"
-          density="comfortable"
-          hide-details="auto"
-          :rules="[defaultPwRule]"
+        v-model="formValues.password"
+        :type="pwVisible ? 'text' : 'password'"
+        label="비밀번호"
+        variant="solo"
+        hide-details="auto"
+        :rules="[defaultPwRule]"
+        :append-inner-icon="pwVisible ? 'mdi-eye-off' : 'mdi-eye'"
+        @click:append-inner="pwVisible = !pwVisible"
       />
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import LogoMini from '../header/LogoMini.vue';
+import LogoMini from '../logo/LogoMini.vue';
 
 </script>
 
@@ -8,7 +8,6 @@ import LogoMini from '../header/LogoMini.vue';
 		<LogoMini />
 		<h1 class="title">비밀번호 찾기</h1>
 	</div>
-	
   <router-view />
 </template>
 

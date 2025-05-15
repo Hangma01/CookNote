@@ -30,7 +30,7 @@ import NavMenu from "./NavMenu.vue";
     align-items: end;
     width: 70rem;
     margin: 0 auto;
-    padding-top: 0.8rem;
+    padding-top: 1.5rem;
     padding-bottom: 2rem;
 }
 

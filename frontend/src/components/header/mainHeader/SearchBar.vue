@@ -29,7 +29,7 @@ const handleInput = (e) => {
 <style lang="scss" scoped>
 .search-bar-container {
     width: 28rem;
-    height: 2.6rem;
+    height: 2.7rem;
     border: 1px solid #aaa;
     border-radius: 1rem;
     display: flex;

@@ -1,34 +1,76 @@
 <script setup>
 import RecipeInfo from "./RecipeInfo.vue";
 import ReciepIngredient from "./ReciepIngredient.vue";
+import RecipeSet from "./RecipeSet.vue";
 import RecipeSeq from "./RecipeSeq.vue";
 import { ref } from "vue";
+import { debounce } from "lodash";
+import { commonValues } from "@/utils/commonValues";
+import { saveRecipe } from '@/services/recipeService';
+import { errorMessages } from "@/utils/messages/errorMessages";
+import { toFormData } from "@/utils/toFormData";
+
 
 const recipeInfoRef = ref(null)
 const recipeIngredienRef = ref(null)
 const recipeSeqRef = ref(null)
+const recipeSetRef = ref(null)
 
-const handleRecipeSave = (type) => {
-  const info = recipeInfoRef.value?.getData?.()
-  const ingredients = recipeIngredienRef.value?.getData?.()
-  const seq = recipeSeqRef.value?.seqs
+// 레시피 저장
+const handleRecipeSave = debounce (async () => {
 
-  // 예시: 모든 정보 통합
-  const payload = {
-    title: info.title,
-    description: info.desciption,
-    videoId: info.videoId,
-    serving: info.serving,
-    level: info.level,
-    categories: info.categories,
-    thumbnail: info.thumbnail
+  // 유효성 검사
+  const recipeInfoValidResult = recipeInfoRef.value.validation()
+  const recipeIngredientsValidResult =  recipeIngredienRef.value.validation()
+  const recipeSeqValidResult = recipeSeqRef.value.validation();
+  const recipeSetValidResult = recipeSetRef.value.validation();
+
+  if(recipeInfoValidResult !== true) {
+    alert(recipeInfoValidResult)
+  } else if (recipeIngredientsValidResult !== true) {
+    alert(recipeIngredientsValidResult)  
+  } else if (recipeSeqValidResult !== true) {
+    alert(recipeSeqValidResult)
+  } else if (recipeSetValidResult !== true) {
+    alert(recipeSetValidResult)
+  } else {
+    // 데이터 가져오기
+    const recipeInfo = recipeInfoRef.value.getData()
+    const recipeIngredients = recipeIngredienRef.value.getData()
+    const recipeSeq = recipeSeqRef.value.getData()
+    const recipeSet = recipeSetRef.value.getData()
+
+    const formValues = {
+      title: recipeInfo.title,
+      description: recipeInfo.description,
+      thumbnail: recipeInfo.thumbnail,
+      videoId: recipeInfo.videoId,
+      serving: recipeInfo.serving,
+      duration: recipeInfo.duration,
+      level: recipeInfo.level,
+      tip: recipeSeq.tip,
+      categories: recipeInfo.categories,
+      ingredients: recipeIngredients.ingredients,
+      recipeSeq: recipeSeq.seqs,
+      status: recipeSet.data.toUpperCase(),
+    }
+
+    console.log(formValues)
+    // 서버에 전송
+    try {
+      const res = await saveRecipe(formValues)
+      console.log(res)
+    } catch (e) {
+      console.log(e)
+      alert(errorMessages.LOGIN_ERROR)
+    } 
   }
-  console.log(payload)
-}
+}, commonValues.defaultDebounce)
+
 </script>
 
 <template>
-  <v-form ref="formRef" @submit.prevent="handleRecipeSave">
+  <v-form ref="formRef">
     <div class="recipe-write-container">
       <h1 class="title"> 레시피 작성 </h1>
 
@@ -51,6 +93,11 @@ const handleRecipeSave = (type) => {
           </section>
       </div>
       
+      <div class="recipe-wrap">
+        <section>
+          <RecipeSet ref="recipeSetRef" />
+        </section>
+      </div>
       
       <div class="write-btn-wrap">
         <div>
@@ -58,8 +105,7 @@ const handleRecipeSave = (type) => {
         </div>
 
         <div>
-          <button class="write-btn private-save-btn"  @click.prevent="handleRecipeSave('private')">저장</button>
-          <button class="write-btn public-save-btn" @click.prevent="handleRecipeSave('public')">저장 후 공개하기</button>
+          <button class="write-btn save-btn"  @click.prevent="handleRecipeSave()">저장</button>
         </div>
       </div>  
     </div>
@@ -88,7 +134,8 @@ const handleRecipeSave = (type) => {
 
   .write-btn-wrap{
     display: flex;
-    justify-content: space-between;
+    justify-content: end;
+    gap: 2rem;
 
     .cancle-btn {
       height: 5rem;
@@ -104,21 +151,13 @@ const handleRecipeSave = (type) => {
       font-size: 1.1rem;
     }
 
-    .private-save-btn {
+    .save-btn {
       background-color: #c09370;
       border: 1px solid #a57954;
       color: white;
       margin-right: 1.5rem;
     }
-
-    .public-save-btn {
-      width: 12rem;
-      background-color: #a57954;
-      border: 1px solid #c09370;
-      color: white;
-    }
     
-
   }
 }
 

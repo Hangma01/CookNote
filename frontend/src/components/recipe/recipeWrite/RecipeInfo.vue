@@ -1,64 +1,40 @@
 <script setup>
 import ImageUploader from '@/components/image/ImageUploader.vue';
-import { commonValues } from '@/utils/commonValues';
-import { ref, shallowRef, watch } from 'vue';
+import SelectDropDown from './SelectDropDown.vue';
+import { recipeInfoForm } from '@/composables/recipes/recipeInfoForm';
 
 
-const title = ref('')
-const desciption = ref('')
-const youtubeUrl = ref('')
-const videoId = ref(null)
-const serving = ref(null)
-const level = ref(null)
+const items = [
+  { state: '한식', no: 1},
+  { state: '일식', no: 2 },
+  { state: '양식', no: 3 },
+  { state: '중식', no: 4 },
+  { state: '퓨전', no: 5 },
+  { state: '디저트', no: 6 },
+]
 
-const categories = ref({
-  type: null,
-  purpose: null
-})
+// 요리 정보 form 가져오기
+const { 
+  title, 
+  description, 
+  videoId, 
+  serving, 
+  duration, 
+  level, 
+  categories, 
+  imageFile, 
+  url, 
+  getData, 
+  handleGetVideoId, 
+  validation 
+} = recipeInfoForm();
 
-const getData = () => {
-  return {
-    title: title.value,
-    description: desciption.value,
-    videoId: videoId.value,
-    serving: serving.value,
-    level: level.value,
-    categories: {
-      type: categories.value.type?.no ?? null,
-      purpose: categories.value.purpose?.no ?? null
-    },
-    thumbnail: selectedFile.value
-  }
-}
 
 // 부모가 사용할 수 있게 expose
 defineExpose({
-  getData
+  getData,
+  validation
 })
-
-  const select = shallowRef()
-
-  const items = [
-    { state: '한식', no: 1},
-    { state: '일식', no: 2 },
-    { state: '양식', no: 3 },
-    { state: '중식', no: 4 },
-    { state: '퓨전', no: 5 },
-    { state: '디저트', no: 6 },
-  ]
-
-const selectedFile = ref(null);
-
-
-const getYoutubeVideoId = () => {
-  const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;
-  const match = youtubeUrl.value.match(regex)
-  return match ? match[1] : null
-}
-
-const handleYotubeURL = () => {
-  videoId.value = getYoutubeVideoId()
-}
 </script>
 
 <template>
@@ -85,10 +61,9 @@ const handleYotubeURL = () => {
 
       <div class="input-filed-wrap">
         <textarea
-          v-model="desciption"
+          v-model="description"
           placeholder="예) 된장찌개 끓이기"
           rows="4"
-          no-resize
           class="textarea-filed"
         ></textarea>
       </div>
@@ -100,80 +75,12 @@ const handleYotubeURL = () => {
         </div>
 
         <input
-          v-model="youtubeUrl "
+          v-model="url"
           type="text"
           placeholder="https://"
           class="input-filed"
-          @input="handleYotubeURL"
+          @input="handleGetVideoId"
         />
-      </div>
-
-      <div>
-        <div class="label-title">
-          <p>카테고리</p>
-        </div>
-
-
-        <div class="input-filed-wrap category-dropdown">
-          <div class="category-item">
-              <v-select
-                v-model="categories.type"
-                :items="items"
-                item-title="state"
-                return-object
-                label="종류"
-                variant="outlined"
-                hide-details=true
-                density="compact"
-                single-line
-              />
-          </div>
-          
-          <div class="category-item">
-
-            <v-select
-              v-model="categories.purpose"
-              :items="items"
-              item-title="state"
-              return-object
-              label="목적"
-              variant="outlined"
-              hide-details=true
-              density="compact"
-              single-line
-            />
-          </div>
-
-          <div class="category-item">
-            <v-select
-              v-model="serving"
-              :items="items"
-              item-title="state"
-              return-object
-              label="요리시간"
-              variant="outlined"
-              hide-details=true
-              density="compact"
-              single-line
-            />
-          </div>
-
-          <div class="category-item">
-
-            <v-select
-              v-model="level"
-              :items="items"
-              item-title="state"
-              return-object
-              label="난이도"
-              variant="outlined"
-              hide-details=true
-              density="compact"
-              single-line
-            />
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -184,7 +91,7 @@ const handleYotubeURL = () => {
           <p>썸네일</p>        
         </div>
         
-        <ImageUploader v-model="selectedFile" />
+        <ImageUploader v-model="imageFile" />
       </div>
       
       <div class="image-preview-wrap">
@@ -204,6 +111,61 @@ const handleYotubeURL = () => {
             <span>Youtube 동영상 썸네일</span>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="label-title">
+      <p>카테고리</p>
+    </div>
+
+    <div class="category-wrap">
+      <div class="category-item">
+          <SelectDropDown
+            v-model="categories.cuisine"
+            :items="items"
+            item-title="state"
+            label="종류"
+          />
+      </div>
+      
+      <div class="category-item">
+
+        <SelectDropDown
+          v-model="categories.purpose"
+          :items="items"
+          item-title="state"
+          label="목적"
+        />
+      </div>
+
+      <div class="category-item">
+        <SelectDropDown
+          v-model="serving"
+          :items="items"
+          item-title="state"
+          label="인원수"
+        />
+      </div>
+
+      <div class="category-item">
+        <SelectDropDown
+          v-model="duration"
+          :items="items"
+          item-title="state"
+          label="요리시간"
+        />
+      </div>
+
+      <div class="category-item">
+
+        <SelectDropDown
+          v-model="level"
+          :items="items"
+          item-title="state"
+          label="난이도"
+        />
       </div>
     </div>
   </div>
@@ -237,17 +199,6 @@ const handleYotubeURL = () => {
         resize: none;
       }
     }
-
-
-
-    .category-dropdown{
-      display: flex;
-      justify-content: space-between;
-
-      .category-item{
-        width: 8rem;
-      }
-    }
   }
 
   .section-group-second {
@@ -277,14 +228,25 @@ const handleYotubeURL = () => {
       }
     }
   }
+}
 
-  .label-title {
-    padding-bottom: 0.6rem;
+.label-title {
+  padding-bottom: 0.6rem;
 
-    .label-title-sub{
-      font-size: 0.8rem;
-      color: #777;
-    }
+  .label-title-sub{
+    font-size: 0.8rem;
+    color: #777;
   }
+}
+
+.category-wrap {
+  display: flex;
+  gap: 3rem;  
+  padding-bottom: 2rem;
+
+  .category-item{
+    width: 8rem;
+  }
+  
 }
 </style>

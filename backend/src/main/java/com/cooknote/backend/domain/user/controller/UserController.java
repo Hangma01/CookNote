@@ -11,11 +11,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
 	private final UserService userService;
 
+	
+	
 	
 	@GetMapping("/mypage")
 	public ResponseEntity<String> MyPage() {

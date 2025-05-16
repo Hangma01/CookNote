@@ -71,7 +71,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
         
 		// 쿠키 삭제
-		response.addCookie(CookieUtil.deleteCookie(Constans.ACCESS_TOKEN_NAME));
 		response.addCookie(CookieUtil.deleteCookie(Constans.REFRESH_TOKEN_NAME));
         
         // 만료 체크

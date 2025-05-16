@@ -1,12 +1,9 @@
 package com.cooknote.backend.domain.user.service;
 
-import org.springframework.stereotype.Service;
+import com.cooknote.backend.domain.user.entity.User;
 
-import lombok.RequiredArgsConstructor;
+public interface UserService {
 
-@Service
-@RequiredArgsConstructor
-public class UserService {
-
+	User getUser(String id);
 
 }

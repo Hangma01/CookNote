@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.user.entity.User;
+import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.mappers.UserMapper;
@@ -17,13 +18,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomUserDetailsServiceImpl implements UserDetailsService {
 	
-	private final UserMapper userMapper;
+	private final UserService userService;
 	
 	@Override
 	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
 
 		// DB에서 유저 조회
-		User getUser = userMapper.getUser(id);
+		User getUser = userService.getUser(id);
 
 		// 유저 조회 실패
 		if(getUser == null) {

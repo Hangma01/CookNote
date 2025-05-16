@@ -1,7 +1,5 @@
 package com.cooknote.backend.domain.auth.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,10 +24,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
 	private final AuthService authService;
@@ -84,7 +84,7 @@ public class AuthController {
 	// 아이디 찾기 - 요청
 	@PostMapping("/findId")
 	public ResponseEntity<Void> userFindIdAuthRequest(@RequestBody UserFindIdAuthRequestDTO userFindIdAuthRequestDTO) {
-
+		
 		authService.userFindIdAuthRequest(userFindIdAuthRequestDTO);
 
 		return ResponseEntity.ok().build();

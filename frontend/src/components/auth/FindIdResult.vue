@@ -1,10 +1,13 @@
 <script setup>
+import AuthHeader from '../header/authHeader/AuthHeader.vue';
+
 
 const id = history.state.id;
 
 </script>
 
 <template>
+  <AuthHeader />
   <div class="find-id-result-info">
     <p>고객님의 아이디 찾기가 완료되었습니다.</p>
     <p class="find-id-value">{{ id }}</p>

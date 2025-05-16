@@ -1,14 +1,14 @@
-package com.cooknote.backend.domain.mail.service.Impl;
+package com.cooknote.backend.global.infra.mail.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.cooknote.backend.domain.mail.dto.response.VerifyAuthCodeResponseDTO;
-import com.cooknote.backend.domain.mail.service.MailService;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.infra.mail.MailSender;
+import com.cooknote.backend.global.infra.mail.dto.response.VerifyAuthCodeResponseDTO;
+import com.cooknote.backend.global.infra.mail.service.MailService;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.message.SuccessMessage;
 import com.cooknote.backend.global.utils.content.MailContent;

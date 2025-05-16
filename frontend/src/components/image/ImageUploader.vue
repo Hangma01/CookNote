@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
       @change="onFileChange($event.target.files)"
     />
     <div v-if="imagePreview" class="preview-img-wrap">
-      <img :src="imagePreview" alt="preview" class="preview-img"/>
+      <img :src="imagePreview" alt="preview" />
     </div>
     <div v-else>
       <div :class="['placeholder', props.sizeClass]">

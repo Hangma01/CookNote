@@ -29,6 +29,7 @@ export const routes = [
         path: 'userfindidresult',
         name: 'userFindIdResult',
         component: () => import('../components/auth/FindIdResult.vue'),
+        meta: { requiresFlow: true },
       },
       {
         path: 'userfindpw',
@@ -43,7 +44,7 @@ export const routes = [
             path: 'pwreset',
             name: 'pwReset',
             component: () => import('../components/auth/FindPwResetForm.vue'),
-            // meta: { requiresAuth: true },
+            meta: { requiresFlow: true },
           },
         ]
       },
@@ -63,6 +64,7 @@ export const routes = [
         path: 'write',
         name: 'recipeWrite',
         component: () => import('../components/recipe/recipeWrite/RecipeWrite.vue'),
+        meta: { requiresAuth: true },
       },
     ]
   },

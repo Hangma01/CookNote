@@ -1,4 +1,4 @@
-package com.cooknote.backend.domain.mail.dto.response;
+package com.cooknote.backend.global.infra.mail.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

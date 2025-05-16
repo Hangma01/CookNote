@@ -1,52 +1,22 @@
 <script setup>
 import ImageUploader from '@/components/image/ImageUploader.vue'
-import { ref } from 'vue'
-import { generateId } from '@/utils/commonFunction'
-
-const seqs = ref([
-                        { id:generateId() , step: 1, description: '', image: null },
-                        { id: generateId(), step: 2, description: '', image: null },
-                        { id: generateId(), step: 3, description: '', image: null },
-                      ])
-
-const addRecipeSeq = () => {
-  if (seqs.value.length < 50) {
-    seqs.value.push({ 
-      id: generateId(),
-      step: seqs.value.length + 1, 
-      description: '' ,
-      image: null
-    })
-  }
-}
+import { recipeSeqForm } from '@/composables/recipes/recipeSeqForm';
 
 
+const { 
+  recipeSeq, 
+  recipeTip,
+  addRecipeSeq, 
+  removeRecipeSeq, 
+  validation, 
+  getData, 
+} = recipeSeqForm();
 
-const removeIngredient = (index) => {
-  if (ingredients.value.length > 1) {
-    ingredients.value.splice(index, 1)
-  }
-}
-const removeSeq = (index) => {
-  if (seqs.value.length > 1) {
-    seqs.value.splice(index, 1)
-    seqs.value.forEach((item, i) => item.step = i + 1)
-  }
-}
-
-const getData = () => {
-  return {
-    seqs: seqs.value.map(item => ({
-      step: item.step,
-      description: item.description,
-      image: item.image
-    }))
-  }
-}
 
 // 부모가 사용할 수 있게 expose
 defineExpose({
-  seqs
+  validation,
+  getData
 })
 </script>
 
@@ -54,9 +24,9 @@ defineExpose({
 <h2 class="sub-title">요리순서</h2>
 
   <ul class="seq-list">
-    <li v-for="(item, index) in seqs" :key="item.id"  class="seq-item-wrap">
+    <li v-for="(item, index) in recipeSeq" :key="item.id"  class="seq-item-wrap">
       <div class="seq-item-box">
-        <span class="seq-item-title">STEP {{ index + 1}}</span>
+        <span class="seq-item-title">STEP {{ item.step }}</span>
         <div class="seq-item-filed">
           <textarea
             v-model="item.description"
@@ -74,8 +44,8 @@ defineExpose({
       <div class="seq-item-remove">
         <button 
         type="button"
-        v-if="seqs.length > 1" 
-        @click="removeSeq(index)" 
+        v-if="recipeSeq.length > 3" 
+        @click="removeRecipeSeq(index)" 
         class="remove-button"
         >
           <font-awesome-icon :icon="['fas', 'xmark']"/>  
@@ -90,6 +60,20 @@ defineExpose({
       <font-awesome-icon :icon="['fas', 'plus']" class="add-icon"/>
       <span>순서 추가하기</span>
     </button>
+  </div>
+
+
+  <div class="label-title">
+    <p>요리 팁 / 주의사항 </p>
+  </div>
+  
+  <div class="seq-filed">
+    <textarea
+        v-model="recipeTip"
+        placeholder="예) 된장찌개 끓이기"
+        rows="4"
+        class="textarea-filed"
+    ></textarea>
   </div>
 
 </template>
@@ -154,6 +138,24 @@ defineExpose({
     font-size: 1.7rem;
   }
 }
+
+.label-title {
+  padding-bottom: 0.6rem;
+}
+
+.seq-filed{
+    padding-bottom: 2rem;
+    
+  .textarea-filed {
+    width: 100%;
+    border: 1px solid #e7e7e7;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    resize: none;
+  }
+}
+
+
 
 .add-btn-wrap {
   text-align: center;

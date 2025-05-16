@@ -30,7 +30,7 @@
 			PROFILE_IMAGE,
 			CREATE_AT,
 			UPDATE_AT
-		FROM USERS
+		FROM USER
 		WHERE ID = #{id}
 	</select>   
 </mapper>

@@ -1,4 +1,4 @@
-package com.cooknote.backend.domain.mail.dto.request;
+package com.cooknote.backend.global.infra.mail.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

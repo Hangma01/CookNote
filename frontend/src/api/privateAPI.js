@@ -53,6 +53,7 @@ privateAPI.interceptors.response.use(
         return privateAPI(originalRequest); // 재요청
       } catch (e) {
         // 유저 스토어 삭제
+        console('재요청마저 실패라~',e)
         alert(e.response?.data?.message);
         userStore.logout();
         window.location.href = '/login';

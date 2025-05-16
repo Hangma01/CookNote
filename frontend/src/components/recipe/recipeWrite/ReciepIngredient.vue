@@ -1,39 +1,18 @@
 <script setup>
-import { ref } from 'vue'
-import { generateId } from '@/utils/commonFunction'
+import { recipeIngredientForm } from '@/composables/recipes/recipeIngredientForm';
 
 
-const ingredients = ref([
-                        { id: generateId(), name: '', quantity: '' , remark: ''},
-                        { id: generateId(), name: '', quantity: '' , remark: ''},
-                        { id: generateId(), name: '', quantity: '' , remark: ''},
-                      ])
-
-const addIngredient = () => {
-  if (ingredients.value.length < 50) {
-    ingredients.value.push({ name: '', quantity: '' })
-  }
-}
-
-const removeIngredient = (index) => {
-  if (ingredients.value.length > 1) {
-    ingredients.value.splice(index, 1)
-  }
-}
-
-const getData = () => {
-  return {
-    ingredients: ingredients.value.map(item => ({
-      id: generateId(),
-      name: item.remark,
-      quantity: item.quantity,
-      remark: item.remark
-    }))
-  }
-}
+const { 
+  ingredients, 
+  addIngredient, 
+  removeIngredient, 
+  validation, 
+  getData, 
+} = recipeIngredientForm();
 
 // 부모가 사용할 수 있게 expose
 defineExpose({
+  validation,
   getData
 })
 </script>
@@ -57,7 +36,7 @@ defineExpose({
         <div class="ingredient-item-filed">
           <span class="ingredient-item-title">수량</span>
             <input
-            v-model="item.amount "
+            v-model="item.quantity "
             type="text"
             placeholder="200g"
             class="input-filed"
@@ -79,7 +58,7 @@ defineExpose({
       <div class="ingredient-item-remove">
         <button 
         type="button"
-        v-if="ingredients.length > 1" 
+        v-if="ingredients.length > 3" 
         @click="removeIngredient(index)" 
         class="remove-button"
         >

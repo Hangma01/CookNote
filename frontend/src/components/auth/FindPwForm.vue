@@ -183,7 +183,7 @@ watch (
 		</v-btn>
 		
 		<v-btn type="submit" class="find-pw-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
-			비밀번호 변경
+			비밀번호 변경 하기
 		</v-btn>
 	</v-form>
 </template>

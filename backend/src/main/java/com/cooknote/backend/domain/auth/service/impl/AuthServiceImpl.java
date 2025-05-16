@@ -1,12 +1,9 @@
 package com.cooknote.backend.domain.auth.service.impl;
 
-import java.io.PrintWriter;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.cooknote.backend.domain.auth.dto.request.UserFindIdAuthRequestDTO;
 import com.cooknote.backend.domain.auth.dto.request.UserFindPwAuthRequestDTO;
@@ -15,7 +12,6 @@ import com.cooknote.backend.domain.auth.dto.request.UserJoinRequestDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
-import com.cooknote.backend.domain.mail.service.Impl.MailServiceImpl;
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
@@ -24,21 +20,16 @@ import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
-import com.cooknote.backend.global.message.ErrorMessage;
+import com.cooknote.backend.global.infra.mail.service.impl.MailServiceImpl;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 import com.cooknote.backend.mappers.AuthMapper;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor

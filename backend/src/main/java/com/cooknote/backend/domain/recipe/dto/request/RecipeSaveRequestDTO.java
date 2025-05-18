@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 
+import com.cooknote.backend.domain.recipe.enums.RecipeDuration;
+import com.cooknote.backend.domain.recipe.enums.RecipeLevel;
+import com.cooknote.backend.domain.recipe.enums.RecipeServing;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 
 import jakarta.validation.Valid;
@@ -40,13 +43,13 @@ public class RecipeSaveRequestDTO {
 	private String videoId;											// 동영상 아이디
     
 	@NotNull()
-    private Integer serving;										// 레시피 인원수
+    private RecipeServing serving;									// 레시피 인원수
     
     @NotNull()
-    private Integer duration;										// 레시피 요리시간
+    private RecipeDuration duration;								// 레시피 요리시간
     
     @NotNull()
-    private Integer level;			 								// 레시피 난이도
+    private RecipeLevel level;			 							// 레시피 난이도
     
     @Length(max = 250)
     private String tip;												// 레시피 요리 팁

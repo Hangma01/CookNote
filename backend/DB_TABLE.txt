@@ -77,22 +77,21 @@ CREATE TABLE `CATEGORY_PURPOSE` (
 
 -- 레시피 테이블
 CREATE TABLE `RECIPE` (
-	`RECIPE_ID` BIGINT AUTO_INCREMENT,								-- 레시피 Key
-	`TITLE` VARCHAR(50) NOT NULL,									-- 레시피 제목
-	`THUMBNAIL` VARCHAR(400) NOT NULL,								-- 레시피 썸네일
-	`DESCRIPTION` VARCHAR(250) NULL,								-- 레시피 소개
-	`SERVING` TINYINT NOT NULL,										-- 인원수
-	`DURATION` TINYINT NOT NULL,									-- 요리 시간
-	`LEVEL` TINYINT NOT NULL,										-- 요리 난이도
-	`VIDEO_ID` VARCHAR(11),											-- 동영상 아이디
-	`TIP` VARCHAR(250),												-- 요리 팁
-	`STATUS` ENUM('PRIVATE', 'PUBLIC', 'PRIVATE_ADMIN', 'DELETE') 	-- 레시피 상태
-			NOT NULL COMMENT '공개, 비공개, 관리자 비공개, 삭제',
-	`CREATE_AT` DATETIME NOT NULL DEFAULT NOW(),					-- 생성일
-	`UPDATE_AT` DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW(),	-- 수정일
-	`CATEGORY_CUISINE_ID` INT NOT NULL,								-- 카테고리 요리 종류 (FK)
-	`CATEGORY_PURPOSE_ID` INT NOT NULL,								-- 카테고리 목적 종류 (FK)
-	`WRITER_ID` BIGINT NOT NULL,									-- 작성자 (FK)
+	`RECIPE_ID` BIGINT AUTO_INCREMENT,												-- 레시피 Key
+	`TITLE` VARCHAR(50) NOT NULL,													-- 레시피 제목
+	`THUMBNAIL` VARCHAR(400) NOT NULL,												-- 레시피 썸네일
+	`DESCRIPTION` VARCHAR(250) NULL,												-- 레시피 소개
+	`SERVING` ENUM("ONE", "TWO", "THREE", "OVER_FOUR") NOT NULL,					-- 인원수
+	`DURATION` ENUM("WITHIN_30", "WITHIN_60", "WITHIN_120", "OVER_120") NOT NULL,	-- 요리 시간
+	`LEVEL` ENUM("EASY", "NORMAL", "HARD") NOT NULL,								-- 요리 난이도
+	`VIDEO_ID` VARCHAR(11),															-- 동영상 아이디
+	`TIP` VARCHAR(250),																-- 요리 팁
+	`STATUS` ENUM("PRIVATE", "PUBLIC", "PRIVATE_ADMIN", "DELETE") NOT NULL, 		-- 레시피 상태
+	`CREATE_AT` DATETIME NOT NULL DEFAULT NOW(),									-- 생성일
+	`UPDATE_AT` DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW(),					-- 수정일
+	`CATEGORY_CUISINE_ID` INT NOT NULL,												-- 카테고리 요리 종류 (FK)
+	`CATEGORY_PURPOSE_ID` INT NOT NULL,												-- 카테고리 목적 종류 (FK)
+	`WRITER_ID` BIGINT NOT NULL,													-- 작성자 (FK)
 	PRIMARY KEY (`RECIPE_ID`),
 	FOREIGN KEY (`CATEGORY_CUISINE_ID`) REFERENCES `CATEGORY_CUISINE`(`CATEGORY_CUISINE_ID`),
 	FOREIGN KEY (`CATEGORY_PURPOSE_ID`) REFERENCES `CATEGORY_PURPOSE`(`CATEGORY_PURPOSE_ID`),

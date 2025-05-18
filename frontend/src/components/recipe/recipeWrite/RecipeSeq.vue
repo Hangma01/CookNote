@@ -1,16 +1,55 @@
 <script setup>
 import ImageUploader from '@/components/image/ImageUploader.vue'
-import { recipeSeqForm } from '@/composables/recipes/recipeSeqForm';
+import { commonInputHangle, generateId } from '@/utils/commonFunction';
+import { reactive, ref } from 'vue';
 
+const recipeSeq = reactive([
+                    { id: generateId() , step: 1, description: '', image: null },
+                    { id: generateId(), step: 2, description: '', image: null },
+                    { id: generateId(), step: 3, description: '', image: null },
+                  ])
+  
+  const recipeTip = ref('')
 
-const { 
-  recipeSeq, 
-  recipeTip,
-  addRecipeSeq, 
-  removeRecipeSeq, 
-  validation, 
-  getData, 
-} = recipeSeqForm();
+  const addRecipeSeq = () => {
+    if (recipeSeq.length < 50) {
+      recipeSeq.push({ 
+        id: generateId(),
+        step: recipeSeq.length + 1, 
+        description: '' ,
+        image: null
+      })
+    }
+  }
+
+  const removeRecipeSeq = (index) => {
+    if (recipeSeq.length > 1) {
+      recipeSeq.splice(index, 1)
+      recipeSeq.forEach((item, i) => item.step = i + 1)
+    }
+  }
+
+  const validation = () => {
+
+    if (recipeSeq.some(item => {
+      return (item.description.trim().length < 10);
+    })) {
+      return '요리순서 최소 10자 이상 작성해주세요.'
+    }
+
+    return true;
+  }
+
+  const getData = () => {
+    return {
+      seqs: recipeSeq.map(item => ({
+        step: item.step,
+        description: item.description,
+        image: item.image
+      })),
+      tip: recipeTip.value
+    }
+  }
 
 
 // 부모가 사용할 수 있게 expose
@@ -18,6 +57,13 @@ defineExpose({
   validation,
   getData
 })
+
+
+// 재료 수량 250자 제한 (한글)
+const handleItemDescriptionInput = (e, item) => commonInputHangle(e, 250, (value) => item.description = value)
+
+const handleTipInput = (e) => commonInputHangle(e, 250, (value) => recipeTip.value = value)
+
 </script>
 
 <template>
@@ -28,11 +74,16 @@ defineExpose({
       <div class="seq-item-box">
         <span class="seq-item-title">STEP {{ item.step }}</span>
         <div class="seq-item-filed">
-          <textarea
+          <v-textarea
             v-model="item.description"
-            placeholder="예) 청경체"      
-            class="textarea-filed"
-          ></textarea>
+            @input="handleItemDescriptionInput($event, item)"
+            placeholder="예) 청경체"
+            rows="7"
+            no-resize
+            variant="outlined"
+            density="compact"
+            hide-details=true
+          ></v-textarea>
         </div>
 
         <div class="image-preview-wrap">
@@ -68,12 +119,16 @@ defineExpose({
   </div>
   
   <div class="seq-filed">
-    <textarea
+    <v-textarea
         v-model="recipeTip"
         placeholder="예) 된장찌개 끓이기"
-        rows="4"
-        class="textarea-filed"
-    ></textarea>
+        @input="handleTipInput($event, item)"
+        rows="4"  
+        no-resize
+        variant="outlined"
+        density="compact"
+        hide-details=true
+    ></v-textarea>
   </div>
 
 </template>

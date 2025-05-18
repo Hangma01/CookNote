@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.S3ErrorCode;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -39,6 +40,16 @@ public class ErrorResponseEntity {
 	}
 	
 	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(CommonErrorCode e) {
+		return ResponseEntity
+				.status(e.getHttpStatus())
+				.body(ErrorResponseEntity.builder()
+						.status(e.getHttpStatus().value())
+						.name(e.name())
+						.message(e.getMessage())
+						.build());
+	}
+	
+	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(S3ErrorCode e) {
 		return ResponseEntity
 				.status(e.getHttpStatus())
 				.body(ErrorResponseEntity.builder()

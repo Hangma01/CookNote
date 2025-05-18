@@ -1,7 +1,9 @@
 <script setup>
 import ImageUploader from '@/components/image/ImageUploader.vue';
 import SelectDropDown from './SelectDropDown.vue';
-import { recipeInfoForm } from '@/composables/recipes/recipeInfoForm';
+import { commonInputHangle } from '@/utils/commonFunction';
+import { reactive, ref } from 'vue';
+import { commonValues } from '@/utils/commonValues';
 
 
 const items = [
@@ -13,21 +15,60 @@ const items = [
   { state: '디저트', no: 6 },
 ]
 
-// 요리 정보 form 가져오기
-const { 
-  title, 
-  description, 
-  videoId, 
-  serving, 
-  duration, 
-  level, 
-  categories, 
-  imageFile, 
-  url, 
-  getData, 
-  handleGetVideoId, 
-  validation 
-} = recipeInfoForm();
+const formValues = reactive({
+  title: '',
+  description: '',
+  videoId: null,
+  serving: null,
+  duration: null,
+  level: null,
+  categories: {
+    cuisine: null,
+    purpose: null,
+  }
+});
+
+
+const imageFile = ref(null)
+const url = ref('')
+
+const validation = () => {
+  if (!formValues.title) return '제목을 입력하세요'
+  else if (!formValues.description) return '요리소개를 입력하세요'
+  else if (formValues.description.length <= 10) return '요리소개는 10자 이상 작성해주세요.'
+  else if (!imageFile.value) return '썸네일을 넣어주세요.'
+  else if (url.value && !formValues.videoId) return '유효한 유튜브 동영상 URL을 입력하세요.'
+  else if (!formValues.categories.cuisine) return '카테고리 종류를 선택하세요'
+  else if (!formValues.categories.purpose) return '카테고리 목적을 선택하세요'
+  else if (!formValues.serving) return '인원수를 선택하세요'
+  else if (!formValues.duration) return '요리시간을 선택하세요'
+  else if (!formValues.level) return '난이도를 선택하세요'
+  else return true
+}
+
+const getData = () => ({
+  title: formValues.title,
+  description: formValues.description,
+  thumbnail: imageFile.value,
+  videoId: formValues.videoId,
+  serving: formValues.serving?.no,
+  duration: formValues.duration?.no,
+  level: formValues.level?.no,
+  categories: {
+    cuisine: formValues.categories.cuisine?.no ?? null,
+    purpose: formValues.categories.purpose?.no ?? null
+  },
+})
+
+const getYoutubeVideoId = () => {
+  const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;
+  const match = url.value.match(regex)
+  return match ? match[1] : null
+}
+
+const handleGetVideoId = () => {
+  formValues.videoId = getYoutubeVideoId()
+}
 
 
 // 부모가 사용할 수 있게 expose
@@ -35,6 +76,15 @@ defineExpose({
   getData,
   validation
 })
+
+
+
+// 제목 50자 제한 (한글)
+const handleTitleInput = (e) => commonInputHangle(e, 50, (value) => formValues.title = value)
+
+// 레시피 소개 250자 제한 (한글)
+const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formValues.description = value)
+
 </script>
 
 <template>
@@ -47,11 +97,14 @@ defineExpose({
       </div>
 
       <div class="input-filed-wrap">
-        <input
-          v-model="title"
+        <v-text-field
+          v-model="formValues.title"
+          @input="handleTitleInput"
           type="text"
           placeholder="예) 된장찌개 끓이기"
-          class="input-filed"
+          variant="outlined"
+          density="compact"
+          hide-details=true
         />
       </div>
 
@@ -60,12 +113,16 @@ defineExpose({
       </div>
 
       <div class="input-filed-wrap">
-        <textarea
-          v-model="description"
+        <v-textarea
+          v-model="formValues.description"
+          @input="handleDescriptionInput"
           placeholder="예) 된장찌개 끓이기"
-          rows="4"
-          class="textarea-filed"
-        ></textarea>
+          rows="7"
+          no-resize
+          variant="outlined"
+          density="compact"
+          hide-details=true
+        />
       </div>
 
       <div class="input-filed-wrap">
@@ -74,12 +131,15 @@ defineExpose({
           <p class="label-title-sub">ⓘ 레시피 동영상 등록은 Youtube만 가능합니다.</p>
         </div>
 
-        <input
+        <v-text-field
           v-model="url"
           type="text"
           placeholder="https://"
           class="input-filed"
           @input="handleGetVideoId"
+          variant="outlined"
+          density="compact"
+          hide-details=true
         />
       </div>
     </div>
@@ -100,10 +160,10 @@ defineExpose({
         </div>
         
         <div class="video-thumnail-wrap">
-          <div v-if="videoId" class="video-thumnail-box">
+          <div v-if="formValues.videoId" class="video-thumnail-box">
             <img 
               class="video-thumnail"
-              :src="`https://img.youtube.com/vi/${videoId}/0.jpg`" 
+              :src="`https://img.youtube.com/vi/${formValues.videoId}/0.jpg`" 
               alt="Youtube 동영상 썸네일"/>
           </div>
 
@@ -123,7 +183,7 @@ defineExpose({
     <div class="category-wrap">
       <div class="category-item">
           <SelectDropDown
-            v-model="categories.cuisine"
+            v-model="formValues.categories.cuisine"
             :items="items"
             item-title="state"
             label="종류"
@@ -133,7 +193,7 @@ defineExpose({
       <div class="category-item">
 
         <SelectDropDown
-          v-model="categories.purpose"
+          v-model="formValues.categories.purpose"
           :items="items"
           item-title="state"
           label="목적"
@@ -142,7 +202,7 @@ defineExpose({
 
       <div class="category-item">
         <SelectDropDown
-          v-model="serving"
+          v-model="formValues.serving"
           :items="items"
           item-title="state"
           label="인원수"
@@ -151,7 +211,7 @@ defineExpose({
 
       <div class="category-item">
         <SelectDropDown
-          v-model="duration"
+          v-model="formValues.duration"
           :items="items"
           item-title="state"
           label="요리시간"
@@ -161,7 +221,7 @@ defineExpose({
       <div class="category-item">
 
         <SelectDropDown
-          v-model="level"
+          v-model="formValues.level"
           :items="items"
           item-title="state"
           label="난이도"
@@ -188,7 +248,7 @@ defineExpose({
     .input-filed-wrap{
       padding-bottom: 2rem;
 
-      .input-filed, .textarea-filed {
+      .textarea-filed {
         width: 100%;
         border: 1px solid #e7e7e7;
         border-radius: 0.5rem;

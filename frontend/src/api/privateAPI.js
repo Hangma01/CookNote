@@ -9,7 +9,7 @@ const userStore = useUserStore();
 
 
 const privateAPI = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL, // 실제 서버 주소로 바꾸기
+  baseURL: import.meta.env.VITE_API_BASE_URL, // 실제 서버 주소로 바꾸기
 
 })
 
@@ -19,7 +19,7 @@ privateAPI.interceptors.request.use(
   (config) => {
     const accessToken = userStore.getAccessToken;
 
-    if(accessToken) {
+    if (accessToken) {
       config.headers[commonValues.AUTHORIZATION_HEADER] = accessToken;
     }
 
@@ -31,16 +31,16 @@ privateAPI.interceptors.request.use(
 // 응답 인터셉터: access token 만료시 리프레시
 privateAPI.interceptors.response.use(
   (response) => response,
-  async (error) => { 
+  async (error) => {
+    const originalRequest = error.config;
+    const isTokenExpired = error.response?.status === HttpStatusCode.Unauthorized
+      && error.response?.data?.message === errorMessages.ACCESS_TOKEN_EXPIRED_MESSAGE;
 
-    // const originalRequest = error.config;
-    const isTokenExpired = error.response?.status === HttpStatusCode.Unauthorized 
-                            && error.response?.data?.message === errorMessages.ACCESS_TOKEN_EXPIRED_MESSAGE;
+    //if (isTokenExpired && !originalRequest._retry) {
+    if (isTokenExpired) {
+      //  originalRequest._retry = true;
 
-    // if (isTokenExpired && !originalRequest._retry) {
-    if(isTokenExpired) {
-      // originalRequest._retry = true;
-
+      console.log('재요청마저 실패', e)
       try {
         const res = await publicAPI.post(`/auth/reissue`,
           {},
@@ -49,11 +49,12 @@ privateAPI.interceptors.response.use(
 
         const newAccessToken = res.headers['authorization'];
 
+        alert('재요청 성공')
         userStore.setNewAccessToken(newAccessToken);
         return privateAPI(originalRequest); // 재요청
       } catch (e) {
         // 유저 스토어 삭제
-        console('재요청마저 실패라~',e)
+        alert("재요청 실패패")
         alert(e.response?.data?.message);
         userStore.logout();
         window.location.href = '/login';

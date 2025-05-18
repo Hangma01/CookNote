@@ -2,7 +2,6 @@ package com.cooknote.backend.domain.recipe.entity;
 
 import java.time.LocalDate;
 
-import com.cooknote.backend.domain.recipe.enums.RecipeLevel;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 
 import lombok.AllArgsConstructor;

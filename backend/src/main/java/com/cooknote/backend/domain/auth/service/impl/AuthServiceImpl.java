@@ -20,6 +20,7 @@ import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
+import com.cooknote.backend.global.infra.mail.service.MailService;
 import com.cooknote.backend.global.infra.mail.service.impl.MailServiceImpl;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
@@ -37,7 +38,7 @@ public class AuthServiceImpl implements AuthService{
 	
 	private final AuthMapper authMapper;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
-	private final MailServiceImpl mailService;
+	private final MailService mailService;
 	private final RedisUtil redisUtil;
 	private final JwtUtil jwtUtil;
 	

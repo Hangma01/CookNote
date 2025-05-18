@@ -8,7 +8,7 @@ import { debounce } from "lodash";
 import { commonValues } from "@/utils/commonValues";
 import { saveRecipe } from '@/services/recipeService';
 import { errorMessages } from "@/utils/messages/errorMessages";
-
+import { s3Convert } from "@/services/awsService";
 
 const recipeInfoRef = ref(null)
 const recipeIngredienRef = ref(null)
@@ -48,20 +48,25 @@ const handleRecipeSave = debounce (async () => {
       duration: recipeInfo.duration,
       level: recipeInfo.level,
       tip: recipeSeq.tip,
-      categories: recipeInfo.categories,
-      ingredients: recipeIngredients.ingredients,
-      recipeSeq: recipeSeq.seqs,
+      categoryCuisineId: recipeInfo.categories.cuisine,
+      categoryPurposeId: recipeInfo.categories.purpose,
+      recipeIngredientList: recipeIngredients.ingredients,
+      recipeSeqList: recipeSeq.seqs,
       status: recipeSet.data.toUpperCase(),
     }
-
     console.log(formValues)
     // 서버에 전송
     try {
-      const res = await saveRecipe(formValues)
-      console.log(res)
+      const saverRes = await saveRecipe(formValues)
+      console.log(saverRes)
     } catch (e) {
       console.log(e)
-      alert(errorMessages.LOGIN_ERROR)
+      if (e.response && e.response?.data?.message) {
+        alert(e.response.data.message)  
+      } else {
+        alert(errorMessages.BADREQUEST)
+      }
+      // window.location.reload();
     } 
   }
 }, commonValues.defaultDebounce)

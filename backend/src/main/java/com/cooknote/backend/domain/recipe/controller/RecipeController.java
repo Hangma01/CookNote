@@ -1,16 +1,20 @@
 package com.cooknote.backend.domain.recipe.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.cooknote.backend.domain.recipe.dto.request.SaveRecipeRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
+import com.cooknote.backend.domain.recipe.service.RecipeService;
+import com.cooknote.backend.global.auth.CustomUserDetails;
+import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
+import com.cooknote.backend.global.error.excption.CustomCommonException;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,23 +24,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RecipeController {
 	
+	private final RecipeService recipeService;
+	
 	@PostMapping("")
-	public ResponseEntity<String> saveRecipe(@RequestParam("title") String title,
-	        @RequestParam("description") String description,
-	        @RequestParam("thumbnail") MultipartFile thumbnail,
-	        @RequestParam("videoId") String videoId,
-	        @RequestParam("serving") int serving,
-	        @RequestParam("duration") int duration,
-	        @RequestParam("level") String level,
-	        @RequestParam("tip") String tip,
-	        @RequestParam("status") String status,
-	        @RequestParam("categoryCuisineId") int categoryCuisineId,
-	        @RequestParam("categoryPurposeId") int categoryPurposeId,
-	        @RequestParam("ingredients") String ingredientsJson,
-	        @RequestParam("recipeSeq") String recipeSeqJson) {
+	public ResponseEntity<String> saveRecipe(@AuthenticationPrincipal CustomUserDetails customUserDetails 
+											, @Valid @RequestBody RecipeSaveRequestDTO saveRecipeRequestDTO
+											, BindingResult bindingResult) {
+
+		// 유효성 검사 확인
+		if (bindingResult.hasErrors()) {
+			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
+		}
 			
-		log.info("됐나");
+		recipeService.recipeSave(customUserDetails.getUserId(), saveRecipeRequestDTO);
 		
-		return ResponseEntity.ok("성공");
+		return ResponseEntity.ok().build();
 	}
 }

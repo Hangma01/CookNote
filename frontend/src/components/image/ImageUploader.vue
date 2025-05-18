@@ -1,8 +1,10 @@
 <script setup>
-import { ref, onBeforeUnmount } from 'vue';
+import { ref } from 'vue';
+import { s3Delete, s3Upload } from '@/services/awsService';
+import { errorMessages } from '@/utils/messages/errorMessages';
 
 const props = defineProps({
-  modelValue: File,
+  modelValue: String,
   sizeClass: {
     type: String,
     default: 'recipeInfo'
@@ -11,33 +13,45 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const imagePreview = ref(null);
-const imageFile = ref(null);
+const imageUrl = ref(null);
 
-const onFileChange = (files) => {
+
+// 이미지 변경
+const onFileChange = async (files) => {
   if (files && files.length > 0) {
     const file = files[0]
     if (file.type.startsWith('image/')) {
-      imageFile.value = file
-      
-      if (imagePreview.value) {
-        URL.revokeObjectURL(imagePreview.value);
+            
+      // s3 이미지 존재하면 삭제
+      if (imageUrl.value) {
+        const res = await s3Delete(imageUrl.value)
       }
 
-      // 미리보기 임시 주소 생성
-      imagePreview.value = URL.createObjectURL(file)
+      // formData에 담아서 전달
+      const formData = new FormData();
+      formData.append('image', file);
+      // s3 업로드
+      try {
+        
+        const res = await s3Upload(formData)
 
-      emit('update:modelValue', imageFile.value);
+        // 이미지 url 저장
+        imageUrl.value = res.data
+      } catch (e) {
+        if (e.response && e.response?.data?.message) {
+          alert(e.response.data.message)  
+          
+        } else {
+          alert(errorMessages.BADREQUEST)
+        }
+        imageUrl.value = null;
+      }
+
+      emit('update:modelValue', imageUrl.value);
     }
   }
 }
 
-// 컴포넌트 사라질 때 메모리 정리
-onBeforeUnmount(() => {
-  if (imagePreview.value) {
-    URL.revokeObjectURL(imagePreview.value);
-  }
-});
 </script>
 
 <template>
@@ -54,8 +68,8 @@ onBeforeUnmount(() => {
       hidden
       @change="onFileChange($event.target.files)"
     />
-    <div v-if="imagePreview" class="preview-img-wrap">
-      <img :src="imagePreview" alt="preview" />
+    <div v-if="imageUrl" class="preview-img-wrap">
+      <img :src="imageUrl" alt="preview" class="preview-img"/>
     </div>
     <div v-else>
       <div :class="['placeholder', props.sizeClass]">

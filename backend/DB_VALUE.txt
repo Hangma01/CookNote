@@ -1,0 +1,45 @@
+-- 카테고리 - 요리
+
+INSERT INTO CATEGORY_CUISINE (
+                                TYPE
+)
+VALUES (
+	'한식'
+);
+INSERT INTO CATEGORY_CUISINE (
+                                TYPE
+)
+VALUES (
+	'일식'
+);
+INSERT INTO CATEGORY_CUISINE (
+                                TYPE
+)
+VALUES (
+	'양식'
+);
+INSERT INTO CATEGORY_CUISINE (
+                                TYPE
+)
+VALUES (
+	'중식'
+);
+INSERT INTO CATEGORY_PURPOSE (
+                                TYPE
+)
+VALUES (
+	'다이어트'
+);
+INSERT INTO CATEGORY_PURPOSE (
+                                TYPE
+)
+VALUES (
+	'혼밥'
+);
+INSERT INTO CATEGORY_PURPOSE (
+                                TYPE
+)
+VALUES (
+	'퓨전'
+);
+npm uninstall @vue/devtools

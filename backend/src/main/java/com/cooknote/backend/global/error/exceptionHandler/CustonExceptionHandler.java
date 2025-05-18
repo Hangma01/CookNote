@@ -8,6 +8,7 @@ import com.cooknote.backend.global.error.entity.ErrorResponseEntity;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
+import com.cooknote.backend.global.error.excption.CustomS3Exception;
 
 @ControllerAdvice // 모든 @Controller 즉, 전역에서 발생할 수 있는 예외를 잡아 처리한다.
 public class CustonExceptionHandler {
@@ -29,5 +30,11 @@ public class CustonExceptionHandler {
 	protected ResponseEntity<ErrorResponseEntity> handleCommonException(CustomCommonException e) {
 
 		return ErrorResponseEntity.toResponseEntity(e.getCommonErrorCode());
+	}
+	
+	@ExceptionHandler(CustomS3Exception.class)
+	protected ResponseEntity<ErrorResponseEntity> handleS3Exception(CustomS3Exception e) {
+		
+		return ErrorResponseEntity.toResponseEntity(e.getS3ErrorCode());
 	}
 }

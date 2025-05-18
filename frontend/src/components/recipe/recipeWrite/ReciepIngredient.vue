@@ -1,20 +1,63 @@
 <script setup>
-import { recipeIngredientForm } from '@/composables/recipes/recipeIngredientForm';
+import { commonInputHangle, generateId } from '@/utils/commonFunction';
+import { reactive } from 'vue';
 
 
-const { 
-  ingredients, 
-  addIngredient, 
-  removeIngredient, 
-  validation, 
-  getData, 
-} = recipeIngredientForm();
+const ingredients = reactive([
+                        { id: generateId(), name: '', quantity: '' , remark: ''},
+                        { id: generateId(), name: '', quantity: '' , remark: ''},
+                        { id: generateId(), name: '', quantity: '' , remark: ''},
+                      ])
+
+  const addIngredient = () => {
+    if (ingredients.length < 50) {
+      ingredients.push({ name: '', quantity: '' })
+    }
+  }
+
+  const removeIngredient = (index) => {
+    if (ingredients.length > 1) {
+      ingredients.splice(index, 1)
+    }
+  }
+
+  const validation = () => {
+
+    if (ingredients.some(item => {
+      return (!item.name?.trim() || !item.quantity?.trim());
+    })) {
+      return '재료와 수량을 모두 입력하세요'
+    }
+
+    return true;
+  }
+
+  const getData = () => {
+    return {
+      ingredients: ingredients.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        remark: item.remark || null
+      }))
+    }
+  }
 
 // 부모가 사용할 수 있게 expose
 defineExpose({
   validation,
   getData
 })
+
+
+// 재료 이름 20자 제한 (한글)
+const handleItemNameInput = (e, item) => commonInputHangle(e, 20, (value) => item.name = value)
+
+// 재료 수량 10자 제한 (한글)
+const handleItemQuantityInput = (e, item) => commonInputHangle(e, 10, (value) => item.quantity = value)
+
+// 재료 비고 30자 제한 (한글)
+const handleItemRemarkInput = (e, item) => commonInputHangle(e, 30, (value) => item.remark = value)
+
 </script>
 
 <template>
@@ -25,31 +68,40 @@ defineExpose({
       <div class="ingredient-item-box">
         <div class="ingredient-item-filed">
           <span class="ingredient-item-title">재료</span>
-          <input
-            v-model="item.name "
+          <v-text-field
+            v-model="item.name"
+            @input="handleItemNameInput($event, item)"
             type="text"
             placeholder="예) 청경체"
-            class="input-filed"
+            variant="outlined"
+            density="compact"
+            hide-details=true
           />
         </div>
 
         <div class="ingredient-item-filed">
           <span class="ingredient-item-title">수량</span>
-            <input
-            v-model="item.quantity "
+            <v-text-field
+            v-model="item.quantity"
+            @input="handleItemQuantityInput($event, item)"
             type="text"
             placeholder="200g"
-            class="input-filed"
+            variant="outlined"
+            density="compact"
+            hide-details=true
           />
         </div>
 
         <div class="ingredient-item-filed">
           <span class="ingredient-item-title">비고</span>
-          <input
-            v-model="item.remark "
+          <v-text-field
+            v-model="item.remark"
+            @input="handleItemRemarkInput($event, item)"
             type="text"
             placeholder="예) 비고"
-            class="input-filed"
+            variant="outlined"
+            density="compact"
+            hide-details=true
           />
         </div>
       </div>
@@ -105,16 +157,8 @@ defineExpose({
         width: 18rem;
 
         .ingredient-item-title {
-        margin-right: 1rem;
-      }
-
-
-        .input-filed {
-        border: 1px solid #e7e7e7;
-        border-radius: 0.5rem;
-        padding: 0.5rem;
-      }
-
+            margin-right: 1rem;
+        }
       }
     }
 

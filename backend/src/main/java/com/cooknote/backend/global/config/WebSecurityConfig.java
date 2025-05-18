@@ -95,7 +95,7 @@ public class WebSecurityConfig {
 		// 경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-						.requestMatchers("/login", "/logout", "/auth/**", "/mail/**").permitAll()
+						.requestMatchers("/login", "/logout", "/auth/**", "/mail/**","/s3/**").permitAll()
 						.anyRequest().authenticated());
 
 		

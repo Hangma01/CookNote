@@ -20,7 +20,6 @@ export const verifyMailAuthCode = async (email, authCode) => {
 };
 
 export const deleteMailAuthCode = async (email) => {
-    console.log(email)
     const res = await publicAPI.delete(`/mail/authCode`, { params: { email } });
     return res;
 }

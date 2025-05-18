@@ -1,18 +1,23 @@
 <script setup>
-import { recipeSeqForm } from '@/composables/recipes/recipeSeqForm';
-import { recipeSetForm } from '@/composables/recipes/recipeSetForm';
 import { ref } from 'vue';
 
 
 const recipePrivate = 'private'
 const recipePublic = 'public'
 
-const { 
-  selectedStatus, 
-  validation, 
-  getData, 
-} = recipeSetForm(recipePrivate);
+const selectedStatus = ref(recipePrivate)
 
+const validation = () => {
+  if (!selectedStatus.value) return '설정을 선택해주세요.'
+
+  return true;
+}
+
+const getData = () => {
+  return {
+    data: selectedStatus.value,
+  }
+}
 
 // 부모가 사용할 수 있게 expose
 defineExpose({

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cooknote.backend.mappers.RecipeMapper">
+	
+	<!-- 레시피 저장 -->
+	<insert id="recipeSave" useGeneratedKeys="true" keyProperty="recipeId">
+		INSERT INTO RECIPE (
+							  TITLE
+							, DESCRIPTION
+							, THUMBNAIL
+							, VIDEO_ID
+							, SERVING
+							, DURATION
+							, LEVEL
+							, TIP
+							, STATUS
+							, CATEGORY_CUISINE_ID
+							, CATEGORY_PURPOSE_ID
+							, WRITER_ID
+		)
+		VALUES (
+				  #{title}
+				, #{description}
+				, #{thumbnail}
+				, #{videoId}
+				, #{serving}
+				, #{duration}
+				, #{level}
+				, #{tip}
+				, #{status}
+				, #{categoryCuisineId}
+				, #{categoryPurposeId}
+				, #{writerId}
+		)
+	</insert>
+</mapper>
+

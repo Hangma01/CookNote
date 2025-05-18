@@ -1,6 +1,5 @@
 package com.cooknote.backend.global.infra.mail;
 
-import java.security.SecureRandom;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -8,12 +7,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
-import com.cooknote.backend.global.error.excption.CustomAuthException;
-import com.cooknote.backend.global.infra.mail.dto.response.VerifyAuthCodeResponseDTO;
-import com.cooknote.backend.global.message.ErrorMessage;
-import com.cooknote.backend.global.message.SuccessMessage;
-import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { s3Delete, s3Upload } from '@/services/awsService';
 import { errorMessages } from '@/utils/messages/errorMessages';
 
@@ -13,7 +13,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const imageUrl = ref(null);
+const imageUrl = ref(props.modelValue || null);
 
 
 // 이미지 변경
@@ -51,6 +51,10 @@ const onFileChange = async (files) => {
     }
   }
 }
+// 부모의 modelValue가 변경될 때마다 imageUrl을 갱신
+watch(() => props.modelValue, (newVal) => {
+  imageUrl.value = newVal;  // 부모에서 값이 변경되면 자식의 imageUrl도 갱신
+});
 
 </script>
 

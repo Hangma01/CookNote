@@ -2,36 +2,62 @@
 import ImageUploader from '@/components/image/ImageUploader.vue';
 import SelectDropDown from './SelectDropDown.vue';
 import { commonInputHangle } from '@/utils/commonFunction';
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { commonValues } from '@/utils/commonValues';
 
 
-const items = [
-  { state: '한식', no: 1},
-  { state: '일식', no: 2 },
-  { state: '양식', no: 3 },
-  { state: '중식', no: 4 },
-  { state: '퓨전', no: 5 },
-  { state: '디저트', no: 6 },
-]
+// RecipeWrite.vue로부터 받는 데이터
+const props = defineProps({ 
+  categories: {   // 레시피 작성 시 오는 데이터
+    type: Object
+  },
+  originalRecipeData: { // 레시피 수정 시 오는 데이터
+    type: Object
+  },
+})
 
+// 입력 값 선언
 const formValues = reactive({
   title: '',
   description: '',
-  videoId: null,
+  videoId: '',
   serving: null,
   duration: null,
   level: null,
   categories: {
     cuisine: null,
-    purpose: null,
+    purpose: null
   }
-});
+})
 
-
+// 이미지 파일 선언
 const imageFile = ref(null)
+
+// url 선언
 const url = ref('')
 
+// 레시피 수정 시 데이터가 바뀐것을 감지해야햠
+watch(() => props.originalRecipeData, (newVal) => {
+  if (newVal) {
+    formValues.title = newVal.title || ''
+    formValues.description = newVal.description || ''
+    formValues.videoId = newVal.videoId || ''
+    formValues.serving = props.categories.recipeServingList?.find(s => s.name === newVal.serving) || null
+    formValues.duration = props.categories.recipeDurationList?.find(d => d.name === newVal.duration) || null
+    formValues.level = props.categories.recipeLevelList?.find(l => l.name === newVal.level) || null
+    formValues.categories.cuisine = props.categories.categoryCuisineList?.find(
+      c => c.id === newVal.categoryCuisineId
+    ) || null
+
+    formValues.categories.purpose = props.categories.categoryPurposeList?.find(
+      p => p.id === newVal.categoryPurposeId
+    ) || null
+
+    imageFile.value = props.originalRecipeData.thumbnail || null
+  }
+})
+
+// 유효성 검사사
 const validation = () => {
   if (!formValues.title) return '제목을 입력하세요'
   else if (!formValues.description) return '요리소개를 입력하세요'
@@ -46,37 +72,31 @@ const validation = () => {
   else return true
 }
 
+// RecipeWrite.vue에게 보낼 데이터
 const getData = () => ({
   title: formValues.title,
   description: formValues.description,
   thumbnail: imageFile.value,
   videoId: formValues.videoId,
-  serving: formValues.serving?.no,
-  duration: formValues.duration?.no,
-  level: formValues.level?.no,
+  serving: formValues.serving?.name,
+  duration: formValues.duration?.name,
+  level: formValues.level?.name,
   categories: {
-    cuisine: formValues.categories.cuisine?.no ?? null,
-    purpose: formValues.categories.purpose?.no ?? null
+    cuisine: formValues.categories.cuisine.id,
+    purpose: formValues.categories.purpose.id
   },
 })
+
+// Youtube VideoId 추출
+const handleGetVideoId = () => {
+  formValues.videoId = getYoutubeVideoId()
+}
 
 const getYoutubeVideoId = () => {
   const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;
   const match = url.value.match(regex)
   return match ? match[1] : null
 }
-
-const handleGetVideoId = () => {
-  formValues.videoId = getYoutubeVideoId()
-}
-
-
-// 부모가 사용할 수 있게 expose
-defineExpose({
-  getData,
-  validation
-})
-
 
 
 // 제목 50자 제한 (한글)
@@ -85,6 +105,12 @@ const handleTitleInput = (e) => commonInputHangle(e, 50, (value) => formValues.t
 // 레시피 소개 250자 제한 (한글)
 const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formValues.description = value)
 
+
+// 부모가 사용할 수 있게 expose
+defineExpose({
+  getData,
+  validation
+})
 </script>
 
 <template>
@@ -184,8 +210,8 @@ const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formV
       <div class="category-item">
           <SelectDropDown
             v-model="formValues.categories.cuisine"
-            :items="items"
-            item-title="state"
+            :items="props.categories?.categoryCuisineList"
+            item-title="type"
             label="종류"
           />
       </div>
@@ -194,8 +220,8 @@ const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formV
 
         <SelectDropDown
           v-model="formValues.categories.purpose"
-          :items="items"
-          item-title="state"
+          :items="props.categories?.categoryPurposeList"
+          item-title="type"
           label="목적"
         />
       </div>
@@ -203,8 +229,8 @@ const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formV
       <div class="category-item">
         <SelectDropDown
           v-model="formValues.serving"
-          :items="items"
-          item-title="state"
+          :items="props.categories?.recipeServingList"
+          item-title="label"
           label="인원수"
         />
       </div>
@@ -212,8 +238,8 @@ const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formV
       <div class="category-item">
         <SelectDropDown
           v-model="formValues.duration"
-          :items="items"
-          item-title="state"
+          :items="props.categories?.recipeDurationList"
+          item-title="label"
           label="요리시간"
         />
       </div>
@@ -222,8 +248,8 @@ const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formV
 
         <SelectDropDown
           v-model="formValues.level"
-          :items="items"
-          item-title="state"
+          :items="props.categories?.recipeLevelList"
+          item-title="label"
           label="난이도"
         />
       </div>

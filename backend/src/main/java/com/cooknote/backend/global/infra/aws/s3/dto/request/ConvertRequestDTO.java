@@ -2,13 +2,13 @@ package com.cooknote.backend.global.infra.aws.s3.dto.request;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class ConvertRequestDTO {
 
     private String thumbnail;

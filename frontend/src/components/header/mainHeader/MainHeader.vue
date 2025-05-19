@@ -1,8 +1,10 @@
 <script setup>
-import Logo from "@/components/logo/Logo.vue";
-import SearchBar from "./SearchBar.vue";
-import UserMenu from "./UserMenu.vue";
-import NavMenu from "./NavMenu.vue";
+import { defineAsyncComponent } from "vue"
+
+const Logo = defineAsyncComponent(() => import("@/components/logo/Logo.vue"))
+const SearchBar = defineAsyncComponent(() => import("./SearchBar.vue"))
+const UserMenu = defineAsyncComponent(() => import("./UserMenu.vue"))
+const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
 
 </script>
 

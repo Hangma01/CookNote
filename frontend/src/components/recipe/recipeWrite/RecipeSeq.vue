@@ -47,7 +47,7 @@ const recipeSeq = reactive([
         description: item.description,
         image: item.image
       })),
-      tip: recipeTip.value
+      tip: recipeTip.value.trim() ? recipeTip.value : null
     }
   }
 

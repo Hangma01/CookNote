@@ -1,6 +1,5 @@
 package com.cooknote.backend.domain.recipe.dto.request;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
@@ -24,7 +23,6 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class RecipeSaveRequestDTO {
 
 	@NotBlank()

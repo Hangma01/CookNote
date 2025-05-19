@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSeqRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeIngredientResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeSeqResponseDTO;
+import com.cooknote.backend.domain.category.dto.response.CategoryGetAllResponseDTO;
+import com.cooknote.backend.domain.category.service.CategoryService;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.entity.Recipe;
 import com.cooknote.backend.domain.recipe.service.RecipeService;
@@ -32,6 +37,7 @@ public class RecipeServiceImpl implements RecipeService {
 	private final RecipeIngredientMapper recipeIngredientMapper;
 	private final RecipeSeqMapper recipeSeqMapper;
 	private final S3Service s3Service;
+	private final CategoryService categoryService;
 
 	// 레시피 저장
 	@Override
@@ -101,4 +107,39 @@ public class RecipeServiceImpl implements RecipeService {
 		}
 	}
 
+	// 레시피 데이터 가져오기 - 수정
+	@Override
+	public RecipeEditResponseDTO getRecipeForEdit(long userId, String recipeId) {
+		
+		// 레시피 데이터 가져오기
+		RecipeEditResponseDTO recipeEditResponseDTO = recipeMapper.getRecipeForEdit(userId, recipeId);
+		
+		checkNull(recipeEditResponseDTO);
+		
+		// 재료 데이터 가져오기
+		List<RecipeIngredientResponseDTO> recipeIngredientResponseDTO = recipeMapper.getRecipeIngredient(recipeId);
+		
+		checkNull(recipeIngredientResponseDTO);
+		
+		
+		// 순서 데이터 가져오기
+		List<RecipeSeqResponseDTO> recipeSeqResponseDTO = recipeMapper.getRecipeSeq(recipeId);
+		
+		checkNull(recipeSeqResponseDTO);
+		
+		// 카테고리 목록 가져오기
+		CategoryGetAllResponseDTO categoryGetAllResponseDTO = categoryService.getCategoryAll();
+		
+		checkNull(categoryGetAllResponseDTO);
+	
+		recipeEditResponseDTO.setRecipeCategories(categoryGetAllResponseDTO);
+		
+		return recipeEditResponseDTO;
+	}
+	
+	private void checkNull(Object obj) {
+		if (obj == null) {
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
+	}
 }

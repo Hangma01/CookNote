@@ -13,7 +13,6 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Setter
 public class RecipeSeqRequestDTO {
 	

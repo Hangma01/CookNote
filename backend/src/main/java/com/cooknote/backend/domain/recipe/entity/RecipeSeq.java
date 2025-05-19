@@ -1,18 +1,16 @@
 package com.cooknote.backend.domain.recipe.entity;
 
-import java.time.LocalDate;
-
-import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class RecipeSeq {
 	private Long recipeSeqId;  		// 레시피 순서 Key
 	private Long recipeId;     		// 레시피 Key

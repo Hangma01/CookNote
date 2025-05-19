@@ -1,16 +1,17 @@
-package com.cooknote.backend.global.infra.mail.dto.response;
+package com.cooknote.backend.domain.category.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VerifyAuthCodeResponseDTO {
-	private boolean result;
-	private String message;
+@ToString
+public class CategoryCuisine {
+	private int categoryCuisineId;
+	private String type;
 }

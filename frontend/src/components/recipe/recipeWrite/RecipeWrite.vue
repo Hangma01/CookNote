@@ -3,17 +3,33 @@ import RecipeInfo from "./RecipeInfo.vue";
 import ReciepIngredient from "./ReciepIngredient.vue";
 import RecipeSet from "./RecipeSet.vue";
 import RecipeSeq from "./RecipeSeq.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { debounce } from "lodash";
 import { commonValues } from "@/utils/commonValues";
-import { saveRecipe } from '@/services/recipeService';
+import { getRecipeEdit, saveRecipe } from '@/services/recipeService';
 import { errorMessages } from "@/utils/messages/errorMessages";
-import { s3Convert } from "@/services/awsService";
+import { useRoute, useRouter } from "vue-router";
+import { getCategoryAll } from "@/services/categoryService";
 
+// 화면 전환
+const router = useRouter();
+
+// 컴포넌트 별 Ref => 자식 데이터를 가져오기 위함
 const recipeInfoRef = ref(null)
 const recipeIngredienRef = ref(null)
 const recipeSeqRef = ref(null)
 const recipeSetRef = ref(null)
+
+// 카테고리 데이터
+const categories = ref(null)
+
+// 레시피 수정 데이터
+const originalRecipeData = ref(null)
+
+// 수정 모드 인지 체크
+const route = useRoute()
+const recipeId = route.params.recipeId || null
+const isEditMode = ref(!!recipeId) 
 
 // 레시피 저장
 const handleRecipeSave = debounce (async () => {
@@ -54,11 +70,11 @@ const handleRecipeSave = debounce (async () => {
       recipeSeqList: recipeSeq.seqs,
       status: recipeSet.data.toUpperCase(),
     }
-    console.log(formValues)
+
     // 서버에 전송
     try {
       const saverRes = await saveRecipe(formValues)
-      console.log(saverRes)
+      router.replace({ name: 'mainPage'});
     } catch (e) {
       console.log(e)
       if (e.response && e.response?.data?.message) {
@@ -66,11 +82,35 @@ const handleRecipeSave = debounce (async () => {
       } else {
         alert(errorMessages.BADREQUEST)
       }
-      // window.location.reload();
+      window.location.reload();
     } 
   }
 }, commonValues.defaultDebounce)
 
+// 레시피 작성 / 수정 시 가져올 데이터
+onMounted(async () => {
+  console.log(isEditMode.value)
+  if (isEditMode.value) {  
+    try {
+      const res = await getRecipeEdit(recipeId)
+      originalRecipeData.value = res.data
+      categories.value = res.data.categories
+    } catch (e) {
+      alert('레시피 정보를 불러오는데 실패했습니다.')
+      router.push({ name: "mainPage" })
+    }
+  } else {  // 레시피 추가시 요청 데이터
+    try {
+      const res = await getCategoryAll()
+      console.log(res);
+      categories.value = res.data
+    } catch (e) {
+      alert('레시피 정보를 불러오는데 실패했습니다.')
+      router.push({ name: "mainPage" })
+    }
+    
+  }
+})
 </script>
 
 <template>
@@ -80,26 +120,26 @@ const handleRecipeSave = debounce (async () => {
 
       <div class="recipe-wrap">
         <section>
-          <RecipeInfo ref="recipeInfoRef" />
+          <RecipeInfo ref="recipeInfoRef" :originalRecipeData = "originalRecipeData" :categories="categories"/>
         </section>
       </div>
         
       <div class="recipe-wrap">
         <section>
-            <ReciepIngredient ref="recipeIngredienRef" />
+            <ReciepIngredient ref="recipeIngredienRef" :originalRecipeData = "originalRecipeData"/>
           </section>
 
       </div>
 
       <div class="recipe-wrap">
         <section>
-            <RecipeSeq ref="recipeSeqRef" />
+            <RecipeSeq ref="recipeSeqRef" :originalRecipeData = "originalRecipeData"/>
           </section>
       </div>
       
       <div class="recipe-wrap">
         <section>
-          <RecipeSet ref="recipeSetRef" />
+          <RecipeSet ref="recipeSetRef" :originalRecipeData = "originalRecipeData"/>
         </section>
       </div>
       

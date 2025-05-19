@@ -12,8 +12,6 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@ToString
 public class RecipeIngredientRequestDTO {
 	
 	@NotBlank

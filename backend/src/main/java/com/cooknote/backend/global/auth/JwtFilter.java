@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
@@ -46,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
 				
             return;
 	    }
-
+	    log.info("유효성검사한디");
         // accessToken 유효성 검사
         try {
         	if(accessToken != null 
@@ -68,10 +69,12 @@ public class JwtFilter extends OncePerRequestFilter {
             	SecurityContextHolder.getContext().setAuthentication(authentication);
     		}
         } catch (ExpiredJwtException e) {				// Access Token 만료
+        	   log.info("accessToken 만료됨");
 	    	ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE.getMessage());
 	    	
 	    	return;
 	    } catch (RuntimeException e) {
+	    	log.error("accessToken 다른 에러네", e);
 	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	    	return;
 	    } 

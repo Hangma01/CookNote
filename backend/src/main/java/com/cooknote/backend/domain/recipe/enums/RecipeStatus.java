@@ -11,6 +11,7 @@ public enum RecipeStatus {
     
     private final String label;
 
+  
     RecipeStatus(String label) {
         this.label = label;
     }

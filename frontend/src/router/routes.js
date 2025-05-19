@@ -66,6 +66,12 @@ export const routes = [
         component: () => import('../components/recipe/recipeWrite/RecipeWrite.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: 'edit/:recipeId',
+        name: 'recipeEdit',
+        component: () => import('../components/recipe/recipeWrite/RecipeWrite.vue'),
+        meta: { requiresAuth: true },
+      },
     ]
   },
   {

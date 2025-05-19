@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cooknote.backend.mappers.CategoryMapper">
+
+	<!-- 카테고리 요리 종류 Map  -->
+<!-- 	<resultMap id="CategoryCuisineResultMap" type="CategoryCuisine">
+        <id property="categoryCuisineId" column="CATEGORY_CUISINE_ID"/>
+        <result property="type" column="TYPE"/>
+    </resultMap> -->
+
+	<!-- 카테고리 요리 목적 Map  -->
+<!-- 	<resultMap id="CategoryPurposeResultMap" type="CategoryPurpose">
+        <id property="categoryPurposeId" column="CATEGORY_PURPOSE_ID"/>
+        <result property="type" column="TYPE"/>
+    </resultMap> -->
+
+	<!-- 카테고리 요리 종류 가져오기  -->
+	<select id="getCategoryCuisine" resultType="CategoryCuisineListResponseDTO">
+		SELECT CATEGORY_CUISINE_ID AS ID	<!-- 카테고리 요리 종류 아이디 -->
+			 , TYPE							<!-- 카테고리 요리 종류 -->
+		  FROM CATEGORY_CUISINE
+	</select>
+	
+	<!-- 카테고리 요리 목적 가져오기  -->
+	<select id="getCategoryPurpose" resultType="CategoryPurposeResponseDTO">
+		SELECT CATEGORY_PURPOSE_ID AS ID	<!-- 카테고리 요리 목적 아이디 -->
+			 , TYPE							<!-- 카테고리 요리 목적 종류 -->
+		  FROM CATEGORY_PURPOSE
+	</select>
+</mapper>
+

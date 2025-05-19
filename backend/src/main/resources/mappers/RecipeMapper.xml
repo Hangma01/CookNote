@@ -7,33 +7,70 @@
 	<!-- 레시피 저장 -->
 	<insert id="recipeSave" useGeneratedKeys="true" keyProperty="recipeId">
 		INSERT INTO RECIPE (
-							  TITLE
-							, DESCRIPTION
-							, THUMBNAIL
-							, VIDEO_ID
-							, SERVING
-							, DURATION
-							, LEVEL
-							, TIP
-							, STATUS
-							, CATEGORY_CUISINE_ID
-							, CATEGORY_PURPOSE_ID
-							, WRITER_ID
+							TITLE
+						  , DESCRIPTION
+						  , THUMBNAIL
+						  , VIDEO_ID
+						  , SERVING
+						  , DURATION
+						  , LEVEL
+						  , TIP
+						  , STATUS
+						  , CATEGORY_CUISINE_ID
+						  , CATEGORY_PURPOSE_ID
+						  , WRITER_ID
 		)
 		VALUES (
-				  #{title}
-				, #{description}
-				, #{thumbnail}
-				, #{videoId}
-				, #{serving}
-				, #{duration}
-				, #{level}
-				, #{tip}
-				, #{status}
-				, #{categoryCuisineId}
-				, #{categoryPurposeId}
-				, #{writerId}
+				#{title}
+			  , #{description}
+			  , #{thumbnail}
+			  , #{videoId}
+			  , #{serving}
+			  , #{duration}
+			  , #{level}
+			  , #{tip}
+			  , #{status}
+			  , #{categoryCuisineId}
+			  , #{categoryPurposeId}
+			  , #{writerId}
 		)
 	</insert>
+	
+	
+	<!-- 레시피 조회 - 수정 -->
+	<select id="getRecipeForEdit" resultType="RecipeEditResponseDTO">
+		SELECT TITLE										<!-- 레시피 제목 -->
+			 , DESCRIPTION									<!-- 레시피 소개 -->
+			 , THUMBNAIL									<!-- 레시피 썸네일 -->
+			 , VIDEO_ID AS videoId							<!-- 레시피 동영상 -->
+			 , SERVING										<!-- 레시피 인원수 -->
+			 , DURATION										<!-- 레시피 요리 시간 -->
+			 , LEVEL										<!-- 레시피 난이도 -->
+			 , TIP											<!-- 레시피 팁 -->
+			 , STATUS										<!-- 레시피 상태 -->
+			 , CATEGORY_CUISINE_ID AS categoryCuisineId		<!-- 카테고리 요리 종류 아이디 -->
+			 , CATEGORY_PURPOSE_ID AS categoryPurposeId		<!-- 카테고리 요리 목적 아이디 -->
+		  FROM RECIPE
+		 WHERE RECIPE_ID = #{recipeId}
+		   AND WRITER_ID = #{userId}
+	</select>
+	
+	<!-- 레시피 재료 조회 -->
+	<select id="getRecipeIngredient" resultType="RecipeIngredientResponseDTO">
+		SELECT NAME									<!-- 재료 이름 -->
+			 , QUANTITY								<!-- 재료 수량 -->
+			 , REMARK								<!-- 비고 -->
+		  FROM RECIPE_INGREDIENT					
+		 WHERE RECIPE_ID = ${recipeId} 
+	</select>
+	
+	<!-- 레시피 순서 조회 -->
+	<select id="getRecipeSeq" resultType="RecipeSeqResponseDTO">
+		SELECT DESCRIPTION							<!-- 레시피 순서별 설명 -->
+			 , IMAGE								<!-- 레시피 순서별 이미지 -->
+		  FROM RECIPE_SEQ
+		 WHERE RECIPE_ID = ${recipeId} 
+		 ORDER BY RECIPE_SEQ_ID ASC
+	</select>
 </mapper>
 

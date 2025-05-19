@@ -94,6 +94,10 @@ onBeforeUnmount(() => {
             <router-link :to="{name : 'recipeWrite'}">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
+
+            <router-link :to="{name : 'recipeEdit', params: { recipeId: 1 } }" style="padding-left: 20px">
+                <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
+            </router-link>
         </li>
     </ul>
 </template>

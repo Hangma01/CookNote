@@ -5,17 +5,17 @@
 <mapper namespace="com.cooknote.backend.mappers.RecipeSeqMapper">
 	<insert id="recipeSeqSave">
 		INSERT INTO RECIPE_SEQ (
-								  RECIPE_ID
-								, DESCRIPTION
-								, IMAGE
+								RECIPE_ID
+						 	  , DESCRIPTION
+							  , IMAGE
 		)
 		VALUES 
 		<foreach collection="seqs" item="item" separator=",">
-		(
-		    #{recipeId}
-		  , #{item.description}
-		  , #{item.image}
-		)
+			(
+			 #{recipeId}
+		   , #{item.description}
+		   , #{item.image}
+			)
 		</foreach>
 	</insert>	
 </mapper>

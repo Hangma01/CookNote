@@ -35,31 +35,33 @@ privateAPI.interceptors.response.use(
     const originalRequest = error.config;
     const isTokenExpired = error.response?.status === HttpStatusCode.Unauthorized
       && error.response?.data?.message === errorMessages.ACCESS_TOKEN_EXPIRED_MESSAGE;
-
+    console.log("accessToken 만료확인: " + isTokenExpired)
     //if (isTokenExpired && !originalRequest._retry) {
     if (isTokenExpired) {
       //  originalRequest._retry = true;
 
-      console.log('재요청마저 실패', e)
       try {
+        console.log("accessToken 재발급 요청")
         const res = await publicAPI.post(`/auth/reissue`,
           {},
           { withCredentials: true }
         );
 
         const newAccessToken = res.headers['authorization'];
-
-        alert('재요청 성공')
+        console.log("새로운 accessToken: " + newAccessToken)
         userStore.setNewAccessToken(newAccessToken);
         return privateAPI(originalRequest); // 재요청
       } catch (e) {
         // 유저 스토어 삭제
         alert("재요청 실패패")
+        console.log("재발급 실패 이유: " + e)
         alert(e.response?.data?.message);
         userStore.logout();
         window.location.href = '/login';
         return Promise.reject(e);
       }
+    } else {
+      console.log("accessToken 만료가 아닐경우: " + isTokenExpired + "에러: " + error)
     }
     return Promise.reject(error);
   }

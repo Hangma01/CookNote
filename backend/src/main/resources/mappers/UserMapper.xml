@@ -20,17 +20,16 @@
     
 	<!-- 회원 정보 가져오기 -->
 	<select id="getUser" resultMap="UserResultMap">
-		SELECT 
-			USER_ID,
-			ID,
-			NAME,
-			PASSWORD,
-			EMAIL,
-			NICKNAME,
-			PROFILE_IMAGE,
-			CREATE_AT,
-			UPDATE_AT
-		FROM USER
-		WHERE ID = #{id}
+		SELECT USER_ID
+			 , ID
+			 , NAME
+			 , PASSWORD
+			 , EMAIL
+			 , NICKNAME
+			 , PROFILE_IMAGE
+			 , CREATE_AT
+			 , UPDATE_AT
+		  FROM USER
+	 	 WHERE ID = #{id}
 	</select>   
 </mapper>

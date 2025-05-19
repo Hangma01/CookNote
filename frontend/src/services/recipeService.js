@@ -6,3 +6,10 @@ export const saveRecipe = async (formValues) => {
 
   return res;
 }
+
+// 레시피 수정
+export const getRecipeEdit = async (recipeId) => {
+  const res = await privateAPI.get(`/recipe/edit/${recipeId}`)
+
+  return res;
+}

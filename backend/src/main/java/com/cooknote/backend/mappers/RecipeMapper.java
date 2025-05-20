@@ -14,11 +14,10 @@ import com.cooknote.backend.domain.recipe.entity.Recipe;
 @Mapper
 public interface RecipeMapper {
 
-	void recipeSave(Recipe reqRecipe);
+	void save(Recipe reqRecipe);
 
-	RecipeEditResponseDTO getRecipeForEdit(@Param("userId") long userId, @Param("recipeId") String recipeId);
+	RecipeEditResponseDTO getRecipeForEdit(@Param("recipeId") String recipeId
+										 , @Param("userId") long userId);
 
-	List<RecipeIngredientResponseDTO> getRecipeIngredient(@Param("recipeId") String recipeId);
-
-	List<RecipeSeqResponseDTO> getRecipeSeq(@Param("recipeId") String recipeId);
+	void update(Recipe reqRecipe);
 }

@@ -3,7 +3,7 @@ import { defineAsyncComponent } from "vue"
 
 const Logo = defineAsyncComponent(() => import("@/components/logo/Logo.vue"))
 const SearchBar = defineAsyncComponent(() => import("./SearchBar.vue"))
-const UserMenu = defineAsyncComponent(() => import("./UserMenu.vue"))
+const UserAciton = defineAsyncComponent(() => import("./UserAction.vue"))
 const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
 
 </script>
@@ -14,8 +14,8 @@ const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
             <router-link :to="{ name: 'mainPage' }">
                 <Logo />
             </router-link>
-            <SearchBar />
-            <UserMenu />
+            <!-- <SearchBar /> -->
+            <UserAciton />
         </div>
         
         <nav class="nav">
@@ -29,7 +29,7 @@ const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
 .header-bottom {
     display: flex;
     justify-content: space-between;
-    align-items: end;
+    align-items: center;
     width: 70rem;
     margin: 0 auto;
     padding-top: 1.5rem;
@@ -37,7 +37,8 @@ const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
 }
 
 .nav{
-    background-color:#c09370 ;
+    border-bottom: 1px solid rgb(244,244,244);
+    background-color: rgb(244, 240, 239) ;
     height: 3rem;
 }
 </style>

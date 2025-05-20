@@ -1,44 +1,32 @@
--- 카테고리 - 요리
 
-INSERT INTO CATEGORY_CUISINE (
-                                TYPE
-)
-VALUES (
-	'한식'
-);
-INSERT INTO CATEGORY_CUISINE (
-                                TYPE
-)
-VALUES (
-	'일식'
-);
-INSERT INTO CATEGORY_CUISINE (
-                                TYPE
-)
-VALUES (
-	'양식'
-);
-INSERT INTO CATEGORY_CUISINE (
-                                TYPE
-)
-VALUES (
-	'중식'
-);
-INSERT INTO CATEGORY_PURPOSE (
-                                TYPE
-)
-VALUES (
-	'다이어트'
-);
-INSERT INTO CATEGORY_PURPOSE (
-                                TYPE
-)
-VALUES (
-	'혼밥'
-);
-INSERT INTO CATEGORY_PURPOSE (
-                                TYPE
-)
-VALUES (
-	'퓨전'
-);
+-- 카테고리 요리 종류
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '한식' );
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '일식' );
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '양식' );
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '중식' );
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '퓨전' );
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '분식' );
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '비건' );
+INSERT INTO CATEGORY_CUISINE ( TYPE ) VALUES ( '기타' );
+
+-- 카테고리 요리 목적
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '다이어트' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '술안주' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '혼밥' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '고단백' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '캠핑' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '영양식' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '반찬' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '디저트' );
+INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '기타' );
+
+-- 인덱스
+-- 레시피
+CREATE INDEX idx_recipe_writer_id ON RECIPE(WRITER_ID);
+CREATE INDEX idx_recipe_recipe_id ON RECIPE(RECIPE_ID);
+
+-- 레시피 순서
+CREATE INDEX idx_recipe_seq_recipe_id ON RECIPE_SEQ(RECIPE_ID);
+
+-- 레시피 재료
+CREATE INDEX idx_recipe_ingredient_recipe_id ON RECIPE_INGREDIENT(RECIPE_ID);

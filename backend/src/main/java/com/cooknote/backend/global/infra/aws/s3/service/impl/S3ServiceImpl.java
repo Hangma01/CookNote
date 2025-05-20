@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -28,7 +27,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.util.IOUtils;
 import com.cooknote.backend.global.error.exceptionCode.S3ErrorCode;
 import com.cooknote.backend.global.error.excption.CustomS3Exception;
-import com.cooknote.backend.global.infra.aws.s3.dto.request.ConvertRequestDTO;
 import com.cooknote.backend.global.infra.aws.s3.service.S3Service;
 
 import lombok.RequiredArgsConstructor;
@@ -66,7 +64,7 @@ public class S3ServiceImpl implements S3Service {
 		}
 	}
 
-	// filename을 받아서 파일 확장자가 jpg, jpeg, png, gif 중에 속하는지 검증한다.
+	// filename을 받아서 파일 확장자가 jpg, jpeg, png 중에 속하는지 검증한다.
 	private void validateImageFileExtention(String filename) {
 		int lastDotIndex = filename.lastIndexOf(".");
 		if (lastDotIndex == -1) {
@@ -127,8 +125,8 @@ public class S3ServiceImpl implements S3Service {
 	// 이미지의 public url을 이용하여 S3에 해당 이미지를 제거하는 메서드이다.
 	// getKeyFromImageAddress()를 호출하여 삭제에 필요한 key를 얻는다.
 	@Override
-	public void deleteImageFromS3(String imageAddress) {
-		String key = getKeyFromImageAddress(imageAddress);
+	public void deleteImageFromS3(String imageUrl) {
+		String key = getKeyFromImageUrl(imageUrl);
 		try {
 			amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
 		} catch (Exception e) {
@@ -136,81 +134,109 @@ public class S3ServiceImpl implements S3Service {
 		}
 	}
 	
-	@Override
-	public Map<String,Object> convertedGetUrls(Map<String, Object> s3ConvertReq) {
-
-		List<String> copiedKeys = new ArrayList<>();
-		
-		Map<String, Object> result = new HashMap<>();
-		
 	
-		try {		
-			String thumbnailKey = getKeyFromImageAddress((String) s3ConvertReq.get("thumbnail"));
-			
-			// 썸네일 복사
-			int thumbnailLastIdx = thumbnailKey.lastIndexOf('/');
-			String thumbnailFileName = thumbnailKey.substring(thumbnailLastIdx + 1);
-			String thumbnailDestinationKey = "Recipe/Thumbnail/" + thumbnailFileName;
-			
-			// 복사
-			amazonS3.copyObject(new CopyObjectRequest(bucketName, thumbnailKey, bucketName, thumbnailDestinationKey));
-			copiedKeys.add(thumbnailDestinationKey);		
-			
-			// 삭제
-			amazonS3.deleteObject(new DeleteObjectRequest(bucketName, thumbnailKey));
-			
-			// url 가져오기
-			String thumbnailUrl = amazonS3.getUrl(bucketName, thumbnailDestinationKey).toString();
-			result.put("thumbnail", thumbnailUrl);
-			
+	// 여러개의 이미지 삭제
+	@Override
+	public void deleteImagesFromS3(List<String> imageUrls) {
+		try {
+			for(String imageUrl : imageUrls) {
+				String imageKey = getKeyFromImageUrl(imageUrl);
 
-			List<String> images = (List<String>) s3ConvertReq.get("images");
-			List<String> copiedImageUrls = new ArrayList<>();
+				if(imageKey != null) {
+					amazonS3.deleteObject(new DeleteObjectRequest(bucketName, imageKey));	
+				}
+			}
+		} catch (Exception e) {
+			throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
+		}
+	}
+	
+	
+	// 이미지의 위치를 옮기는 메서드이다.
+	@Override
+	public String moveImage(String imageUrl, String targetFolder) {
+		
+		String imageKey = getKeyFromImageUrl(imageUrl);
+		
+		String imageDestinationKey = getImageDestinationKey(imageKey, targetFolder);
+		
+		try {
+			// 이미지 복사
+			amazonS3.copyObject(new CopyObjectRequest(bucketName, imageKey, bucketName, imageDestinationKey));
+			
+			// 기존 위치에 있는 이미지 삭제
+			amazonS3.deleteObject(new DeleteObjectRequest(bucketName, imageKey));
+	
+		} catch (Exception e) {
 
-			for(String image : images) {
-				if(image == null) {
-					copiedImageUrls.add(null);
+			try {
+				// 이미지 복원
+				amazonS3.deleteObject(new DeleteObjectRequest(bucketName, imageDestinationKey));
+			} catch (Exception ex) {
+				log.warn("삭제 실패 위치한 이미지 : " + imageDestinationKey );
+			}
+			
+			throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_UPLOAD);
+		}
+		
+		// 복사한 이미지 경로 가져오기
+		String moveImageUrl = amazonS3.getUrl(bucketName, imageDestinationKey).toString();
+		
+		return moveImageUrl;
+	}
+	
+	
+	// 여러개의 이미지 위치를 옮기는 메서드이다.
+	@Override
+	public List<String> moveImages(List<String> imageUrls, String targetFolder) {
+		
+		// 옮겨진 키들 저장
+		List<String> moveKeys = new ArrayList<>();
+		
+		// 옮겨진 키들 url
+		List<String> moveImageUrls = new ArrayList<>();
+		try {
+			for(String imageUrl : imageUrls) {
+				if(imageUrl == null) {
+					moveImageUrls.add(null);
 				} else {
+					String imageKey = getKeyFromImageUrl(imageUrl);
 					
-					String imageKey = getKeyFromImageAddress(image);
+					String imageDestinationKey = getImageDestinationKey(imageKey, targetFolder);
 					
-
-					int imageLastIdx = imageKey.lastIndexOf('/');
-					String imageFileName = imageKey.substring(imageLastIdx + 1);
-					String imageDestinationKey = "Recipe/SeqImages/" + imageFileName;
-
+				
 					// 복사
 					amazonS3.copyObject(new CopyObjectRequest(bucketName, imageKey, bucketName, imageDestinationKey));
-					copiedKeys.add(imageDestinationKey);
+					moveKeys.add(imageDestinationKey);
 					
 					// 삭제
 					amazonS3.deleteObject(new DeleteObjectRequest(bucketName, imageKey));
-					
+							
 					// url 가져오기
-					String imageUrl = amazonS3.getUrl(bucketName, imageDestinationKey).toString();
-					copiedImageUrls.add(imageUrl);
+					String moveImageUrl = amazonS3.getUrl(bucketName, imageDestinationKey).toString();
+					moveImageUrls.add(moveImageUrl);
 				}
 			}
-			
-			result.put("images", copiedImageUrls);
 		} catch (Exception e) {
-			for (String copiedKey : copiedKeys) {
+			// 이미지 복원
+			for (String moveKey : moveKeys) {
 				try {
-					amazonS3.deleteObject(new DeleteObjectRequest(bucketName, copiedKey));
+					amazonS3.deleteObject(new DeleteObjectRequest(bucketName, moveKey));
 				} catch (Exception ex) {
-					log.error("삭제 실패 위치" + copiedKey + "삭제할 키들" + String.join(", ", copiedKeys));
+					log.warn("삭제 실패 위치" + moveKey + "삭제할 키들" + String.join(", ", moveKey));
 				}
 			}
 			
 			throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_UPLOAD);
 		}
-
-		return result;
+		return moveImageUrls;
 	}
-
-	private String getKeyFromImageAddress(String imageAddress) {
+	
+	
+	// 이미지 key 반환
+	private String getKeyFromImageUrl(String imageUrl) {
 		try {
-			URL url = new URL(imageAddress);
+			URL url = new URL(imageUrl);
 			String decodingKey = URLDecoder.decode(url.getPath(), "UTF-8");
 			
 			return decodingKey.substring(1); // 맨 앞의 '/' 제거
@@ -218,22 +244,15 @@ public class S3ServiceImpl implements S3Service {
 			throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
 		}
 	}
-
-	@Override
-	public void deleteImagesFromS3(Map<String, Object> s3DeleteReq) {
-		try {
-			String thumbnailKey = getKeyFromImageAddress((String) s3DeleteReq.get("thumbnail"));
-			log.info("deleteImagesFromS3 썸네일: " + thumbnailKey);
-			amazonS3.deleteObject(new DeleteObjectRequest(bucketName, thumbnailKey));
-			
-			List<String> images = (List<String>) s3DeleteReq.get("images");
-			for(String image : images) {
-				String imageKey = getKeyFromImageAddress(image);
-				log.info("deleteImagesFromS3 이미지: " +imageKey);
-				amazonS3.deleteObject(new DeleteObjectRequest(bucketName, imageKey));
-			}
-		} catch (Exception e) {
-			throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
-		}
+	
+	
+	private String getImageDestinationKey(String imageKey, String to) {
+		int imageLastIdx = imageKey.lastIndexOf("/");
+		String imageFileName = imageKey.substring(imageLastIdx + 1);
+		String imageDestinationKey = to + imageFileName;
+		
+		return imageDestinationKey;
 	}
+
+
 }

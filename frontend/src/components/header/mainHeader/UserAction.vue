@@ -61,7 +61,13 @@ onBeforeUnmount(() => {
 <template>
     <ul class="user-menu">
         <li class="user-menu-item">
-            <router-link :to="{ name: 'myPage' }" v-if="!isLoggedIn">
+            <router-link :to="{ name: 'myPage' }" >
+                <font-awesome-icon :icon="['fas', 'magnifying-glass']" style="color: #454F5B;" />
+            </router-link>
+        </li>
+
+        <li class="user-menu-item">
+            <router-link :to="{ name: 'myPage' }" v-if="!isLoggedIn" >
                 <font-awesome-icon :icon="['far', 'user']" style="color: #454F5B;" />
             </router-link>
 
@@ -95,9 +101,9 @@ onBeforeUnmount(() => {
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
 
-            <router-link :to="{name : 'recipeEdit', params: { recipeId: 1 } }" style="padding-left: 20px">
+            <!-- <router-link :to="{name : 'recipeEdit', params: { recipeId: 4 } }" style="padding-left: 20px">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
-            </router-link>
+            </router-link> -->
         </li>
     </ul>
 </template>
@@ -107,13 +113,15 @@ onBeforeUnmount(() => {
 .user-menu{
     display: flex;
     gap: 30px;
+    
 
     .user-menu-item{
         width: 3rem;
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         border-radius: 100%;
         align-items: center;
         position: relative;
+        
 
         .user-menu-mypage-item {
             position: absolute;
@@ -139,10 +147,11 @@ onBeforeUnmount(() => {
                 background-color:#c09370;
             }
         }
+        .mypage-icon {
+            cursor: pointer;
+        }
     }
-    .mypage-icon {
-        cursor: pointer;
-    }
+
 
 }
 </style>

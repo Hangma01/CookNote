@@ -10,11 +10,9 @@ import com.cooknote.backend.domain.recipe.enums.RecipeServing;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter

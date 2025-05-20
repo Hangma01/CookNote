@@ -3,13 +3,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.cooknote.backend.mappers.RecipeIngredientMapper">
-		<!-- 레시피 재료 저장 -->
-	<insert id="recipeIngredientSave">
+	
+	<!-- 레시피 재료 저장 -->
+	<insert id="save">
 		INSERT INTO RECIPE_INGREDIENT (
-										 NAME
-										, QUANTITY
-										, REMARK
-										, RECIPE_ID
+										NAME
+									  , QUANTITY
+									  , REMARK
+									  , RECIPE_ID
 										
 		)
 		VALUES 
@@ -22,5 +23,13 @@
 		)
 		</foreach>
 	</insert>
+
+	
+	<!-- 레시피 재료 삭제 -->
+	<delete id="delete">
+		DELETE 
+		  FROM RECIPE_INGREDIENT
+		 WHERE RECIPE_ID = #{recipeId}
+	</delete>
 </mapper>
 

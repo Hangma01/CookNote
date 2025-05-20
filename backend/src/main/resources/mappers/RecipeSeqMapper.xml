@@ -3,20 +3,31 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.cooknote.backend.mappers.RecipeSeqMapper">
-	<insert id="recipeSeqSave">
+
+	<!-- 레시피 순서 저장 -->
+	<insert id="save">
 		INSERT INTO RECIPE_SEQ (
-								RECIPE_ID
-						 	  , DESCRIPTION
-							  , IMAGE
+								 RECIPE_SEQ_ID
+							   , RECIPE_ID
+				 	   		   , DESCRIPTION
+						   	   , IMAGE
 		)
 		VALUES 
-		<foreach collection="seqs" item="item" separator=",">
-			(
-			 #{recipeId}
-		   , #{item.description}
-		   , #{item.image}
-			)
+		<foreach collection="recipeSeqs" item="item" separator=",">
+        (
+        	#{item.step}
+	      , #{recipeId}
+	      , #{item.description}
+	      , #{item.image}
+        )
 		</foreach>
 	</insert>	
+	
+	<!-- 레시피 순서 삭제 -->
+	<delete id="delete">
+		DELETE 
+		  FROM RECIPE_SEQ
+		 WHERE RECIPE_ID = #{recipeId}
+	</delete>
 </mapper>
 

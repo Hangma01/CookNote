@@ -1,13 +1,30 @@
 <script setup>
 import { commonInputHangle, generateId } from '@/utils/commonFunction';
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 
+const props = defineProps({ 
+  originalRecipeData: { // 레시피 수정 시 오는 데이터
+    type: Object
+  },
+})
 
 const ingredients = reactive([
                         { id: generateId(), name: '', quantity: '' , remark: ''},
                         { id: generateId(), name: '', quantity: '' , remark: ''},
                         { id: generateId(), name: '', quantity: '' , remark: ''},
                       ])
+
+
+watch(() => props.originalRecipeData, (newVal) => {
+    ingredients.splice(0, ingredients.length, 
+      ...newVal.recipeIngredients.map(item => ({
+        id: generateId(),
+        name: item.name,
+        quantity: item.quantity,
+        remark: item.remark
+      }))
+    )
+})                      
 
   const addIngredient = () => {
     if (ingredients.length < 50) {

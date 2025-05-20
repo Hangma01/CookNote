@@ -6,9 +6,13 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSeqRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeSeqResponseDTO;
 
 @Mapper
 public interface RecipeSeqMapper {
 
-	void recipeSeqSave(@Param("seqs") List<RecipeSeqRequestDTO> seqs,@Param("recipeId") Long recipeId);
+	void save(@Param("recipeSeqs") List<RecipeSeqRequestDTO> recipeSeqs
+			, @Param("recipeId") Long recipeId);
+
+	void delete(@Param("recipeId") Long recipeId);
 }

@@ -100,10 +100,10 @@ CREATE TABLE `RECIPE` (
 
 -- 레시피 순서 테이블
 CREATE TABLE `RECIPE_SEQ` (
-	`RECIPE_SEQ_ID` INT AUTO_INCREMENT,								-- 레시피 순서 Key
+	`RECIPE_SEQ_ID` INT,											-- 레시피 순서 Key
 	`RECIPE_ID` BIGINT NOT NULL,									-- 레시피 Key (복합키)
 	`DESCRIPTION` VARCHAR(250) NOT NULL,							-- 레시피 순서별 설명
-	`IMAGE` VARCHAR(400),											-- 레시피 순서별 이미지
+	`IMAGE` VARCHAR(400) NOT NULL,									-- 레시피 순서별 이미지
 	PRIMARY KEY (`RECIPE_SEQ_ID`, `RECIPE_ID`),
 	FOREIGN KEY (`RECIPE_ID`) REFERENCES `RECIPE`(`RECIPE_ID`)
 );

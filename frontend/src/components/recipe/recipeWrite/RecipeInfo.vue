@@ -8,26 +8,29 @@ import { commonValues } from '@/utils/commonValues';
 
 // RecipeWrite.vue로부터 받는 데이터
 const props = defineProps({ 
-  categories: {   // 레시피 작성 시 오는 데이터
-    type: Object
-  },
-  originalRecipeData: { // 레시피 수정 시 오는 데이터
-    type: Object
-  },
+    categories: {   // 레시피 작성 시 오는 데이터
+        type: Object
+    },
+    originalRecipeData: { // 레시피 수정 시 오는 데이터
+        type: Object
+    },
+    isEditMode: {
+        type: Boolean
+    }
 })
 
 // 입력 값 선언
 const formValues = reactive({
-  title: '',
-  description: '',
-  videoId: '',
-  serving: null,
-  duration: null,
-  level: null,
-  categories: {
-    cuisine: null,
-    purpose: null
-  }
+    title: '',
+    description: '',
+    videoId: null,
+    serving: null,
+    duration: null,
+    level: null,
+    categories: {
+        cuisine: null,
+        purpose: null
+    }
 })
 
 // 이미지 파일 선언
@@ -36,80 +39,82 @@ const imageFile = ref(null)
 // url 선언
 const url = ref('')
 
+
 // 레시피 수정 시 데이터가 바뀐것을 감지해야햠
 watch(() => props.originalRecipeData, (newVal) => {
-  if (newVal) {
-    formValues.title = newVal.title || ''
-    formValues.description = newVal.description || ''
-    formValues.videoId = newVal.videoId || ''
-    formValues.serving = props.categories.recipeServingList?.find(s => s.name === newVal.serving) || null
-    formValues.duration = props.categories.recipeDurationList?.find(d => d.name === newVal.duration) || null
-    formValues.level = props.categories.recipeLevelList?.find(l => l.name === newVal.level) || null
-    formValues.categories.cuisine = props.categories.categoryCuisineList?.find(
-      c => c.id === newVal.categoryCuisineId
-    ) || null
+    console.log(newVal)
+    if (newVal) {
+        formValues.title = newVal.title || ''
+        formValues.description = newVal.description || ''
+        formValues.videoId = newVal.videoId || null
+        formValues.serving = newVal.recipeCategories.recipeServingList?.find(s => s.name === newVal.serving) || null
+        formValues.duration = newVal.recipeCategories.recipeDurationList?.find(d => d.name === newVal.duration) || null
+        formValues.level = newVal.recipeCategories.recipeLevelList?.find(l => l.name === newVal.level) || null
+        formValues.categories.cuisine = newVal.recipeCategories.categoryCuisineList?.find(
+            c => c.id === newVal.categoryCuisineId
+        ) || null
 
-    formValues.categories.purpose = props.categories.categoryPurposeList?.find(
-      p => p.id === newVal.categoryPurposeId
-    ) || null
+        formValues.categories.purpose = newVal.recipeCategories.categoryPurposeList?.find(
+            p => p.id === newVal.categoryPurposeId
+        ) || null
 
-    imageFile.value = props.originalRecipeData.thumbnail || null
-  }
+        imageFile.value = newVal.thumbnail || null
+    }
 })
 
 // 유효성 검사사
 const validation = () => {
-  if (!formValues.title) return '제목을 입력하세요'
-  else if (!formValues.description) return '요리소개를 입력하세요'
-  else if (formValues.description.length <= 10) return '요리소개는 10자 이상 작성해주세요.'
-  else if (!imageFile.value) return '썸네일을 넣어주세요.'
-  else if (url.value && !formValues.videoId) return '유효한 유튜브 동영상 URL을 입력하세요.'
-  else if (!formValues.categories.cuisine) return '카테고리 종류를 선택하세요'
-  else if (!formValues.categories.purpose) return '카테고리 목적을 선택하세요'
-  else if (!formValues.serving) return '인원수를 선택하세요'
-  else if (!formValues.duration) return '요리시간을 선택하세요'
-  else if (!formValues.level) return '난이도를 선택하세요'
-  else return true
+    if (!formValues.title) return '제목을 입력하세요'
+    else if (!formValues.description) return '레시피 소개를 입력하세요'
+    else if (formValues.description.length <= 10) return '레시피 소개는 10자 이상 작성해주세요.'
+    else if (!imageFile.value) return '썸네일을 넣어주세요.'
+    else if (url.value && !formValues.videoId) return '유효한 유튜브 동영상 URL을 입력하세요.'
+    else if (!formValues.categories.cuisine) return '카테고리 종류를 선택하세요'
+    else if (!formValues.categories.purpose) return '카테고리 목적을 선택하세요'
+    else if (!formValues.serving) return '인원수를 선택하세요'
+    else if (!formValues.duration) return '요리시간을 선택하세요'
+    else if (!formValues.level) return '난이도를 선택하세요'
+    else return true
 }
 
 // RecipeWrite.vue에게 보낼 데이터
 const getData = () => ({
-  title: formValues.title,
-  description: formValues.description,
-  thumbnail: imageFile.value,
-  videoId: formValues.videoId,
-  serving: formValues.serving?.name,
-  duration: formValues.duration?.name,
-  level: formValues.level?.name,
-  categories: {
-    cuisine: formValues.categories.cuisine.id,
-    purpose: formValues.categories.purpose.id
-  },
+    title: formValues.title,
+    description: formValues.description,
+    thumbnail: imageFile.value,
+    videoId: formValues.videoId,
+    serving: formValues.serving?.name,
+    duration: formValues.duration?.name,
+    level: formValues.level?.name,
+    categories: {
+        cuisine: formValues.categories.cuisine?.id || null,
+        purpose: formValues.categories.purpose?.id || null
+    },
 })
 
 // Youtube VideoId 추출
 const handleGetVideoId = () => {
-  formValues.videoId = getYoutubeVideoId()
+    formValues.videoId = getYoutubeVideoId()
 }
 
 const getYoutubeVideoId = () => {
-  const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;
-  const match = url.value.match(regex)
-  return match ? match[1] : null
+    const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;
+    const match = url.value.match(regex)
+    return match ? match[1] : null
 }
 
 
 // 제목 50자 제한 (한글)
 const handleTitleInput = (e) => commonInputHangle(e, 50, (value) => formValues.title = value)
 
-// 레시피 소개 250자 제한 (한글)
-const handleDescriptionInput = (e) => commonInputHangle(e, 250, (value) => formValues.description = value)
+// 레시피 소개 400자 제한 (한글)
+const handleDescriptionInput = (e) => commonInputHangle(e, 400, (value) => formValues.description = value)
 
 
 // 부모가 사용할 수 있게 expose
 defineExpose({
-  getData,
-  validation
+    getData,
+    validation
 })
 </script>
 
@@ -177,7 +182,7 @@ defineExpose({
           <p>썸네일</p>        
         </div>
         
-        <ImageUploader v-model="imageFile" />
+        <ImageUploader v-model="imageFile"/>
       </div>
       
       <div class="image-preview-wrap">
@@ -210,7 +215,7 @@ defineExpose({
       <div class="category-item">
           <SelectDropDown
             v-model="formValues.categories.cuisine"
-            :items="props.categories?.categoryCuisineList"
+            :items="categories?.categoryCuisineList || props.recipeCategories?.categoryCuisineList"
             item-title="type"
             label="종류"
           />
@@ -220,7 +225,7 @@ defineExpose({
 
         <SelectDropDown
           v-model="formValues.categories.purpose"
-          :items="props.categories?.categoryPurposeList"
+          :items="categories?.categoryPurposeList || props.recipeCategories?.categoryPurposeList"
           item-title="type"
           label="목적"
         />
@@ -229,7 +234,7 @@ defineExpose({
       <div class="category-item">
         <SelectDropDown
           v-model="formValues.serving"
-          :items="props.categories?.recipeServingList"
+          :items="categories?.recipeServingList || props.recipeCategories?.recipeServingList"
           item-title="label"
           label="인원수"
         />
@@ -238,7 +243,7 @@ defineExpose({
       <div class="category-item">
         <SelectDropDown
           v-model="formValues.duration"
-          :items="props.categories?.recipeDurationList"
+          :items="categories?.recipeDurationList || props.recipeCategories?.recipeDurationList"
           item-title="label"
           label="요리시간"
         />
@@ -248,7 +253,7 @@ defineExpose({
 
         <SelectDropDown
           v-model="formValues.level"
-          :items="props.categories?.recipeLevelList"
+          :items="categories?.recipeLevelList || props.recipeCategories?.recipeLevelList"
           item-title="label"
           label="난이도"
         />

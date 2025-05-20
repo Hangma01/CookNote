@@ -23,9 +23,9 @@ const onFileChange = async (files) => {
     if (file.type.startsWith('image/')) {
             
       // s3 이미지 존재하면 삭제
-      if (imageUrl.value) {
-        const res = await s3Delete(imageUrl.value)
-      }
+      // if (imageUrl.value) {
+      //   const res = await s3Delete(imageUrl.value)
+      // }
 
       // formData에 담아서 전달
       const formData = new FormData();

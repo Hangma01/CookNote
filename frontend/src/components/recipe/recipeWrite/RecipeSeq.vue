@@ -1,55 +1,73 @@
 <script setup>
 import ImageUploader from '@/components/image/ImageUploader.vue'
 import { commonInputHangle, generateId } from '@/utils/commonFunction';
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
+
+const props = defineProps({ 
+  originalRecipeData: { // 레시피 수정 시 오는 데이터
+    type: Object
+  },
+})
 
 const recipeSeq = reactive([
                     { id: generateId() , step: 1, description: '', image: null },
                     { id: generateId(), step: 2, description: '', image: null },
                     { id: generateId(), step: 3, description: '', image: null },
                   ])
-  
-  const recipeTip = ref('')
 
-  const addRecipeSeq = () => {
-    if (recipeSeq.length < 50) {
-      recipeSeq.push({ 
-        id: generateId(),
-        step: recipeSeq.length + 1, 
-        description: '' ,
-        image: null
-      })
-    }
+const recipeTip = ref('')
+
+watch(() => props.originalRecipeData, (newVal) => {
+  recipeSeq.splice(0, recipeSeq.length, 
+    ...newVal.recipeSeqs.map(item => ({
+      id: generateId(),
+      step: item.step,
+      description: item.description,
+      image: item.image
+    }))
+  )
+
+  recipeTip.value = newVal.tip
+})  
+
+const addRecipeSeq = () => {
+  if (recipeSeq.length < 50) {
+    recipeSeq.push({ 
+      id: generateId(),
+      step: recipeSeq.length + 1, 
+      description: '' ,
+      image: null
+    })
+  }
+}
+
+const removeRecipeSeq = (index) => {
+  if (recipeSeq.length > 1) {
+    recipeSeq.splice(index, 1)
+    recipeSeq.forEach((item, i) => item.step = i + 1)
+  }
+}
+
+const validation = () => {
+
+  for (const item of recipeSeq) {
+    if (item.description.trim().length < 5) return '요리순서는 최소 5자 이상 작성해주세요.';
+    else if (!item.image) return '요리순서 이미지를 넣어주세요.';
   }
 
-  const removeRecipeSeq = (index) => {
-    if (recipeSeq.length > 1) {
-      recipeSeq.splice(index, 1)
-      recipeSeq.forEach((item, i) => item.step = i + 1)
-    }
+  return true;
+}
+
+const getData = () => {
+  return {
+    seqs: recipeSeq.map(item => ({
+      step: item.step,
+      description: item.description,
+      image: item.image
+    })),
+    tip: recipeTip.value.trim() ? recipeTip.value : null
   }
-
-  const validation = () => {
-
-    if (recipeSeq.some(item => {
-      return (item.description.trim().length < 10);
-    })) {
-      return '요리순서 최소 10자 이상 작성해주세요.'
-    }
-
-    return true;
-  }
-
-  const getData = () => {
-    return {
-      seqs: recipeSeq.map(item => ({
-        step: item.step,
-        description: item.description,
-        image: item.image
-      })),
-      tip: recipeTip.value.trim() ? recipeTip.value : null
-    }
-  }
+}
 
 
 // 부모가 사용할 수 있게 expose
@@ -62,7 +80,7 @@ defineExpose({
 // 재료 수량 250자 제한 (한글)
 const handleItemDescriptionInput = (e, item) => commonInputHangle(e, 250, (value) => item.description = value)
 
-const handleTipInput = (e) => commonInputHangle(e, 250, (value) => recipeTip.value = value)
+const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.value = value)
 
 </script>
 

@@ -9,20 +9,23 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
+@ToString
 public class RecipeSeqRequestDTO {
 	
 	@NotNull
     private Integer step;
 	
 	@NotBlank
-	@Length(min = 10, max = 250)
+	@Length(min = 5, max = 250)
     private String description;
 	
+	@NotBlank
 	@Length(max = 400)
     private String image;
 }

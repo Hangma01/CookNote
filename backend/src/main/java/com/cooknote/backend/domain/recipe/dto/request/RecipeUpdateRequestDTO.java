@@ -18,20 +18,17 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-public class RecipeSaveRequestDTO {
-
+public class RecipeUpdateRequestDTO {
 	@NotBlank()
 	@Length(max = 50)
     private String title;											// 레시피 제목
     
 	@NotBlank()
-	@Length(min = 10, max = 400)
+	@Length(min = 10, max = 250)
 	private String description;										// 레시피 요리소개
     
 	@NotBlank()
@@ -50,7 +47,7 @@ public class RecipeSaveRequestDTO {
     @NotNull()
     private RecipeLevel level;			 							// 레시피 난이도
     
-    @Length(max = 400)
+    @Length(max = 250)
     private String tip;												// 레시피 요리 팁
     
     @NotNull
@@ -71,4 +68,16 @@ public class RecipeSaveRequestDTO {
     @Size(min = 3)
     @Valid
     private List<RecipeSeqRequestDTO> recipeSeqs;					// 레시피 순서 목록
+
+    @NotNull
+    private Long recipeId;											// 레시피 아이디
+    
+    @NotBlank
+    @Length(max = 400)
+    private String originalThumbnail;								// 오리지널 썸네일
+    
+    @NotEmpty()
+    @Size(min = 3)
+    @Valid
+    private List<RecipeSeqRequestDTO> originalRecipeSeqs;			// 오리지널 레시피 순서
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeUpdateRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeDetailResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
 import com.cooknote.backend.domain.recipe.service.RecipeService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
@@ -33,7 +34,25 @@ public class RecipeController {
 	
 	private final RecipeService recipeService;
 	
-	// 레시피 저장
+	
+	// 레시피 검색 조회
+	@GetMapping("/search")
+	public ResponseEntity<RecipeEditResponseDTO> getSearchRecipe(@PathVariable("recipeId") String recipeId) {
+		
+		return ResponseEntity.ok().build();
+	}
+		
+	// 레시피 상세 조회
+	@GetMapping("/{recipeId}")
+	public ResponseEntity<RecipeDetailResponseDTO> getRecipeDetail(@PathVariable("recipeId") String recipeId) {
+		
+		
+		RecipeDetailResponseDTO recipeDetailResponseDTO =  recipeService.getRecipeDetail(recipeId);
+		
+		return ResponseEntity.ok(recipeDetailResponseDTO);
+	}
+	
+	// 레시피 생성
 	@PostMapping("")
 	public ResponseEntity<Void> recipeSave(@AuthenticationPrincipal CustomUserDetails customUserDetails 
 										   , @Valid @RequestBody RecipeSaveRequestDTO saveRecipeRequestDTO

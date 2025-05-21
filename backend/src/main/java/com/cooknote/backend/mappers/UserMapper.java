@@ -11,5 +11,5 @@ import com.cooknote.backend.domain.user.entity.User;
 public interface UserMapper {
 	
 	// 회원 정보 가져오기
-	User getUser(@Param("id") String id);
+	User getUser(String id);
 }

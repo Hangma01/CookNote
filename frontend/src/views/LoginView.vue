@@ -1,10 +1,12 @@
 <template>
   <div class="user-auth-wrap">
-    <router-view />
+    <RouterView />
   </div>
 </template>
 
 <script setup>
+import { RouterView } from 'vue-router';
+
 </script>
 
 <style scoped>

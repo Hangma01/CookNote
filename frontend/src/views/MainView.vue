@@ -1,15 +1,12 @@
 <script setup>
-import mainHeader from '../components/header/mainHeader/MainHeader.vue'
 </script>
 
 <template>
-    <mainHeader />
-
     <!-- 추천 -->
     <section class="section-tag recommend-recipe-container">
         <div class="section-title">
             <h1>RECIPES FOR YOU</h1>
-            <h2>추천 레시피를 둘러보세요.</h2>
+            <h2>다양한 레시피를 둘러보세요.</h2>
         </div>
 
         <div class="cardlist">
@@ -70,7 +67,6 @@ import mainHeader from '../components/header/mainHeader/MainHeader.vue'
 .section-title{
 
     h1 {
-        font-family: "Noto Serif KR", serif, Helvetica, "Helvetica Neue", Arial;
         font-size: 1.8rem;
         line-height: 2.8rem;
         letter-spacing: 0.32rem;

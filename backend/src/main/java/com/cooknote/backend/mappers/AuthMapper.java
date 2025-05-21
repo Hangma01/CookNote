@@ -13,13 +13,13 @@ public interface AuthMapper {
 
 	
 	// 아이디 중복 체크
-	boolean getExistsId(@Param("id") String id);
+	boolean getExistsId(String id);
 	
 	// 닉네임 중복 체크
-	boolean getExistsNickname(@Param("nickname") String nickname);
+	boolean getExistsNickname(String nickname);
 
 	// 이메일 중복 체크
-	boolean getExistsEmail(@Param("email") String email);
+	boolean getExistsEmail(String email);
 
 	// 회원가입
 	void userJoin(User user);

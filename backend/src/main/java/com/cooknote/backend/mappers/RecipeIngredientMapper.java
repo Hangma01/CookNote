@@ -6,8 +6,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeIngredientRequestDTO;
-import com.cooknote.backend.domain.recipe.dto.response.RecipeIngredientResponseDTO;
-import com.cooknote.backend.domain.recipe.dto.response.RecipeSeqResponseDTO;
 
 
 @Mapper
@@ -17,5 +15,5 @@ public interface RecipeIngredientMapper {
 			, @Param("recipeId") Long recipeId);
 	
 
-	void delete(@Param("recipeId") Long recipeId);
+	void delete(Long recipeId);
 }

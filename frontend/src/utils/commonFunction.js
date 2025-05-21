@@ -54,4 +54,4 @@ export const commonInputHangle = (e, maxLength, setValue) => {
   setValue(value.length > maxLength ? value.slice(0, maxLength) : value);
 };
 
-export const generateId = () => Date.now() + Math.random()
+export const generateId = () => crypto.randomUUID();

@@ -5,15 +5,15 @@
 <mapper namespace="com.cooknote.backend.mappers.RecipeMapper">
 
 	<resultMap id="RecipeEditResultMap" type="RecipeEditResponseDTO">
-	    <result property="title" column="TITLE"/>
-	    <result property="description" column="DESCRIPTION"/>
-	    <result property="thumbnail" column="THUMBNAIL"/>
-	    <result property="videoId" column="VIDEO_ID"/>
-	    <result property="serving" column="SERVING"/>
-	    <result property="duration" column="DURATION"/>
-	    <result property="level" column="LEVEL"/>
-	    <result property="tip" column="TIP"/>
-	    <result property="status" column="STATUS"/>
+	    <result property="title" column="TITLE"/>									<!-- 레시피 제목 -->
+	    <result property="description" column="DESCRIPTION"/>						<!-- 레시피 소개 -->
+	    <result property="thumbnail" column="THUMBNAIL"/>							<!-- 레시피 썸네일 -->
+	    <result property="videoId" column="VIDEO_ID"/>								<!-- 레시피 동영상 아이디 -->
+	    <result property="serving" column="SERVING"/>								<!-- 레시피 인원수 -->
+	    <result property="duration" column="DURATION"/>								<!-- 레시피 요리 시간 -->
+	    <result property="level" column="LEVEL"/>									<!-- 레시피 난이도 -->
+	    <result property="tip" column="TIP"/>										<!-- 레시피 팁 -->
+	    <result property="status" column="STATUS"/>									<!-- 레시피 상태 -->
 	    <result property="categoryCuisineId" column="CATEGORY_CUISINE_ID"/>
 	    <result property="categoryPurposeId" column="CATEGORY_PURPOSE_ID"/>
 	
@@ -27,10 +27,87 @@
 	    <!-- 중첩된 시퀀스 리스트 -->
 	    <collection property="recipeSeqs" ofType="RecipeSeqResponseDTO">
 	        <result property="step" column="RECIPE_SEQ_ID"/>
-	        <result property="description" column="DESCRIPTION"/>
+	        <result property="description" column="SEQ_DESCRIPTION"/>
 	        <result property="image" column="IMAGE"/>
 	    </collection>
 	</resultMap>
+
+	<resultMap id="RecipeDetailResultMap" type="RecipeDetailResponseDTO" extends="RecipeEditResultMap">
+
+	    <result property="createAt" column="CREATE_AT"/> 							<!-- 작성일 -->
+	
+	    <!-- 작성자 정보 -->
+	    <result property="writerUserId" column="WRITER_USER_ID"/>
+	    <result property="writerNickname" column="WRITER_NICKNAME"/>
+	    <result property="writerProfileImage" column="WRITER_PROFILE_IMAGE"/>
+	</resultMap>
+	
+	
+	<!-- 레시피 상세 조회 -->
+	<select id="getRecipeDetail" resultMap="RecipeDetailResultMap">
+		SELECT R.TITLE											<!-- 레시피 제목 -->
+			 , R.DESCRIPTION									<!-- 레시피 소개 -->
+			 , R.THUMBNAIL										<!-- 레시피 썸네일 -->
+			 , R.VIDEO_ID AS videoId							<!-- 레시피 동영상 -->
+			 , R.SERVING										<!-- 레시피 인원수 -->
+			 , R.DURATION										<!-- 레시피 요리 시간 -->
+			 , R.LEVEL											<!-- 레시피 난이도 -->
+			 , R.TIP											<!-- 레시피 팁 -->
+			 , R.STATUS											<!-- 레시피 상태 -->
+			 , R.CATEGORY_CUISINE_ID							<!-- 카테고리 요리 종류 아이디 -->
+			 , R.CATEGORY_PURPOSE_ID							<!-- 카테고리 요리 목적 아이디 -->
+			 , R.CREATE_AT										<!-- 레시피 작성일 -->
+			 
+			 , I.NAME											<!-- 재료 이름 -->
+	         , I.QUANTITY										<!-- 재료 용량 -->
+        	 , I.REMARK											<!-- 재료 비고 -->
+        	 
+        	 , S.RECIPE_SEQ_ID									<!-- 요리 순서 -->
+        	 , S.DESCRIPTION AS SEQ_DESCRIPTION					<!-- 요리 순서별 설명 -->
+        	 , S.IMAGE											<!-- 요리 순서별 이미지 -->
+        	 
+        	 , U.USER_ID AS WRITER_USER_ID						<!-- 작성자 번호 Key -->
+        	 , U.NICKNAME AS WRITER_NICKNAME					<!-- 작성자 닉네임 -->
+        	 , U.PROFILE_IMAGE AS WRITER_PROFILE_IMAGE			<!-- 작성자 프로필 이미지 -->
+		   FROM RECIPE AS R
+      LEFT JOIN RECIPE_INGREDIENT AS I 
+      		 ON R.RECIPE_ID = I.RECIPE_ID
+      LEFT JOIN RECIPE_SEQ AS S 
+      		 ON R.RECIPE_ID = S.RECIPE_ID
+      LEFT JOIN USER AS U
+      		 ON R.WRITER_ID = U.USER_ID
+		  WHERE R.RECIPE_ID = #{recipeId}
+	</select>
+	
+	<!-- 레시피 조회 - 수정 -->
+	<select id="getRecipeForEdit" resultMap="RecipeEditResultMap">
+		SELECT R.TITLE											<!-- 레시피 제목 -->
+			 , R.DESCRIPTION									<!-- 레시피 소개 -->
+			 , R.THUMBNAIL										<!-- 레시피 썸네일 -->
+			 , R.VIDEO_ID AS videoId							<!-- 레시피 동영상 -->
+			 , R.SERVING										<!-- 레시피 인원수 -->
+			 , R.DURATION										<!-- 레시피 요리 시간 -->
+			 , R.LEVEL											<!-- 레시피 난이도 -->
+			 , R.TIP											<!-- 레시피 팁 -->
+			 , R.STATUS											<!-- 레시피 상태 -->
+			 , R.CATEGORY_CUISINE_ID							<!-- 카테고리 요리 종류 아이디 -->
+			 , R.CATEGORY_PURPOSE_ID							<!-- 카테고리 요리 목적 아이디 -->
+			 
+			 , I.NAME											<!-- 재료 이름 -->
+	         , I.QUANTITY										<!-- 재료 용량 -->
+        	 , I.REMARK											<!-- 재료 비고 -->
+        	 
+        	 , S.RECIPE_SEQ_ID									<!-- 요리 순서 -->
+        	 , S.DESCRIPTION AS SEQ_DESCRIPTION					<!-- 요리 순서별 설명 -->
+        	 , S.IMAGE											<!-- 요리 순서별 이미지 -->
+		   FROM RECIPE AS R
+      LEFT JOIN RECIPE_INGREDIENT AS I 
+      		 ON R.RECIPE_ID = I.RECIPE_ID
+      LEFT JOIN RECIPE_SEQ AS S 
+      		 ON R.RECIPE_ID = S.RECIPE_ID
+		  WHERE R.RECIPE_ID = #{recipeId}
+		    AND R.WRITER_ID = #{userId}
+	</select>
 
 	
 	<!-- 레시피 저장 -->
@@ -65,37 +142,7 @@
 		)
 	</insert>
 	
-	
-	<!-- 레시피 조회 - 수정 -->
-	<select id="getRecipeForEdit" resultMap="RecipeEditResultMap">
-		SELECT R.TITLE											<!-- 레시피 제목 -->
-			 , R.DESCRIPTION									<!-- 레시피 소개 -->
-			 , R.THUMBNAIL										<!-- 레시피 썸네일 -->
-			 , R.VIDEO_ID AS videoId							<!-- 레시피 동영상 -->
-			 , R.SERVING										<!-- 레시피 인원수 -->
-			 , R.DURATION										<!-- 레시피 요리 시간 -->
-			 , R.LEVEL											<!-- 레시피 난이도 -->
-			 , R.TIP											<!-- 레시피 팁 -->
-			 , R.STATUS											<!-- 레시피 상태 -->
-			 , R.CATEGORY_CUISINE_ID							<!-- 카테고리 요리 종류 아이디 -->
-			 , R.CATEGORY_PURPOSE_ID							<!-- 카테고리 요리 목적 아이디 -->
-			 
-			 , I.NAME											<!-- 재료 이름 -->
-	         , I.QUANTITY										<!-- 재료 용량 -->
-        	 , I.REMARK											<!-- 재료 비고 -->
-        	 
-        	 , S.RECIPE_SEQ_ID									<!-- 요리 순서 -->
-        	 , S.DESCRIPTION									<!-- 요리 순서별 설명 -->
-        	 , S.IMAGE											<!-- 요리 순서별 이미지 -->
-		   FROM RECIPE AS R
-      LEFT JOIN RECIPE_INGREDIENT AS I 
-      		 ON R.RECIPE_ID = I.RECIPE_ID
-      LEFT JOIN RECIPE_SEQ AS S 
-      		 ON R.RECIPE_ID = S.RECIPE_ID
-		  WHERE R.RECIPE_ID = #{recipeId}
-		    AND R.WRITER_ID = #{userId}
-	</select>
-	
+	<!-- 레시피 수정 -->
 	<update id="update">
 		UPDATE RECIPE
 		   SET TITLE = #{title}
@@ -112,5 +159,6 @@
     	 WHERE RECIPE_ID = #{recipeId}
     	   AND WRITER_ID = #{writerId}
 	</update>
+	
 </mapper>
 

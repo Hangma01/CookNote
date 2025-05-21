@@ -1,12 +1,18 @@
 <script setup>
-import MainHeader from '@/components/header/mainHeader/MainHeader.vue';
+import { computed } from 'vue';
+import { RouterView, useRoute } from 'vue-router';
 
+const route = useRoute()
+
+const routerKey = computed(() => {
+  // meta에 forceRemount가 있을 경우에만 key 부여
+  return route.meta.forceRemount ? `${route.name}-${route.params.recipeId || 'new'}` : undefined
+})
 </script>
 
 <template>
-    <MainHeader />
-    <div class="recipe-content">
-        <router-view />
+    <div class="recipe-content" :key="routerKey">
+        <RouterView />
     </div>
 </template>
 

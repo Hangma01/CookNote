@@ -1,5 +1,5 @@
 <script setup>
-import ImageUploader from '@/components/image/ImageUploader.vue'
+import ImageUploader from '@/components/ui/ImageUploader.vue'
 import { commonInputHangle, generateId } from '@/utils/commonFunction';
 import { reactive, ref, watch } from 'vue';
 

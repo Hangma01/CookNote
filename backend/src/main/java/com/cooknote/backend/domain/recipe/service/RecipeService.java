@@ -4,15 +4,26 @@ import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeUpdateRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeDetailResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
 
 import jakarta.validation.Valid;
 
 @Service
 public interface RecipeService {
-	public void recipeSave(long userId, RecipeSaveRequestDTO saveRecipeRequestDTO);
+	
+	// 레시피 상세 조회
+	public RecipeDetailResponseDTO getRecipeDetail(String recipeId);
+	
+	
+	// 레시피 저장
+	public void recipeSave(Long userId, RecipeSaveRequestDTO saveRecipeRequestDTO);
 
-	public RecipeEditResponseDTO getRecipeForEdit(long userId, String recipeId);
+	// 레시피 수정 조회
+	public RecipeEditResponseDTO getRecipeForEdit(Long userId, String recipeId);
 
-	public void recipeUpdate(long userId, @Valid RecipeUpdateRequestDTO recipeUpdateRequestDTO);
+	// 레시피 수정
+	public void recipeUpdate(Long userId, @Valid RecipeUpdateRequestDTO recipeUpdateRequestDTO);
+
+	
 }

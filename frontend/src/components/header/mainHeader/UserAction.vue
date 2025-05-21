@@ -101,9 +101,13 @@ onBeforeUnmount(() => {
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
 
-            <!-- <router-link :to="{name : 'recipeEdit', params: { recipeId: 4 } }" style="padding-left: 20px">
+            <router-link :to="{name : 'recipeEdit', params: { recipeId: 4 } }" style="padding-left: 20px">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
-            </router-link> -->
+            </router-link>
+
+            <router-link :to="{name : 'recipeDetail', params: { recipeId: 4 } }" style="padding-left: 20px">
+                <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
+            </router-link>
         </li>
     </ul>
 </template>

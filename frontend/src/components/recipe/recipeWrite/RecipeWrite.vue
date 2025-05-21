@@ -1,6 +1,6 @@
 <script setup>
 import RecipeInfo from "./RecipeInfo.vue";
-import ReciepIngredient from "./ReciepIngredient.vue";
+import RecipeIngredient from "./RecipeIngredient.vue";
 import RecipeSet from "./RecipeSet.vue";
 import RecipeSeq from "./RecipeSeq.vue";
 import { onMounted, ref } from "vue";
@@ -101,12 +101,16 @@ const handleRecipeSave = debounce (async () => {
 
 // 레시피 작성 / 수정 시 가져올 데이터
 onMounted(async () => {
-
     if (isEditMode.value) { // 레시피 수정시요청 데이터터  
         try {
-            const res = await getOriRecipe(recipeId)
-            originalRecipeData.value = res.data
-            categories.value = res.data.recipeCategories
+            const [originalRecipeRes, categoriesRes] = await Promise.all([
+                getOriRecipe(recipeId),
+                getCategoryAll(),
+            ]);
+            console.log(originalRecipeRes)
+            console.log(categoriesRes)
+            originalRecipeData.value = originalRecipeRes.data
+            categories.value = categoriesRes.data
         } catch (e) {
             if (e.response && e.response?.data?.message) {
                 alert(e.response.data.message)  
@@ -117,9 +121,8 @@ onMounted(async () => {
         }
     } else {  // 레시피 작성시 요청 데이터
         try {
-            const res = await getCategoryAll()
-            console.log(res)
-            categories.value = res.data
+            const categoriesRes = await getCategoryAll()
+            categories.value = categoriesRes.data
         } catch (e) {
             if (e.response && e.response?.data?.message) {
                 alert(e.response.data.message)  
@@ -145,7 +148,7 @@ onMounted(async () => {
         
             <div class="recipe-wrap">
                 <section>
-                    <ReciepIngredient ref="recipeIngredienRef" :originalRecipeData = "originalRecipeData"/>
+                    <RecipeIngredient ref="recipeIngredienRef" :originalRecipeData = "originalRecipeData"/>
                 </section>
             </div>
 

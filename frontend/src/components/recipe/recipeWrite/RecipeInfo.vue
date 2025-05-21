@@ -1,6 +1,6 @@
 <script setup>
-import ImageUploader from '@/components/image/ImageUploader.vue';
-import SelectDropDown from './SelectDropDown.vue';
+import ImageUploader from '@/components/ui/ImageUploader.vue';
+import SelectDropDown from '../../ui/SelectDropDown.vue';
 import { commonInputHangle } from '@/utils/commonFunction';
 import { reactive, ref, watch } from 'vue';
 import { commonValues } from '@/utils/commonValues';
@@ -47,14 +47,14 @@ watch(() => props.originalRecipeData, (newVal) => {
         formValues.title = newVal.title || ''
         formValues.description = newVal.description || ''
         formValues.videoId = newVal.videoId || null
-        formValues.serving = newVal.recipeCategories.recipeServingList?.find(s => s.name === newVal.serving) || null
-        formValues.duration = newVal.recipeCategories.recipeDurationList?.find(d => d.name === newVal.duration) || null
-        formValues.level = newVal.recipeCategories.recipeLevelList?.find(l => l.name === newVal.level) || null
-        formValues.categories.cuisine = newVal.recipeCategories.categoryCuisineList?.find(
+        formValues.serving = props.categories.recipeServingList?.find(s => s.name === newVal.serving) || null
+        formValues.duration = props.categories.recipeDurationList?.find(d => d.name === newVal.duration) || null
+        formValues.level = props.categories.recipeLevelList?.find(l => l.name === newVal.level) || null
+        formValues.categories.cuisine = props.categories.categoryCuisineList?.find(
             c => c.id === newVal.categoryCuisineId
         ) || null
 
-        formValues.categories.purpose = newVal.recipeCategories.categoryPurposeList?.find(
+        formValues.categories.purpose = props.categories.categoryPurposeList?.find(
             p => p.id === newVal.categoryPurposeId
         ) || null
 
@@ -215,7 +215,7 @@ defineExpose({
       <div class="category-item">
           <SelectDropDown
             v-model="formValues.categories.cuisine"
-            :items="categories?.categoryCuisineList || props.recipeCategories?.categoryCuisineList"
+            :items="categories?.categoryCuisineList"
             item-title="type"
             label="종류"
           />
@@ -225,7 +225,7 @@ defineExpose({
 
         <SelectDropDown
           v-model="formValues.categories.purpose"
-          :items="categories?.categoryPurposeList || props.recipeCategories?.categoryPurposeList"
+          :items="categories?.categoryPurposeList"
           item-title="type"
           label="목적"
         />
@@ -234,7 +234,7 @@ defineExpose({
       <div class="category-item">
         <SelectDropDown
           v-model="formValues.serving"
-          :items="categories?.recipeServingList || props.recipeCategories?.recipeServingList"
+          :items="categories?.recipeServingList"
           item-title="label"
           label="인원수"
         />
@@ -243,7 +243,7 @@ defineExpose({
       <div class="category-item">
         <SelectDropDown
           v-model="formValues.duration"
-          :items="categories?.recipeDurationList || props.recipeCategories?.recipeDurationList"
+          :items="categories?.recipeDurationList"
           item-title="label"
           label="요리시간"
         />
@@ -253,7 +253,7 @@ defineExpose({
 
         <SelectDropDown
           v-model="formValues.level"
-          :items="categories?.recipeLevelList || props.recipeCategories?.recipeLevelList"
+          :items="categories?.recipeLevelList"
           item-title="label"
           label="난이도"
         />

@@ -13,10 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSeqRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeUpdateRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeDetailResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
-import com.cooknote.backend.domain.recipe.dto.response.RecipeIngredientResponseDTO;
-import com.cooknote.backend.domain.recipe.dto.response.RecipeSeqResponseDTO;
-import com.cooknote.backend.domain.category.dto.response.CategoryGetAllResponseDTO;
 import com.cooknote.backend.domain.category.service.CategoryService;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.entity.Recipe;
@@ -40,24 +38,46 @@ public class RecipeServiceImpl implements RecipeService {
 	private final RecipeIngredientMapper recipeIngredientMapper;
 	private final RecipeSeqMapper recipeSeqMapper;
 	private final S3Service s3Service;
-	private final CategoryService categoryService;
 
+	
+
+	// 레시피 상세 조회
+	@Override
+	public RecipeDetailResponseDTO getRecipeDetail(String recipeId) {
+		
+		
+		RecipeDetailResponseDTO recipeDetailResponseDTO = recipeMapper.getRecipeDetail(recipeId);
+			
+		if (recipeDetailResponseDTO == null) {
+
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
+	
+		recipeDetailResponseDTO.setServingLabel(recipeDetailResponseDTO.getServing().getLabel());
+		recipeDetailResponseDTO.setDurationLabel(recipeDetailResponseDTO.getDuration().getLabel());
+		recipeDetailResponseDTO.setLevelLabel(recipeDetailResponseDTO.getLevel().getLabel());
+		
+		return recipeDetailResponseDTO;
+	}
+	
+	
+	
 	// 레시피 저장
 	@Override
 	@Transactional
-	public void recipeSave(long userId, RecipeSaveRequestDTO recipeSaveRequestDTO) {
-		long start = System.currentTimeMillis();
+	public void recipeSave(Long userId, RecipeSaveRequestDTO recipeSaveRequestDTO) {
+
 		// 이동한 이미지 url들
 		List<String> moveImageUrls = new ArrayList<>();
 		
 		// 썸네일
 		String thumbnail =  recipeSaveRequestDTO.getThumbnail();        
 
-		long thumbStart = System.currentTimeMillis();
+
 		// 이동한 썸네일 url
 		String moveThumbnailUrl = s3Service.moveImage(thumbnail, "Recipe/Thumbnails/");
 		moveImageUrls.add(moveThumbnailUrl);
-		log.info("썸네일 이동 시간: {}ms", System.currentTimeMillis() - thumbStart);
+
 		// 레시피 순서 이미지
 		List<String> moveRecipeSeqImages = new ArrayList<>();
 		List<RecipeSeqRequestDTO> recipeSeqs = recipeSaveRequestDTO.getRecipeSeqs();
@@ -66,10 +86,10 @@ public class RecipeServiceImpl implements RecipeService {
         	moveRecipeSeqImages.add(recipeSeq.getImage());
         }
         
-        long seqMoveStart = System.currentTimeMillis();
+
         // 이동한 레시피 순서 이미지 url
         List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, "Recipe/SeqImages/");
-        log.info("순서 이미지 이동 시간: {}ms", System.currentTimeMillis() - seqMoveStart);
+
         
 		try {
 	        Recipe reqRecipe = Recipe.builder()
@@ -87,14 +107,13 @@ public class RecipeServiceImpl implements RecipeService {
 					.writerId(userId)
 					.build();
 	        
-	        long seqExtractStart = System.currentTimeMillis();
+
 	        // 레시피 저장
 		    recipeMapper.save(reqRecipe);
-		    log.info("레시피 저장 시간: {}ms", System.currentTimeMillis() - seqExtractStart);
-		    long ingredientSaveStart = System.currentTimeMillis();
+
+
 		    // 재료 저장
 		    recipeIngredientMapper.save(recipeSaveRequestDTO.getRecipeIngredients(), reqRecipe.getRecipeId());
-		    log.info("재료 저장 시간: {}ms", System.currentTimeMillis() - ingredientSaveStart);
 
         	// 레시피 순서 저장
 			for (int i = 0; i < recipeSeqs.size(); i++) {
@@ -103,10 +122,9 @@ public class RecipeServiceImpl implements RecipeService {
 				recipeSeqs.get(i).setImage(moveRecipeSeqImageUrl);
 				moveImageUrls.add(moveRecipeSeqImageUrl);
 			}
-		    long seqMappingStart = System.currentTimeMillis();
+
 		    recipeSeqMapper.save(recipeSeqs, reqRecipe.getRecipeId());
-		    log.info("순서 저장 시간: {}ms", System.currentTimeMillis() - seqMappingStart);
-		    log.info("전체 처리 시간: {}ms", System.currentTimeMillis() - start);
+
 		} catch (Exception e) {
 	        try {
 		        s3Service.deleteImagesFromS3(moveImageUrls);				
@@ -120,17 +138,14 @@ public class RecipeServiceImpl implements RecipeService {
 
 	// 레시피 데이터 가져오기 - 수정
 	@Override
-	public RecipeEditResponseDTO getRecipeForEdit(long userId, String recipeId) {
+	public RecipeEditResponseDTO getRecipeForEdit(Long userId, String recipeId) {
 		
 		// 레시피 데이터 가져오기
 		RecipeEditResponseDTO recipeEditResponseDTO = recipeMapper.getRecipeForEdit(recipeId, userId);
-		checkNull(recipeEditResponseDTO);
-		
-		// 카테고리 목록 가져오기
-		CategoryGetAllResponseDTO categoryGetAllResponseDTO = categoryService.getCategoryAll();
-		checkNull(categoryGetAllResponseDTO);
-	
-		recipeEditResponseDTO.setRecipeCategories(categoryGetAllResponseDTO);
+		if (recipeEditResponseDTO == null) {
+
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
 		
 		return recipeEditResponseDTO;
 	}
@@ -138,8 +153,7 @@ public class RecipeServiceImpl implements RecipeService {
 	// 레시피 업데이트 - 수정
 	@Override
 	@Transactional
-	public void recipeUpdate(long userId, RecipeUpdateRequestDTO recipeUpdateRequestDTO) {
-
+	public void recipeUpdate(Long userId, RecipeUpdateRequestDTO recipeUpdateRequestDTO) {
 
 		// 새로운 썸네일
 		String newThumbnail = recipeUpdateRequestDTO.getThumbnail();
@@ -191,8 +205,6 @@ public class RecipeServiceImpl implements RecipeService {
 
         // 이동한 레시피 순서 이미지 url
         List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, "Recipe/SeqImages/");
-
-        log.info("실패7");
         
         try {
         	// 레시피 저장
@@ -246,7 +258,7 @@ public class RecipeServiceImpl implements RecipeService {
 	        
 	       throw new CustomCommonException(CommonErrorCode.UPDATE_EXCEPTION);
 		}
-        log.info("실패13");
+
         // 기존 레시피 이미지 삭제
 	    List<RecipeSeqRequestDTO> oldRecipeSeqs = recipeUpdateRequestDTO.getOriginalRecipeSeqs();
 	    
@@ -265,10 +277,5 @@ public class RecipeServiceImpl implements RecipeService {
 	private boolean isTempImage(String url) {
 	    return url!= null && url.contains("https://cooknote98.s3.ap-northeast-2.amazonaws.com/TempImages/");
 	}
-	
-	private void checkNull(Object obj) {
-		if (obj == null) {
-			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
-		}
-	}
+
 }

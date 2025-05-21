@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecipeEditResponseDTO {
@@ -33,5 +32,5 @@ public class RecipeEditResponseDTO {
     
     private List<RecipeIngredientResponseDTO> recipeIngredients;
     private List<RecipeSeqResponseDTO> recipeSeqs;
-    private CategoryGetAllResponseDTO recipeCategories;
+
 }

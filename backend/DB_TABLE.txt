@@ -80,12 +80,12 @@ CREATE TABLE `RECIPE` (
 	`RECIPE_ID` BIGINT AUTO_INCREMENT,												-- 레시피 Key
 	`TITLE` VARCHAR(50) NOT NULL,													-- 레시피 제목
 	`THUMBNAIL` VARCHAR(400) NOT NULL,												-- 레시피 썸네일
-	`DESCRIPTION` VARCHAR(250) NULL,												-- 레시피 소개
+	`DESCRIPTION` VARCHAR(400) NULL,												-- 레시피 소개
 	`SERVING` ENUM("ONE", "TWO", "THREE", "OVER_FOUR") NOT NULL,					-- 인원수
 	`DURATION` ENUM("WITHIN_30", "WITHIN_60", "WITHIN_120", "OVER_120") NOT NULL,	-- 요리 시간
 	`LEVEL` ENUM("EASY", "NORMAL", "HARD") NOT NULL,								-- 요리 난이도
 	`VIDEO_ID` VARCHAR(11),															-- 동영상 아이디
-	`TIP` VARCHAR(250),																-- 요리 팁
+	`TIP` VARCHAR(400),																-- 요리 팁
 	`STATUS` ENUM("PRIVATE", "PUBLIC", "PRIVATE_ADMIN", "DELETE") NOT NULL, 		-- 레시피 상태
 	`CREATE_AT` DATETIME NOT NULL DEFAULT NOW(),									-- 생성일
 	`UPDATE_AT` DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW(),					-- 수정일
@@ -113,7 +113,7 @@ CREATE TABLE `RECIPE_INGREDIENT` (
 	`RECIPE_INGREDIENT_ID` INT AUTO_INCREMENT,						-- 재료 Key
 	`NAME` VARCHAR(20) NOT NULL,									-- 재료 이름
 	`QUANTITY` VARCHAR(10) NOT NULL,								-- 재료 수량
-    `REMARK` VARCHAR(30),											-- 비고
+    `REMARK` VARCHAR(20),											-- 비고
 	`RECIPE_ID` BIGINT NOT NULL,									-- 레시피 (FK)
 	PRIMARY KEY (`RECIPE_INGREDIENT_ID`),
 	FOREIGN KEY (`RECIPE_ID`) REFERENCES `RECIPE`(`RECIPE_ID`)

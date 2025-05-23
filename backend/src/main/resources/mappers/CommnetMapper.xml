@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cooknote.backend.mappers.CommentMapper">
+
+
+	<!-- 댓글 페이징 -->
+	<select id="getComments" resultType="CommentsResponseDTO">
+		SELECT C.COMMENT_ID    AS commentId		<!-- 댓글 아이디 -->
+			 , C.WRITER_ID     AS writerId		<!-- 작성자 아이디 -->
+			 , C.CONTENT 	   AS content 		<!-- 댓글 컨텐츠 -->
+			 , C.CREATE_AT     AS createAt		<!-- 댁슬 작성일 -->
+			   
+			 , U.NICKNAME 	   AS nickname		<!-- 작성자 닉네임 -->
+			 , U.PROFILE_IMAGE AS profileImage	<!-- 작성자 프로필 이미지 -->
+		 	   
+		 FROM COMMENT C
+		 JOIN USER U
+		   ON C.WRITER_ID = U.USER_ID
+	 	WHERE RECIPE_ID = #{recipeId}
+		  AND PARENT_COMMENT_ID IS NULL
+	   	  AND STATUS = #{statusPublic}
+	 ORDER BY C.CREATE_AT DESC
+	    LIMIT #{size} OFFSET #{offset}
+	</select>
+	
+	<!-- 댓글 토탈 갯수 -->
+	<select id="commentsCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM COMMENT
+		 WHERE RECIPE_ID = #{recipeId}
+		   AND STATUS = #{statusPublic}
+	</select>
+	
+	<!-- 리플 페이징 -->
+	<select id="getCommentReplies" resultType="CommentRepliesResponseDTO">
+		SELECT C.COMMENT_ID    AS commentId		<!-- 댓글 아이디 -->
+			 , C.WRITER_ID     AS writerId		<!-- 작성자 아이디 -->
+			 , C.CONTENT 	   AS content 		<!-- 댓글 컨텐츠 -->
+			 , C.CREATE_AT     AS createAt		<!-- 댁슬 작성일 -->
+			 , U.NICKNAME 	   AS nickname		<!-- 작성자 닉네임 -->
+			 , U.PROFILE_IMAGE AS profileImage	<!-- 작성자 프로필 이미지 -->
+		 FROM COMMENT AS C
+		 JOIN USER AS U
+		   ON C.WRITER_ID = U.USER_ID
+	 	WHERE PARENT_COMMENT_ID = #{parentCommentId}
+	   	  AND STATUS = #{statusPublic}
+	 ORDER BY C.CREATE_AT DESC
+	    LIMIT #{size} OFFSET #{offset}
+	</select>
+
+	<!-- 리플 토탈 갯수 -->
+	<select id="commentRepliesCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM COMMENT
+		 WHERE PARENT_COMMENT_ID = #{parentCommentId}
+		   AND STATUS = #{statusPublic}
+	</select>
+
+	<!-- 댓글 추가 - 부모 댓글 조회 -->
+	<select id="findParentComment" resultType="Comment">
+		SELECT RECIPE_ID			AS recipeId
+			 , PARENT_COMMENT_ID 	AS parentCommentId
+		  FROM COMMENT
+		 WHERE COMMENT_ID = #{parentCommentId}
+		   AND STATUS = #{statusPublic}
+	</select>   
+	
+	
+	<!-- 댓글 추가 -->
+	<insert id="commnetInsert">
+		INSERT INTO COMMENT (
+								 CONTENT 
+							   , RECIPE_ID 
+							   , WRITER_ID 
+							   , PARENT_COMMENT_ID 
+		)
+		VALUES (
+				#{insertDTO.content} 
+			  , #{insertDTO.recipeId} 
+			  , #{userId} 
+			  , #{insertDTO.parentCommentId} 
+		)
+	</insert>
+	
+	<!-- 댓글 삭제 -->
+	<update id="commentDelete">
+		UPDATE COMMENT
+		   SET STATUS = #{commentStatus}
+		 WHERE COMMENT_ID = #{commentId}
+	</update>
+	
+	<!-- 댓글 수정, 삭제 - 기존 정보 조회 -->
+	<select id="findComment">
+		SELECT WRITER_ID AS writerId
+		  FROM COMMENT
+		 WHERE COMMENT_ID = #{commentId}
+		   AND STATUS = #{statusPublic}
+	</select>
+	
+	<!-- 댓글 수정 -->
+	<update id="commentUpdate">
+		UPDATE COMMENT
+		   SET CONTENT = #{updateDTO.content}
+		 WHERE COMMENT_ID = #{updateDTO.commentId}
+	</update>
+</mapper>

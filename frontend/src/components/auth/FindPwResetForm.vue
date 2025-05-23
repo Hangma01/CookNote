@@ -59,7 +59,7 @@ const handleFindPwReset = debounce(async () => {
 
 
 watch(() => formValues.newPw, () => {
-  if (formRef.value) {
+  if (formValues.newPwConfirm !== '' && formRef.value)  {
     formRef.value.validate();
   }
 });
@@ -72,8 +72,8 @@ watch(() => formValues.newPw, () => {
 				v-model="formValues.newPw"
 				:type="newPwVisible ? 'text' : 'password'"
 				label="새 비밀번호"
-				variant="solo"
-				density="comfortable"
+				variant="outlined"
+				density="compact"
 				hide-details="auto"
 				maxlength="16"
 				:rules="[pwRule]"
@@ -85,8 +85,8 @@ watch(() => formValues.newPw, () => {
 				v-model="formValues.newPwConfirm"
 				:type="newPwConfirmVisible ? 'text' : 'password'"
 				label="새 비밀번호 확인"
-				variant="solo"
-				density="comfortable"
+				variant="outlined"
+				density="compact"
 				hide-details="auto"
 				:rules="[newPwConfirmRule(() => formValues.newPw)]"
 				:append-inner-icon="newPwConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"

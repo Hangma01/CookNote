@@ -23,7 +23,7 @@ const props = defineProps({
         </div>
 
         <div class="item-grid">
-            <ul v-for="(item, index) in recipeIngredients" :key="index" class="item-box">
+            <ul v-for="(item, index) in props.recipeIngredients" :key="index" class="item-box">
                 <li class="item-list">
                     <div class="ingredients-item">
                         <div>

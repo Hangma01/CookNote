@@ -4,30 +4,19 @@
 
 <mapper namespace="com.cooknote.backend.mappers.CategoryMapper">
 
-	<!-- 카테고리 요리 종류 Map  -->
-<!-- 	<resultMap id="CategoryCuisineResultMap" type="CategoryCuisine">
-        <id property="categoryCuisineId" column="CATEGORY_CUISINE_ID"/>
-        <result property="type" column="TYPE"/>
-    </resultMap> -->
-
-	<!-- 카테고리 요리 목적 Map  -->
-<!-- 	<resultMap id="CategoryPurposeResultMap" type="CategoryPurpose">
-        <id property="categoryPurposeId" column="CATEGORY_PURPOSE_ID"/>
-        <result property="type" column="TYPE"/>
-    </resultMap> -->
 
 	<!-- 카테고리 요리 종류 가져오기  -->
 	<select id="getCategoryCuisine" resultType="CategoryCuisineListResponseDTO">
-		SELECT CATEGORY_CUISINE_ID AS ID	<!-- 카테고리 요리 종류 아이디 -->
-			 , TYPE							<!-- 카테고리 요리 종류 -->
-		  FROM CATEGORY_CUISINE
+		SELECT CATEGORY_CUISINE_ID AS ID		<!-- 카테고리 요리 종류 아이디 -->
+			 , TYPE				   AS TYPE		<!-- 카테고리 요리 종류 -->
+		  FROM CATEGORY_CUISINE					<!-- 카테고리 요리 종류 테이블 -->
 	</select>
 	
 	<!-- 카테고리 요리 목적 가져오기  -->
 	<select id="getCategoryPurpose" resultType="CategoryPurposeResponseDTO">
-		SELECT CATEGORY_PURPOSE_ID AS ID	<!-- 카테고리 요리 목적 아이디 -->
-			 , TYPE							<!-- 카테고리 요리 목적 종류 -->
-		  FROM CATEGORY_PURPOSE
+		SELECT CATEGORY_PURPOSE_ID AS ID		<!-- 카테고리 목적 아이디 -->
+			 , TYPE				   AS TYPE		<!-- 카테고리 목적 종류 -->
+		  FROM CATEGORY_PURPOSE					<!-- 카테고리 목적 테이블 -->
 	</select>
 </mapper>
 

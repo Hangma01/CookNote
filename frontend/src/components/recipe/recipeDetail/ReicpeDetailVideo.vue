@@ -9,10 +9,12 @@ const router = useRouter();
 
 
 const props = defineProps({ 
-    recipeDetailData: { 
-        type: Object    
+    youtubeVideoId: { 
+        type: String    
     },
 })
+
+const youtubeEmbedUrl = `https://www.youtube.com/embed/${props.youtubeVideoId}`
 
 </script>
 
@@ -20,6 +22,19 @@ const props = defineProps({
     <div class="recipe-detail-video-section">
         <div class="section-title">
             <p>동영상</p>
+        </div>
+        <p>{{ youtubeEmbedUrl }}</p>
+        <div>
+            <iframe 
+            width="560" 
+            height="315" 
+            src="https://www.youtube.com/embed/JVQaQBsCbrE" 
+            title="YouTube video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin" 
+            allowfullscreen></iframe>
+            <iframe :src="youtubeEmbedUrl" frameborder="0"  allowfullscreen clipboard-write encrypted-media gyroscope picture-in-picture></iframe>
         </div>
     </div>
 </template>

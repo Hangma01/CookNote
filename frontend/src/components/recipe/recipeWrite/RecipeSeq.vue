@@ -27,11 +27,11 @@ watch(() => props.originalRecipeData, (newVal) => {
     }))
   )
 
-  recipeTip.value = newVal.tip
+  recipeTip.value = newVal.tip ?? ''
 })  
 
 const addRecipeSeq = () => {
-  if (recipeSeq.length < 50) {
+  if (recipeSeq.length < 20) {
     recipeSeq.push({ 
       id: generateId(),
       step: recipeSeq.length + 1, 
@@ -65,7 +65,7 @@ const getData = () => {
       description: item.description,
       image: item.image
     })),
-    tip: recipeTip.value.trim() ? recipeTip.value : null
+    tip: recipeTip.value.trim() ? recipeTip.value : ''
   }
 }
 
@@ -77,15 +77,20 @@ defineExpose({
 })
 
 
-// 재료 수량 250자 제한 (한글)
+// 요리 순서 250자 제한 (한글)
 const handleItemDescriptionInput = (e, item) => commonInputHangle(e, 250, (value) => item.description = value)
 
+// 요리 팁 400자 제한 (한글)
 const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.value = value)
 
 </script>
 
 <template>
-<h2 class="sub-title">요리순서</h2>
+<h2 class="sub-title">
+  <span>요리순서</span>
+
+  <p class="required">ⓘ 요리 순서, 이미지는 필수 입력 항목입니다.</p>
+</h2>
 
   <ul class="seq-list">
     <li v-for="(item, index) in recipeSeq" :key="item.id"  class="seq-item-wrap">
@@ -95,7 +100,7 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.val
           <v-textarea
             v-model="item.description"
             @input="handleItemDescriptionInput($event, item)"
-            placeholder="예) 청경체"
+            placeholder="요리 순서는 최소 5자 이상 250자 이내로 작성해주세요."
             rows="7"
             no-resize
             variant="outlined"
@@ -124,7 +129,7 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.val
     </li>
   </ul>
 
-  <div class="add-btn-wrap">
+  <div class="add-btn-wrap" v-if="recipeSeq.length < 20">
     <button type="button" @click="addRecipeSeq" class="add-btn">
       <font-awesome-icon :icon="['fas', 'plus']" class="add-icon"/>
       <span>순서 추가하기</span>
@@ -139,7 +144,7 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.val
   <div class="seq-filed">
     <v-textarea
         v-model="recipeTip"
-        placeholder="예) 된장찌개 끓이기"
+        placeholder="요리팁은 400자 이내로 작성해주세요."
         @input="handleTipInput($event, item)"
         rows="4"  
         no-resize
@@ -156,6 +161,13 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.val
   font-size: 1.2rem;
   color: #c09370;
   padding-bottom: 1.5rem;
+
+  
+  .required {
+    font-size: 0.8rem;
+    color: #777;
+    font-weight: 400;
+  }
 }
 
 .seq-list {
@@ -170,30 +182,30 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.val
 
     .seq-item-box {
       display: flex;
-      gap: 2em;
+      width: 93%;
 
       .seq-item-title {
         margin-right: 1rem;
-
+        flex: 0.7
       }
 
       .seq-item-filed {
         display: flex;
-        width: 33.6rem;
+        flex: 5;
 
         .textarea-filed {
-        width: 100%;
-        border: 1px solid #e7e7e7;
-        border-radius: 0.5rem;
-        padding: 0.5rem;
-        resize: none;
+          width: 100%;
+          border: 1px solid #e7e7e7;
+          border-radius: 0.5rem;
+          padding: 0.5rem;
+          resize: none;
         }
 
       }
     }
 
     .image-preview-wrap{
-      width: 13rem;
+      flex: 2;
       margin-left: 2rem;
     }
 

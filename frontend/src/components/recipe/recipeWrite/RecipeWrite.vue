@@ -6,7 +6,7 @@ import RecipeSeq from "./RecipeSeq.vue";
 import { onMounted, ref } from "vue";
 import { debounce } from "lodash";
 import { commonValues } from "@/utils/commonValues";
-import { getOriRecipe, editRecipe, saveRecipe } from '@/services/recipeService';
+import { getOriRecipe, editRecipe, saveRecipe, deleteRecipe } from '@/services/recipeService';
 import { errorMessages } from "@/utils/messages/errorMessages";
 import { useRoute, useRouter } from "vue-router";
 import { getCategoryAll } from "@/services/categoryService";
@@ -99,6 +99,32 @@ const handleRecipeSave = debounce (async () => {
   }
 }, commonValues.defaultDebounce)
 
+// 레시피 삭제
+const handleRecipeDelete = debounce (async () => {
+    const proceed = confirm("레시피를 정말 삭제하시겠습니까?");
+    if (proceed) {
+        try {
+            const res = await deleteRecipe(recipeId)
+            
+            router.replace({ name: 'mainPage'});
+        } catch (e) {
+            if (e.response && e.response?.data?.message) {
+                alert(e.response.data.message)  
+            } else {
+                alert(errorMessages.BADREQUEST)
+            }
+            
+            window.location.reload();
+        }
+    }
+}, commonValues.defaultDebounce)
+
+// 취소
+const handleCancle = debounce (async () => {
+    router.back();
+}, commonValues.defaultDebounce)
+
+
 // 레시피 작성 / 수정 시 가져올 데이터
 onMounted(async () => {
     if (isEditMode.value) { // 레시피 수정시요청 데이터터  
@@ -107,8 +133,7 @@ onMounted(async () => {
                 getOriRecipe(recipeId),
                 getCategoryAll(),
             ]);
-            console.log(originalRecipeRes)
-            console.log(categoriesRes)
+
             originalRecipeData.value = originalRecipeRes.data
             categories.value = categoriesRes.data
         } catch (e) {
@@ -165,13 +190,9 @@ onMounted(async () => {
             </div>
 
             <div class="write-btn-wrap">
-                <div>
-                    <button type="button" class="write-btn cancle-btn" @click="history.back()">작성 취소</button>
-                </div>
-            
-                <div>
+                    <button type="button" class="write-btn cancle-btn" @click="handleCancle()">취소</button>
+                    <button type="button" class="write-btn delete-btn" @click="handleRecipeDelete()" v-if="isEditMode">삭제</button>
                     <button type="button" class="write-btn save-btn"  @click.prevent="handleRecipeSave()">저장</button>
-                </div>
             </div>  
         </div>
     </v-form>
@@ -213,6 +234,11 @@ onMounted(async () => {
             border: 1px solid;
             border-radius: 1rem;
             font-size: 1.1rem;
+        }
+
+        .delete-btn {
+            background-color: red;
+            color: white;
         }
 
         .save-btn {

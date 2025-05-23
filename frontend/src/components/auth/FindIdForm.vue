@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { debounce } from 'lodash';
-import { required, defaultNameRule, emailRule } from '@/utils/rules';
+import { required, defaultNameRule, emailRule, authCodeRule } from '@/utils/rules';
 import { commonValues } from '@/utils/commonValues';
 import { userFindIdAuth, userFindId } from '@/services/authService';
 import { deleteMailAuthCode, sendMailAuthCode } from '@/services/mailService';
@@ -11,6 +11,7 @@ import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
 import { commonVerifyMailAuthCode } from '@/utils/commonFunction';
 import LogoMini from '../logo/LogoMini.vue';
+import { useTimer } from '@/utils/useTimer';
 
 // 화면 전환
 const router = useRouter();
@@ -27,12 +28,19 @@ const isSuccessAuthCode = ref(false)        // 메일 인증 코드 성공 메�
 // etc...
 const isAuthCodeRequest = ref(false)      	// 메일 인증 요청 토글
 const authCodeValue = ref('')             	// 메일 인증 input-field
+const isAtuhCodeimer = ref(false)						// 메일 인증 시간 제한
 
 // input-field
 const formValues = reactive({             	// Form input-field 
   name: '',
   email: '',
 })
+
+
+// 타이머를 2분으로 설정하고 타이머 종료시 동작
+const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(15, () => {
+  isAtuhCodeimer.value = false
+});
 
 
 
@@ -42,10 +50,14 @@ const formValues = reactive({             	// Form input-field
 const handleUserFindIdRequest = async () => {
 
   const isFormVal = await formRef.value.validate()
-
+	
   // 유효성 검사 통과 시 메일 인증 코드 발송
   if (isFormVal.valid) { 
 		try {
+			resetTimer();   
+  		startTimer();
+			isAtuhCodeimer.value = true
+
 			const res = await userFindIdAuth({ ...formValues })
 			isAuthCodeRequest.value = true;
 		} catch (e) {
@@ -64,8 +76,13 @@ const handleUserFindIdRequest = async () => {
 // 메일 재전송
 const handleSendMailAuthCodeRetry = async () => {
 
+
   try {
     const res = await sendMailAuthCode(formValues.email);
+		resetTimer();   
+  	startTimer();
+		isAtuhCodeimer.value = true
+
     isSuccessAuthCode.value = false;
     authCodeValue.value = '';
     alert(successMessage.authMailRetry);
@@ -74,19 +91,6 @@ const handleSendMailAuthCodeRetry = async () => {
   }
 }
 
-// 인증 코드 검증하기
-const handleVerifyMailAuthCode = debounce(async () => {
-  await commonVerifyMailAuthCode(
-    formValues.email,
-    authCodeValue,
-		isAuthCodeRequest,
-    (result, message) => {
-      isSuccessAuthCode.value = result;
-      errorMsgAuthCode.value = message;
-    },
-  );
-}, commonValues.defaultDebounce);
-
 
 
 // 아이디 찾기
@@ -94,32 +98,47 @@ const handleFindId = debounce(async () => {
 	
 	const isFormVal = await formRef.value.validate()
 
-	if (isFormVal.valid && isSuccessAuthCode) {
-		try {
-			const userFindIdres = await userFindId(formValues.name, formValues.email)
-			
-			if(userFindIdres.status === HttpStatusCode.Ok) {
-				try {
-					const deleteRes = await deleteMailAuthCode(formValues.email)
-					router.replace({ name: 'userFindIdResult', state: { id: userFindIdres.data.id }});
-				}catch (e) {
+
+	if(!isAtuhCodeimer.value){
+		alert("메일 인증 시간이 초과했습니다. 재전송을 해주세요.")
+	} else if (isFormVal.valid){
+			await commonVerifyMailAuthCode(
+			formValues.email,
+			authCodeValue,
+			isAuthCodeRequest,
+			(result, message) => {
+				isSuccessAuthCode.value = result;
+				errorMsgAuthCode.value = message;
+			},
+		);
+
+		if (isSuccessAuthCode.value) {
+			try {
+				const userFindIdres = await userFindId(formValues.name, formValues.email)
+				
+				if(userFindIdres.status === HttpStatusCode.Ok) {
+					try {
+						const deleteRes = await deleteMailAuthCode(formValues.email)
+						router.replace({ name: 'userFindIdResult', state: { id: userFindIdres.data.id }});
+					}catch (e) {
+						alert(errorMessages.BADREQUEST);
+					}
+				}
+			} catch (e) {
+				if(e.response &&
+					(e.response.data.status === HttpStatusCode.BadRequest || e.response.data.status === HttpStatusCode.NotFound)
+						&& e.response.data.message
+				){
+					alert(e.response.data.message);
+				} else {
 					alert(errorMessages.BADREQUEST);
 				}
+				
+				isAuthCodeRequest.value = false;
+				authCodeValue.value = '';
+				errorMsgAuthCode.value = '';
+				isSuccessAuthCode.value = false;
 			}
-		} catch (e) {
-			if(e.response &&
-				(e.response.data.status === HttpStatusCode.BadRequest || e.response.data.status === HttpStatusCode.NotFound)
-					&& e.response.data.message
-			){
-				alert(e.response.data.message);
-			} else {
-				alert(errorMessages.BADREQUEST);
-			}
-			
-			isAuthCodeRequest.value = false;
-			authCodeValue.value = '';
-			errorMsgAuthCode.value = '';
-			isSuccessAuthCode.value = false;
 		}
 	}
 }, commonValues.defaultDebounce);
@@ -155,8 +174,8 @@ watch (
 				v-model="formValues.name"
 				type="text"
 				label="이름"
-				variant="solo"
-				density="comfortable"
+				variant="outlined"
+				density="compact"
 				hide-details="auto"
 				:rules="[defaultNameRule]"
 			/>
@@ -165,8 +184,8 @@ watch (
 				v-model="formValues.email"
 				type="text"
 				label="이메일"
-				variant="solo"
-				density="comfortable"
+				variant="outlined"
+				density="compact"
 				hide-details="auto"
 				:rules="[emailRule]"
 			/>
@@ -175,27 +194,29 @@ watch (
 				<div class="auth-code-wrap">
 					<v-text-field
 						v-model="authCodeValue"
-						@input="handleVerifyMailAuthCode"
 						type="text"
 						label="인증번호"
-						variant="solo"
-						density="comfortable"
+						variant="outlined"
+						density="compact"
 						hide-details="auto"
 						maxlength="6"
 						v-if="isAuthCodeRequest"
-						:rules="[required]"
+						:rules="[authCodeRule]"
 						:error-messages="errorMsgAuthCode"
-						class="auth-code-field"
 					/> 
+
 					<v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest">
 						재전송
 					</v-btn>
 				</div>     
 
-				<div v-if="isSuccessAuthCode" class="success-message">
+				<!-- <div v-if="isSuccessAuthCode" class="success-message">
 					<span>
 						인증에 성공했습니다.
 					</span>
+				</div> -->
+				<div class="timer" v-if="isAuthCodeRequest">
+					<span>{{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
 				</div>
 			</div>
 		</div>
@@ -204,7 +225,7 @@ watch (
 			인증요청
 		</v-btn>
 		
-		<v-btn type="submit" class="find-id-btn" v-show="isAuthCodeRequest" :disabled="!isSuccessAuthCode">
+		<v-btn type="submit" class="find-id-btn" v-if="isAuthCodeRequest">
 			인증 후 아이디 찾기
 		</v-btn>
 	</v-form>
@@ -236,7 +257,7 @@ watch (
 	flex-direction: column;
 	justify-content: space-between;
 	gap: 1.5rem;
-	height: 18rem;
+	height: 20rem;
 
 	.find-id-content {
 		display: flex;
@@ -245,12 +266,9 @@ watch (
 
 		.auth-code-wrap{
 			display: flex;
-			align-items: center;
 			gap: 1.3rem;
 		}
-		.auth-code-field {
-			height: 3rem;
-		}
+
 
 		.auth-mail-retry {
 			display: inline;
@@ -271,6 +289,13 @@ watch (
 		color: white;
 		font-size: 1rem;
 		height: 2.5rem;
+	}
+
+	.timer{
+		font-size: 0.8rem;
+		color: #FF3F3F;
+		margin-top: 0.5rem;
+		margin-left: 1rem;
 	}
 }
 </style>

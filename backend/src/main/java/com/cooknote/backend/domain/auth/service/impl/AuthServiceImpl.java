@@ -31,6 +31,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -77,6 +78,13 @@ public class AuthServiceImpl implements AuthService{
 	// 회원가입
 	@Override
 	public void userJoin(UserJoinRequestDTO userJoinRequestDTO) {
+		
+		log.info(userJoinRequestDTO.toString());
+		// 비밀번호 일치 확인
+		if(!userJoinRequestDTO.getPw().equals(userJoinRequestDTO.getPwConfirm())) {
+			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+		}
+		
 		String password = bCryptPasswordEncoder.encode(userJoinRequestDTO.getPw());
 		
 		
@@ -187,11 +195,10 @@ public class AuthServiceImpl implements AuthService{
 	@Override
 	public void reissue(HttpServletRequest request, HttpServletResponse response) {
 		
-		log.info("재발급 신청");
 		String refreshToken = null;
         
         Cookie[] cookies = request.getCookies();
-        log.info("쿠키 확인 신청");
+
         if (cookies == null) {
 
         	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
@@ -205,12 +212,10 @@ public class AuthServiceImpl implements AuthService{
             	refreshToken = cookie.getValue();
             }
         }
-        log.info("쿠키 가져오기: " + refreshToken);
-        log.info("쿠키 유효성 검사");
+
         // refreshToekn 유효성 검사
     	try {
     		if(refreshToken != null && jwtUtil.isValidToken(refreshToken)) {
-    			log.info("쿠키 유효성 검사 성공");
     			String id = jwtUtil.getId(refreshToken);
     			long userId = jwtUtil.getUserId(refreshToken);
     			
@@ -219,7 +224,6 @@ public class AuthServiceImpl implements AuthService{
             	String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId;
     			String refreshTokenReidsValue = redisUtil.getData(refreshTokenRedisKey);
     			
-    			log.info("레디스와 비교");
     			// 레디스에 있는 RefreshToken과 비교하기    			
     			if(refreshToken.equals(refreshTokenReidsValue)) {
     				
@@ -236,12 +240,10 @@ public class AuthServiceImpl implements AuthService{
 		    		// 새로운 RefreshToken 레디스에 저장
 		    		redisUtil.setDataExpire(refreshTokenRedisKey, newRefreshToken, refreshTokenSecond);
     			}else {
-    				log.info("레디스와 비교 실패");
     				throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
     			}
     		}
     	} catch (RuntimeException e) {
-    		log.info("쿠키 유효성 검사 실패");
     		throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
 	    } 
 

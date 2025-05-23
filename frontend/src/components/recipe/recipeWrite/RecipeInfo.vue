@@ -59,6 +59,7 @@ watch(() => props.originalRecipeData, (newVal) => {
         ) || null
 
         imageFile.value = newVal.thumbnail || null
+        url.value = newVal.videoId ? `https://www.youtube.com/watch?v=${newVal.videoId}` : '';
     }
 })
 
@@ -119,7 +120,11 @@ defineExpose({
 </script>
 
 <template>
-  <h2 class="sub-title">기본정보</h2>
+  <h2 class="sub-title">
+    <span>기본정보</span>
+    
+    <p class="required">ⓘ 제목, 레시피 소개, 썸네일, 카테고리는 필수 입력 항목입니다.</p>
+  </h2>
 
   <div class="section-group">
     <div class="section-group-first">
@@ -132,7 +137,7 @@ defineExpose({
           v-model="formValues.title"
           @input="handleTitleInput"
           type="text"
-          placeholder="예) 된장찌개 끓이기"
+          placeholder="제목은 50자 이내로 작성해주세요."
           variant="outlined"
           density="compact"
           hide-details=true
@@ -147,7 +152,7 @@ defineExpose({
         <v-textarea
           v-model="formValues.description"
           @input="handleDescriptionInput"
-          placeholder="예) 된장찌개 끓이기"
+          placeholder="레시피 소개는 최소 10자 이상 400자 이내로 작성해주세요."
           rows="7"
           no-resize
           variant="outlined"
@@ -267,6 +272,12 @@ defineExpose({
   font-size: 1.2rem;
   color: #c09370;
   padding-bottom: 1.5rem;
+
+  .required {
+    font-size: 0.8rem;
+    color: #777;
+    font-weight: 400;
+  }
 }
 
 .section-group {
@@ -321,7 +332,17 @@ defineExpose({
   }
 }
 
+.label-title.required::before {
+  position: absolute;
+  content: '*';
+  color: red;
+  margin-right: 0.25rem;
+  font-weight: bold;
+  left: -0.7rem;
+}
+
 .label-title {
+  position: relative;
   padding-bottom: 0.6rem;
 
   .label-title-sub{

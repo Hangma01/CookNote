@@ -1,60 +1,136 @@
 <script setup>
-import { ref } from "vue";
+import { recipeBookmarkDelete, recipeBookmarkInsert, recipeLikeDelete, recipeLikeInsert } from "@/services/recipeService";
+import { useUserStore } from "@/stores/user";
+import { loginCheck } from "@/utils/commonFunction";
+import { commonValues } from "@/utils/commonValues";
+import { errorMessages } from "@/utils/messages/errorMessages";
+import { debounce } from "lodash";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
-
-
-// 화면 전환
-const router = useRouter();
-
-// 좋아요 상태
-const isLike = ref(false);
-
-// 북마크 상태
-const isBookmark = ref(false);
 
 const props = defineProps({ 
     recipeDetailData: { 
         type: Object    
     },
+    recipeId: {
+        type: String
+    }
 })
+
+// 화면 전환
+const router = useRouter();
+
+// 유저 스토어
+const userStore = useUserStore();
+const isLoggedIn = userStore.isLoggedIn;
+
+// 좋아요 상태
+const isLike = ref(false);
+
+// 북마크 상태
+const isBookmark = ref();
+
+// 좋아요 클릭
+const handleRecipeLike = async () => {
+    if(isLoggedIn) {
+        try {
+            if(isLike.value) {
+                const res = await recipeLikeDelete(props.recipeId)
+            } else {
+                const res = await recipeLikeInsert(props.recipeId)
+            }
+
+            isLike.value = !isLike.value
+        } catch (e) {
+            if (e.response && e.response?.data?.message) {
+                alert(e.response.data.message)
+            } else {
+                alert(errorMessages.BADREQUEST)
+            }
+        }
+         
+    } else {
+        loginCheck(router)
+    }
+}
+
+// 북마크 클릭
+const handleRecipeBookmark = async () => {
+
+    if(isLoggedIn) {
+        try {
+            if(isBookmark.value) {
+                const res = await recipeBookmarkDelete(props.recipeId)
+            } else {
+                const res = await recipeBookmarkInsert(props.recipeId)
+            }
+
+            isBookmark.value = !isBookmark.value
+        } catch (e) {
+            console.log(e)
+            if (e.response && e.response?.data?.message) {
+                alert(e.response.data.message)
+            } else {
+                alert(errorMessages.BADREQUEST)
+            }
+        }
+    } else {
+        loginCheck(router)
+    }
+}
+
+// 신고 클릭 
+const handleRecipeReport = async () => {
+
+    if(isLoggedIn) {
+
+    } else {
+        loginCheck(router)
+    }
+}
+
+watch(() => props.recipeDetailData, (newVal) => {
+    isLike.value = newVal?.liked ?? false;
+    isBookmark.value = newVal?.bookmarked ?? false;
+}), { immediate: true };
 
 </script>
 
 <template>
     <div class="recipe-detail-info-section">
         <div class="thumbnail-wrap">
-            <img :src="recipeDetailData?.thumbnail" alt="thumbnail" class="thumbnail"/>
+            <img :src="props.recipeDetailData?.thumbnail" class="thumbnail" alt="thumbnail" v-if="props.recipeDetailData"/>
             
-            <div class="writer-profile">
-                <div class="writer-profile-image-box">
-                     <img :src="recipeDetailData?.writerProfileImage" alt="writerProfileImage" class="writer-profile-image"/>
+            <div class="writer-profile" >
+                <div class="writer-profile-image-box" v-if="props.recipeDetailData">
+                     <img :src="props.recipeDetailData?.writerProfileImage" class="writer-profile-image" alt="writer-profile" />
                 </div>
 
                 <div class="writer-nickname">
-                    <span>{{ recipeDetailData?.writerNickname }}</span>
+                    <span>{{ props.recipeDetailData?.writerNickname }}</span>
                 </div>
             </div>
         </div>
 
         <div class="recipe-header">
             <div class="recipe-title">
-                <p>{{ recipeDetailData?.title }}</p>
-                <span class="creat-date">{{ recipeDetailData?.createAt }}</span>
+                <p>{{ props.recipeDetailData?.title }}</p>
+                <span class="creat-date">{{ props.recipeDetailData?.createAt }}</span>
             </div>
             
             <div class="recipe-user-aciton">
-                <div :class="{'action' : true, 'liked' : isLike}" >
+                <div :class="{'action' : true, 'liked' : isLike}" @click="handleRecipeLike">
                     <font-awesome-icon :icon="['fas', 'heart']" v-if="isLike" class="action-icon" />
                     <font-awesome-icon :icon="['far', 'heart']" v-else class="action-icon" />
                     <p class="icon-text">좋아요</p>
                 </div>
-                <div :class="{'action' : true, 'bookmarked' : isBookmark }">
+                <div :class="{'action' : true, 'bookmarked' : isBookmark }" @click="handleRecipeBookmark">
                     <font-awesome-icon :icon="['fas', 'bookmark']" v-if="isBookmark" class="action-icon" />
                     <font-awesome-icon :icon="['far', 'bookmark']" v-else class="action-icon" />
                     <p class="icon-text">책갈피</p>
                 </div>
 
-                <div class="action">
+                <div class="action" @click="handleRecipeReport">
                     <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="action-icon"/>
                     <p class="icon-text">신고</p>
                 </div>
@@ -62,25 +138,25 @@ const props = defineProps({
         </div>
 
         <div class="recipe-description">
-            <p>{{ recipeDetailData?.description }}</p>
+            <p>{{ props.recipeDetailData?.description }}</p>
         </div>
 
         <div class="recipe-summary-info">
             <div class="recipe-summary-item">
                 <font-awesome-icon :icon="['fas', 'users']" class="summary-icon" />
-                <span>{{ recipeDetailData?.servingLabel }}</span>
+                <span>{{ props.recipeDetailData?.servingLabel }}</span>
             </div>
 
             
             <div class="recipe-summary-item">
                 <font-awesome-icon :icon="['far', 'clock']" class="summary-icon" />
-                <span>{{ recipeDetailData?.durationLabel }}</span>
+                <span>{{ props.recipeDetailData?.durationLabel }}</span>
             </div>
 
             
             <div class="recipe-summary-item">
                 <font-awesome-icon :icon="['fas', 'ranking-star']" class="summary-icon" />
-                <span>{{ recipeDetailData?.levelLabel }}</span>
+                <span>{{ props.recipeDetailData?.levelLabel }}</span>
             </div>
         </div>
     </div>
@@ -153,6 +229,7 @@ const props = defineProps({
                 letter-spacing: -0.4px;
                 font-weight: 500;
                 color: rgb(189, 189, 189);
+                cursor: pointer;
         
                 .action-icon {
                     padding-top: 0.8rem;

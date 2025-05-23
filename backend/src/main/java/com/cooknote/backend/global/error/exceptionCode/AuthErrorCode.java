@@ -11,9 +11,9 @@ public enum AuthErrorCode {
 	
 	
 	//  회원 가입 중복 체크
-	DUPLICATE_USERID_EXCEPTION(HttpStatus.CONFLICT, "이미 사용중인 아이디 입니다."),
-	DUPLICATE_NICKNAME_EXCEPTION(HttpStatus.CONFLICT, "이미 사용중인 닉네임 입니다."),
-	DUPLICATE_EMAIL_EXCEPTION(HttpStatus.CONFLICT, "이미 사용중인 이메일 입니다."),
+	DUPLICATE_USERID_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 사용중인 아이디 입니다."),
+	DUPLICATE_NICKNAME_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 사용중인 닉네임 입니다."),
+	DUPLICATE_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 사용중인 이메일 입니다."),
 		
 
 	// 사용자 정보 찾지 못할 시 에러

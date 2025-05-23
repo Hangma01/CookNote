@@ -18,38 +18,50 @@ const imageUrl = ref(props.modelValue || null);
 
 // 이미지 변경
 const onFileChange = async (files) => {
-  if (files && files.length > 0) {
-    const file = files[0]
-    if (file.type.startsWith('image/')) {
-            
-      // s3 이미지 존재하면 삭제
-      // if (imageUrl.value) {
-      //   const res = await s3Delete(imageUrl.value)
-      // }
 
-      // formData에 담아서 전달
-      const formData = new FormData();
-      formData.append('image', file);
-      // s3 업로드
-      try {
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+    if (files && files.length > 0) {
+        const file = files[0]
         
-        const res = await s3Upload(formData)
+        if (file.type.startsWith('image/')) {
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+            if (!allowedExtensions.includes(fileExtension)) {
+                
+                alert('jpg, jpeg, png, webp 형식의 이미지 파일만 업로드 가능합니다.');
+                return;
+            }
+            
 
-        // 이미지 url 저장
-        imageUrl.value = res.data
-      } catch (e) {
-        if (e.response && e.response?.data?.message) {
-          alert(e.response.data.message)  
-          
-        } else {
-          alert(errorMessages.BADREQUEST)
+            // formData에 담아서 전달
+            const formData = new FormData();
+            formData.append('image', file);
+            // s3 업로드
+            try {
+                
+                const res = await s3Upload(formData)
+
+                // 이미지 url 저장
+                imageUrl.value = res.data
+            } catch (e) {
+                console.log(e)
+                if (e.response && e.response?.data?.message) {
+                alert(e.response.data.message)  
+                
+                } else {
+                alert(errorMessages.BADREQUEST)
+                }
+                imageUrl.value = null;
+            }
+
+            emit('update:modelValue', imageUrl.value);
+        }else {
+            alert('이미지 파일만 업로드 가능합니다.')
+            
+            return
         }
-        imageUrl.value = null;
-      }
-
-      emit('update:modelValue', imageUrl.value);
     }
-  }
 }
 // 부모의 modelValue가 변경될 때마다 imageUrl을 갱신
 watch(() => props.modelValue, (newVal) => {
@@ -100,7 +112,7 @@ watch(() => props.modelValue, (newVal) => {
 
 .image-uploader.recipe-seq{
   width: 100%;
-  height: 8rem;
+  height: 10.4rem;
   border: 1px solid #e7e7e7;
   border-radius: 1rem;
   display: flex;

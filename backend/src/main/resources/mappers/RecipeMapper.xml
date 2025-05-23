@@ -40,70 +40,102 @@
 	    <result property="writerUserId" column="WRITER_USER_ID"/>
 	    <result property="writerNickname" column="WRITER_NICKNAME"/>
 	    <result property="writerProfileImage" column="WRITER_PROFILE_IMAGE"/>
+	    
+	    <!-- 좋아요 북마크 여부 -->
+	    <result property="isLiked" column="IS_LIKED"/>
+	    <result property="isBookmarked" column="IS_BOOKMARKED"/>
+	    
 	</resultMap>
 	
 	
 	<!-- 레시피 상세 조회 -->
 	<select id="getRecipeDetail" resultMap="RecipeDetailResultMap">
-		SELECT R.TITLE											<!-- 레시피 제목 -->
-			 , R.DESCRIPTION									<!-- 레시피 소개 -->
-			 , R.THUMBNAIL										<!-- 레시피 썸네일 -->
-			 , R.VIDEO_ID AS videoId							<!-- 레시피 동영상 -->
-			 , R.SERVING										<!-- 레시피 인원수 -->
-			 , R.DURATION										<!-- 레시피 요리 시간 -->
-			 , R.LEVEL											<!-- 레시피 난이도 -->
-			 , R.TIP											<!-- 레시피 팁 -->
-			 , R.STATUS											<!-- 레시피 상태 -->
-			 , R.CATEGORY_CUISINE_ID							<!-- 카테고리 요리 종류 아이디 -->
-			 , R.CATEGORY_PURPOSE_ID							<!-- 카테고리 요리 목적 아이디 -->
-			 , R.CREATE_AT										<!-- 레시피 작성일 -->
+		SELECT R.TITLE 		 		 		AS TITLE					<!-- 레시피 제목 -->
+			 , R.DESCRIPTION 		 		AS DESCRIPTION				<!-- 레시피 소개 -->
+			 , R.THUMBNAIL 			 		AS THUMBNAIL				<!-- 레시피 썸네일 -->
+			 , R.VIDEO_ID 			 		AS VIDEO_ID					<!-- 레시피 동영상 -->
+			 , R.SERVING 			 		AS SERVING					<!-- 레시피 인원수 -->
+			 , R.DURATION 			 		AS DURATION	 				<!-- 레시피 요리 시간 -->
+			 , R.LEVEL	 			 		AS LEVEL					<!-- 레시피 난이도 -->
+			 , R.TIP 				 		AS TIP						<!-- 레시피 팁 -->
+			 , R.STATUS	 			 		AS STATUS					<!-- 레시피 상태 -->
+			 , R.CATEGORY_CUISINE_ID 		AS CATEGORY_CUISINE_ID		<!-- 카테고리 요리 종류 아이디 -->
+			 , R.CATEGORY_PURPOSE_ID 		AS CATEGORY_PURPOSE_ID		<!-- 카테고리 요리 목적 아이디 -->
+			 , R.CREATE_AT												<!-- 레시피 작성일 -->
 			 
-			 , I.NAME											<!-- 재료 이름 -->
-	         , I.QUANTITY										<!-- 재료 용량 -->
-        	 , I.REMARK											<!-- 재료 비고 -->
+			 , I.NAME						AS NAME						<!-- 재료 이름 -->
+	         , I.QUANTITY 					AS QUANTITY					<!-- 재료 용량 -->
+        	 , I.REMARK						AS REMARK					<!-- 재료 비고 -->
         	 
-        	 , S.RECIPE_SEQ_ID									<!-- 요리 순서 -->
-        	 , S.DESCRIPTION AS SEQ_DESCRIPTION					<!-- 요리 순서별 설명 -->
-        	 , S.IMAGE											<!-- 요리 순서별 이미지 -->
+        	 , S.RECIPE_SEQ_ID				AS RECIPE_SEQ_ID			<!-- 요리 순서 -->
+        	 , S.DESCRIPTION 				AS SEQ_DESCRIPTION			<!-- 요리 순서별 설명 -->
+        	 , S.IMAGE						AS IMAGE					<!-- 요리 순서별 이미지 -->
         	 
-        	 , U.USER_ID AS WRITER_USER_ID						<!-- 작성자 번호 Key -->
-        	 , U.NICKNAME AS WRITER_NICKNAME					<!-- 작성자 닉네임 -->
-        	 , U.PROFILE_IMAGE AS WRITER_PROFILE_IMAGE			<!-- 작성자 프로필 이미지 -->
-		   FROM RECIPE AS R
-      LEFT JOIN RECIPE_INGREDIENT AS I 
+        	 , U.USER_ID 					AS WRITER_USER_ID			<!-- 작성자 번호 Key -->
+        	 , U.NICKNAME 					AS WRITER_NICKNAME			<!-- 작성자 닉네임 -->
+        	 , U.PROFILE_IMAGE 				AS WRITER_PROFILE_IMAGE		<!-- 작성자 프로필 이미지 -->
+        	 
+	         
+			<if test="userId != null">
+			 , CASE 
+			   WHEN RL.USER_ID IS NOT NULL 
+			   THEN TRUE
+			   ELSE FALSE
+			    END 						AS IS_LIKED					<!-- 레시피 좋아요 여부 (로그인) -->
+		     , CASE 
+		       WHEN B.USER_ID IS NOT NULL 
+		       THEN TRUE
+		       ELSE FALSE
+		        END 						AS IS_BOOKMARKED			<!-- 레시피 북마크 여부 (로그인) -->
+			</if>
+			
+			<if test="userId == null">
+			  , FALSE 						AS iS_LIKED					<!-- 레시피 좋아요 여부 (로그아웃) -->
+			  , FALSE 						AS iS_BOOKMARKED			<!-- 레시피 북마크 여부 (로그아웃) -->
+			</if>
+        	 
+		   FROM RECIPE AS R												<!-- 레시피 테이블 -->
+      LEFT JOIN RECIPE_INGREDIENT AS I 									<!-- 레시피 재료 테이블 -->
       		 ON R.RECIPE_ID = I.RECIPE_ID
-      LEFT JOIN RECIPE_SEQ AS S 
-      		 ON R.RECIPE_ID = S.RECIPE_ID
-      LEFT JOIN USER AS U
+      LEFT JOIN RECIPE_SEQ AS S 										<!-- 레시피 순서 테이블 -->
+      		 ON R.RECIPE_ID = S.RECIPE_ID								
+      LEFT JOIN USER AS U												<!-- 유저 테이블 -->
       		 ON R.WRITER_ID = U.USER_ID
+      <if test="userId != null">
+      LEFT JOIN RECIPE_LIKE RL											<!-- 레시피 좋아요 테이블 -->
+      		 ON R.RECIPE_ID = RL.RECIPE_ID
+      LEFT JOIN BOOKMARK B												<!-- 레시피 북마크 테이블 -->
+      		 ON R.RECIPE_ID = B.RECIPE_ID
+      </if>		 
 		  WHERE R.RECIPE_ID = #{recipeId}
 	</select>
 	
 	<!-- 레시피 조회 - 수정 -->
 	<select id="getRecipeForEdit" resultMap="RecipeEditResultMap">
-		SELECT R.TITLE											<!-- 레시피 제목 -->
-			 , R.DESCRIPTION									<!-- 레시피 소개 -->
-			 , R.THUMBNAIL										<!-- 레시피 썸네일 -->
-			 , R.VIDEO_ID AS videoId							<!-- 레시피 동영상 -->
-			 , R.SERVING										<!-- 레시피 인원수 -->
-			 , R.DURATION										<!-- 레시피 요리 시간 -->
-			 , R.LEVEL											<!-- 레시피 난이도 -->
-			 , R.TIP											<!-- 레시피 팁 -->
-			 , R.STATUS											<!-- 레시피 상태 -->
-			 , R.CATEGORY_CUISINE_ID							<!-- 카테고리 요리 종류 아이디 -->
-			 , R.CATEGORY_PURPOSE_ID							<!-- 카테고리 요리 목적 아이디 -->
+		SELECT R.TITLE 		 		 		AS TITLE					<!-- 레시피 제목 -->
+			 , R.DESCRIPTION 		 		AS DESCRIPTION				<!-- 레시피 소개 -->
+			 , R.THUMBNAIL 			 		AS THUMBNAIL				<!-- 레시피 썸네일 -->
+			, R.VIDEO_ID 			 		AS VIDEO_ID					<!-- 레시피 동영상 -->
+			 , R.SERVING 			 		AS SERVING					<!-- 레시피 인원수 -->
+			 , R.DURATION 			 		AS DURATION	 				<!-- 레시피 요리 시간 -->
+			 , R.LEVEL	 			 		AS LEVEL					<!-- 레시피 난이도 -->
+			 , R.TIP 				 		AS TIP						<!-- 레시피 팁 -->
+			 , R.STATUS	 			 		AS STATUS					<!-- 레시피 상태 -->
+			 , R.CATEGORY_CUISINE_ID 		AS CATEGORY_CUISINE_ID		<!-- 카테고리 요리 종류 아이디 -->
+			 , R.CATEGORY_PURPOSE_ID 		AS CATEGORY_PURPOSE_ID		<!-- 카테고리 요리 목적 아이디 -->
 			 
-			 , I.NAME											<!-- 재료 이름 -->
-	         , I.QUANTITY										<!-- 재료 용량 -->
-        	 , I.REMARK											<!-- 재료 비고 -->
+			 , I.NAME						AS NAME						<!-- 재료 이름 -->
+	         , I.QUANTITY 					AS QUANTITY					<!-- 재료 용량 -->
+        	 , I.REMARK						AS REMARK					<!-- 재료 비고 -->
         	 
-        	 , S.RECIPE_SEQ_ID									<!-- 요리 순서 -->
-        	 , S.DESCRIPTION AS SEQ_DESCRIPTION					<!-- 요리 순서별 설명 -->
-        	 , S.IMAGE											<!-- 요리 순서별 이미지 -->
-		   FROM RECIPE AS R
-      LEFT JOIN RECIPE_INGREDIENT AS I 
-      		 ON R.RECIPE_ID = I.RECIPE_ID
-      LEFT JOIN RECIPE_SEQ AS S 
+        	 , S.RECIPE_SEQ_ID				AS RECIPE_SEQ_ID			<!-- 요리 순서 -->
+        	 , S.DESCRIPTION 				AS SEQ_DESCRIPTION			<!-- 요리 순서별 설명 -->
+        	 , S.IMAGE						AS IMAGE					<!-- 요리 순서별 이미지 -->
+        	 
+		   FROM RECIPE AS R												<!-- 레시피 테이블 -->
+      LEFT JOIN RECIPE_INGREDIENT AS I 									<!-- 레시피 재료 테이블 -->
+      		 ON R.RECIPE_ID = I.RECIPE_ID								
+      LEFT JOIN RECIPE_SEQ AS S 										<!-- 레시피 순서 테이블 -->
       		 ON R.RECIPE_ID = S.RECIPE_ID
 		  WHERE R.RECIPE_ID = #{recipeId}
 		    AND R.WRITER_ID = #{userId}
@@ -160,5 +192,78 @@
     	   AND WRITER_ID = #{writerId}
 	</update>
 	
+	
+	<!-- 레시피 삭제 -->
+	<update id="recipeDelete">
+		UPDATE RECIPE
+		   SET STATUS = #{statusDelete}
+		  WHERE RECIPE_ID = #{recipeId}
+		    AND WRITER_ID = #{userId}
+	</update>
+	
+	<!-- 레시피 좋아요 생성 -->
+	<insert id="recipeLikeInsert">
+		INSERT INTO RECIPE_LIKE (
+								 USER_ID
+							   , RECIPE_ID
+		)
+		VALUES (
+				#{userId}
+			  , #{recipeId}
+		)
+	</insert>
+	
+	<!-- 레시피 좋아요 삭제 -->
+	<delete id="recipeLikeDelete">
+		DELETE 
+		  FROM RECIPE_LIKE
+		 WHERE USER_ID = #{userId}
+		   AND RECIPE_ID = #{recipeId}
+	</delete>
+	
+	<!-- 레시피 북마크 생성 -->
+	<insert id="recipeBookmarkInsert">
+		INSERT INTO BOOKMARK (
+							  USER_ID
+							, RECIPE_ID
+		)
+		VALUES (
+				#{userId}
+			  , #{recipeId}
+		)
+	</insert>
+	
+	
+	<!-- 레시피 북마크 삭제 -->
+	<delete id="recipeBookmarkDelete">
+		DELETE 
+		  FROM BOOKMARK
+		 WHERE USER_ID = #{userId}
+		   AND RECIPE_ID = #{recipeId}
+	</delete>
+	
+	
+	<!-- 레시피 존재 확인 -->
+	<select id="checkRecipe" resultType="Recipe">
+		SELECT WRITER_ID AS writerId
+		  FROM RECIPE 								<!-- 레시피 테이블 -->
+	 	 WHERE RECIPE_ID = #{recipeId}
+		   AND STATUS = #{statusPublic}
+	</select>
+	
+	
+	<!-- 사용자 본인 레시피 확인 -->
+	<select id="checkSelfRecipeExists">
+		SELECT EXISTS (
+			   SELECT 1 
+				 FROM RECIPE 						<!-- 레시피 테이블 -->
+				WHERE WRITER_ID = #{userId}
+				  AND RECIPE_ID = #{recipeId}
+				  AND (
+				  		  STATUS = #{statusPublic}
+				  	   OR STATUS = #{statusPrivate}
+				  )
+		)
+	</select>
 </mapper>
 

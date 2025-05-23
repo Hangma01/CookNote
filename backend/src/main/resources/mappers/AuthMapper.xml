@@ -22,7 +22,7 @@
 	<select id="getExistsId" resultType="boolean">
 		SELECT EXISTS (
 					   SELECT 1 
-						 FROM USER 
+						 FROM USER 						<!-- 유저 테이블 -->
 						WHERE ID = #{id}
 						  AND IS_DELETE = FALSE
 		)
@@ -32,7 +32,7 @@
 	<select id="getExistsNickname" resultType="boolean">
 		SELECT EXISTS (
 					   SELECT 1 
-						 FROM USER
+						 FROM USER						<!-- 유저 테이블 -->
 						WHERE NICKNAME = #{nickname}
 						  AND IS_DELETE = FALSE
 		)
@@ -42,7 +42,7 @@
 	<select id="getExistsEmail" resultType="boolean">
 		SELECT EXISTS (
 					   SELECT 1 
-						 FROM USER 
+						 FROM USER 						<!-- 유저 테이블 -->
 						WHERE EMAIL = #{email}
 						  AND IS_DELETE = FALSE
 		)
@@ -50,7 +50,7 @@
 
 	<!-- 회원 가입 -->
 	<insert id="userJoin" parameterType="User">
-		INSERT INTO USER (
+		INSERT INTO USER (								<!-- 유저 테이브 -->
 	       				  ID, 
 	       				  PASSWORD, 
 	       				  NAME, 
@@ -72,7 +72,7 @@
 	<select id="userFindIdAuthRequest" resultType="boolean">
 		SELECT EXISTS (
 					   SELECT 1 
-						 FROM USER
+						 FROM USER						<!-- 유저 테이블 -->
 						WHERE NAME = #{name} 
 						  AND EMAIL = #{email}
 						  AND IS_DELETE = FALSE
@@ -82,7 +82,7 @@
 	<!-- 아이디 찾기 -->
 	<select id="userFindId" resultType="User">
 		SELECT ID
-		  FROM USER
+		  FROM USER										<!-- 유저 테이블 -->
 		 WHERE NAME = #{name} 
 		   AND EMAIL = #{email}
 		   AND IS_DELETE = FALSE
@@ -91,7 +91,7 @@
 	<!-- 비밀번호 찾기 - 요청 -->
 	<select id="userFindPw" resultMap="UserResultMap">
 		SELECT USER_ID
-		  FROM USER
+		  FROM USER										<!-- 유저 테이블 -->
 		 WHERE ID = #{id} 
 		   AND EMAIL = #{email}
 		   AND IS_DELETE = FALSE
@@ -99,7 +99,7 @@
 	
 	<!-- 비밀번호 변경 -->
 	<update id="updatePwReset">
-		UPDATE USER
+		UPDATE USER										<!-- 유저 테이블 -->
 		   SET PASSWORD = #{password}
 		 WHERE USER_ID = #{userId}
 		   AND IS_DELETE = FALSE

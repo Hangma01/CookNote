@@ -5,10 +5,12 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class UserJoinRequestDTO {
 	
 	@NotBlank()
@@ -18,6 +20,10 @@ public class UserJoinRequestDTO {
 	@NotBlank()
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\\-+=`|\\\\(){}\\[\\]:;\"'<>,.?])\\S{8,16}$")
 	private String pw;
+	
+	@NotBlank()
+	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*_\\-+=`|\\\\(){}\\[\\]:;\"'<>,.?])\\S{8,16}$")
+	private String pwConfirm;
 	
 	@NotBlank()
 	@Pattern(regexp = "^[a-zA-Z가-힣]{1,20}$")

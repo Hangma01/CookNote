@@ -19,6 +19,7 @@ import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
+import com.cooknote.backend.global.utils.commonFunction.CommonFunctionUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,24 +53,17 @@ public class AuthController {
 		return ResponseEntity.ok().build();
 	}
 
-	// 이메일 중복 체크
-	@GetMapping("/existsEmail")
-	public ResponseEntity<Void> getExistsEmail(@RequestParam("email") String email) {
-
-		authService.getExistsEmail(email);
-
-		return ResponseEntity.ok().build();
-	}
 
 	// 회원 가입
 	@PostMapping("/join")
-	public ResponseEntity<Void> userJoin(@Valid @RequestBody UserJoinRequestDTO userJoinRequestDTO, BindingResult bindingResult) {
+	public ResponseEntity<Void> userJoin(@Valid @RequestBody UserJoinRequestDTO userJoinRequestDTO
+									   , BindingResult bindingResult) {
 
 		// 유효성 검사 확인
-		if (bindingResult.hasErrors()) {
+		if (CommonFunctionUtil.validationCheck(bindingResult)) {;
 			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
-
+		
 		// 중복 검사
 		authService.getExistsId(userJoinRequestDTO.getId());
 		authService.getExistsNickname(userJoinRequestDTO.getNickname());
@@ -92,7 +86,8 @@ public class AuthController {
 
 	// 아이디 찾기 - 아이디 반환
 	@GetMapping("/findId")
-	public ResponseEntity<UserFindIdResponseDTO> userFindId(@RequestParam("name") String name, @RequestParam("email") String email) {
+	public ResponseEntity<UserFindIdResponseDTO> userFindId(@RequestParam("name") String name
+													  	  , @RequestParam("email") String email) {
 
 		return ResponseEntity.ok(authService.userFindId(name, email));
 	}
@@ -107,10 +102,11 @@ public class AuthController {
 	
 	// 비밀번호 찾기 - 변경
 	@PatchMapping("/findPw")
-	public ResponseEntity<Void> userFindPwReset(@Valid @RequestBody UserFindPwResetRequestDTO userFindPwResetRequestDTO, BindingResult bindingResult) {
+	public ResponseEntity<Void> userFindPwReset(@Valid @RequestBody UserFindPwResetRequestDTO userFindPwResetRequestDTO
+											  , BindingResult bindingResult) {
 
 		// 유효성 검사 확인
-		if (bindingResult.hasErrors()) {
+		if (CommonFunctionUtil.validationCheck(bindingResult)) {;
 			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
 		
@@ -121,7 +117,9 @@ public class AuthController {
 		
 	// 토큰 재발급
 	@PostMapping("/reissue")
-	 public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+	 public ResponseEntity<?> reissue(HttpServletRequest request
+			 						, HttpServletResponse response) {
+		
 		authService.reissue(request, response);
 
 		return ResponseEntity.ok().build();

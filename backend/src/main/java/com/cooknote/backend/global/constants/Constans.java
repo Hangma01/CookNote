@@ -11,7 +11,7 @@ public class Constans {
     // TOKEN
     public static final String ACCESS_TOKEN_NAME = "accessToken";
     public static final String REFRESH_TOKEN_NAME = "refreshToken";
-    public static final int ACCESS_TOKEN_EXPIRED_MS = 300000; 		// 60 * 30  * 1000 => 30분 1800000
+    public static final int ACCESS_TOKEN_EXPIRED_MS = 1800000; 		// 60 * 30  * 1000 => 30분 1800000
     public static final int REFRESH_TOKEN_EXPIRED_MS = 86400000;	// 60 * 60 * 24 * 1000 => 86400000 1일
     public static final String AUTHORIZATION_HEADER = "Authorization";
     
@@ -30,7 +30,7 @@ public class Constans {
     
     // ETC...
     public static final int SECOND_MS = 1000;
-    public static final int PW_RESET_TOKEN_EXPIRE = 300; 
+    public static final int PW_RESET_TOKEN_EXPIRE = 120; 
     
     
     

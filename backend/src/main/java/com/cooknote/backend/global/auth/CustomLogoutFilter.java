@@ -7,9 +7,9 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
+import com.cooknote.backend.global.utils.auth.JWTResponseUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
-import com.cooknote.backend.global.utils.response.ResponseUtil;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -53,7 +53,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         // 쿠키 체크
         if (cookies == null) {
-        	ResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
+        	JWTResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
         	return;
         }
 
@@ -66,7 +66,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 		
         // refreshToekn 체크
         if(refreshToken == null) {
-        	ResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
+        	JWTResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
         	return;
         }
         
@@ -77,7 +77,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         try {
 			jwtUtil.isExpired(refreshToken);
 		} catch (Exception e) {
-			ResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
+			JWTResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
 			return;
 		}
 

@@ -90,7 +90,6 @@
         .nav-category-item {
             position: absolute;
             display: none;
-            width: 100%;
             border: 1px solid #eee;
             background-color: #fff;
             border-bottom-right-radius: 0.5rem;

@@ -14,15 +14,11 @@ import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.response.ResponseUtil;
+import com.cooknote.backend.global.utils.auth.JWTResponseUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +43,8 @@ public class JwtFilter extends OncePerRequestFilter {
 				
             return;
 	    }
-	    log.info("유효성검사한디");
-        // accessToken 유효성 검사
+
+	    // accessToken 유효성 검사
         try {
         	if(accessToken != null 
         		&& jwtUtil.isValidToken(accessToken)){
@@ -69,12 +65,9 @@ public class JwtFilter extends OncePerRequestFilter {
             	SecurityContextHolder.getContext().setAuthentication(authentication);
     		}
         } catch (ExpiredJwtException e) {				// Access Token 만료
-        	   log.info("accessToken 만료됨");
-	    	ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE.getMessage());
-	    	
+	    	JWTResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE.getMessage());
 	    	return;
 	    } catch (RuntimeException e) {
-	    	log.error("accessToken 다른 에러네", e);
 	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	    	return;
 	    } 

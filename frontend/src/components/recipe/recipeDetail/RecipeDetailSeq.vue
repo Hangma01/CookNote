@@ -29,23 +29,21 @@ const steps = [
         </div>
 
         <div class="recipe-seqs">
-            <div
-                v-for="(item) in recipeSeqs"
-                :key="item.step"
-                class="seq-item"
-            >
-                <div class="seq-image-box">
-                    <img :src="item.image" class="seq-image"/>
-                </div>
-
-                <div class="step-box">
-                    <div class="step">Step {{ item.step }}</div>
-
-                    <div class="seq-content">
-                        {{ item.description }}
+            <ul v-for="(item) in props.recipeSeqs" :key="item.step">
+                <li class="seq-item">
+                    <div class="seq-image-box">
+                        <img :src="item.image" class="seq-image"/>
                     </div>
-                </div>
-            </div>
+
+                    <div class="step-box">
+                        <div class="step">Step {{ item.step }}</div>
+
+                        <div class="seq-content">
+                            {{ item.description }}
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -74,8 +72,8 @@ const steps = [
         }
 
         .seq-image-box {
-            height: 14rem;
-            flex: 1;
+            height: 13rem;
+            flex: 1.3;
 
             .seq-image {
                 width: 100%;

@@ -27,7 +27,7 @@ watch(() => props.originalRecipeData, (newVal) => {
 })                      
 
   const addIngredient = () => {
-    if (ingredients.length < 50) {
+    if (ingredients.length < 40) {
       ingredients.push({ name: '', quantity: '' })
     }
   }
@@ -72,13 +72,17 @@ const handleItemNameInput = (e, item) => commonInputHangle(e, 20, (value) => ite
 // 재료 수량 10자 제한 (한글)
 const handleItemQuantityInput = (e, item) => commonInputHangle(e, 10, (value) => item.quantity = value)
 
-// 재료 비고 30자 제한 (한글)
-const handleItemRemarkInput = (e, item) => commonInputHangle(e, 30, (value) => item.remark = value)
+// 재료 비고 20자 제한 (한글)
+const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => item.remark = value)
 
 </script>
 
 <template>
-<h2 class="sub-title">재료정보</h2>
+<h2 class="sub-title">
+  재료정보
+  
+  <p class="required">ⓘ 재료 수량은 필수 입력 항목입니다.</p>
+</h2>
 
   <ul class="ingredient-list">
     <li v-for="(item, index) in ingredients" :key="item.id"  class="ingredient-item-wrap">
@@ -89,7 +93,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 30, (value) => i
             v-model="item.name"
             @input="handleItemNameInput($event, item)"
             type="text"
-            placeholder="예) 청경체"
+            placeholder="재료는 20자 이내로 작성해주세요."
             variant="outlined"
             density="compact"
             hide-details=true
@@ -102,20 +106,20 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 30, (value) => i
             v-model="item.quantity"
             @input="handleItemQuantityInput($event, item)"
             type="text"
-            placeholder="200g"
+            placeholder="수량은 10자 이내로 작성해주세요."
             variant="outlined"
             density="compact"
             hide-details=true
           />
         </div>
 
-        <div class="ingredient-item-filed">
+        <div class="ingredient-item-filed ">
           <span class="ingredient-item-title">비고</span>
           <v-text-field
             v-model="item.remark"
             @input="handleItemRemarkInput($event, item)"
             type="text"
-            placeholder="예) 비고"
+            placeholder="비고는 20자 이내로 작성해주세요."
             variant="outlined"
             density="compact"
             hide-details=true
@@ -138,7 +142,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 30, (value) => i
     </li>
   </ul>
 
-  <div class="add-btn-wrap">
+  <div class="add-btn-wrap" v-if="ingredients.length < 40">
     <button type="button" @click="addIngredient" class="add-btn">
       <font-awesome-icon :icon="['fas', 'plus']" class="add-icon"/>
       <span>재료 추가하기</span>
@@ -152,6 +156,13 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 30, (value) => i
   font-size: 1.2rem;
   color: #c09370;
   padding-bottom: 1.5rem;
+
+  
+  .required {
+    font-size: 0.8rem;
+    color: #777;
+    font-weight: 400;
+  }
 }
 
 .ingredient-list {
@@ -167,11 +178,21 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 30, (value) => i
       display: flex;
       gap: 2rem;
 
+      .ingredient-item-filed.required::before {
+        position: absolute;
+        content: '*';
+        color: red;
+        margin-right: 0.25rem;
+        font-weight: bold;
+        left: -0.7rem;
+      }
 
       .ingredient-item-filed {
+        position: relative;
         display: flex;
         align-items: center;
         width: 18rem;
+        
 
         .ingredient-item-title {
             margin-right: 1rem;

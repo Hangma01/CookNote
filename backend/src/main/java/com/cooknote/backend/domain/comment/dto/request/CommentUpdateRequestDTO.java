@@ -13,14 +13,12 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CommentInsertRequestDTO {
+public class CommentUpdateRequestDTO {
+	
+	@NotNull
+	private Long commentId;
 	
 	@NotBlank()
 	@Length(max = 250)
 	private String content;
-	
-	@NotNull
-	private Long recipeId;
-	
-	private Long parentCommentId;
 }

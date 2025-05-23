@@ -16,13 +16,13 @@ import lombok.ToString;
 public class RecipeIngredientRequestDTO {
 	
 	@NotBlank
-	@Length(max = 30)
+	@Length(max = 20)
     private String name;
 	
 	@NotBlank
 	@Length(max = 10)
 	private String quantity;
     
-	@Length(max = 30)
+	@Length(max = 20)
 	private String remark;
 }

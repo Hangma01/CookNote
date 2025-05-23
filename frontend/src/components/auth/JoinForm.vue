@@ -26,6 +26,7 @@ const pwConfirmRef = ref(null);
 // 에러 메시지
 const errorMsgIdDuplicate = ref('')           // 아이디 중복 시 에러 메시지
 const errorMsgNicknameDuplicate = ref('')     // 닉네임 중복 시 에러 메시지
+const errorMsgEmailDuplicate = ref('')          // 메일 중복 시 에러 메시지지
 const errorMsgAuthCode = ref('')              // 메일 인증 코드 에러 메시지
 
 // 성공 메시지
@@ -101,7 +102,8 @@ const handleSendMailAuthCode = async () => {
   if (
       isFormVal.valid &&
       !errorMsgIdDuplicate.value &&
-      !errorMsgNicknameDuplicate.value
+      !errorMsgNicknameDuplicate.value &&
+      !errorMsgEmailDuplicate.value
   ) { 
 
       if(isSuccessIdCheck.value === false) {
@@ -172,11 +174,24 @@ const handleSubmitJoin = debounce(async () => {
         router.push({ name: 'mainPage'});
       } catch (e) {
         if(e.response && e.response.data.status === HttpStatusCode.BadRequest) {
-          alert(e.response.data.message)
-        }else {
+            const errorMessage = e.response.data.message 
+
+            if(errorMessage === '이미 사용중인 이메일 입니다.') {
+                alert(errorMessage)
+                errorMsgEmailDuplicate.value = errorMessage;   
+                isAuthCodeRequest.value = false;
+                authCodeValue.value = '';
+                errorMsgAuthCode.value = '';
+                isSuccessAuthCode.value = false;
+                
+            } else {
+                alert(errorMessage)
+                window.location.reload();
+            }
+        } else {
           alert(errorMessages.BADREQUEST);
+          window.location.reload();
         }
-        window.location.reload();
       }
     }
   }
@@ -209,6 +224,13 @@ watch(() => formValues.pw, () => {
     pwConfirmRef.value.validate();
   }
 });
+
+watch(() => formValues.email, () => {
+    if(errorMsgEmailDuplicate) {
+        errorMsgEmailDuplicate.value = '';
+    }
+})
+
 </script>
 
 <template>
@@ -320,6 +342,7 @@ watch(() => formValues.pw, () => {
           hide-details="auto"
           maxlength="100"
           :rules="[emailRule]"
+            :error-messages="errorMsgEmailDuplicate"
       />        
       <div> 
         <div class="auth-code-wrap">
@@ -335,7 +358,8 @@ watch(() => formValues.pw, () => {
             :rules="[authCodeRule]"
             :error-messages="errorMsgAuthCode"
           /> 
-          <v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest">
+
+          <v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest" >
             재전송
           </v-btn>
         </div>     
@@ -347,8 +371,8 @@ watch(() => formValues.pw, () => {
         </div> -->
 
         <div class="timer" v-if="isAuthCodeRequest">
-					<span>{{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
-				</div>
+            <span>{{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
+        </div>
       </div>
     </div>
 
@@ -415,11 +439,11 @@ watch(() => formValues.pw, () => {
 
         .auth-code-wrap{
           display: flex;
-          align-items: center;
           gap: 1.3rem;
           
 
           .auth-mail-retry {
+            margin-top: 0.1rem;
             display: inline;
             background-color: #888;
             color: white;

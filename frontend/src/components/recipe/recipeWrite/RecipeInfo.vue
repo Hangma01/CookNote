@@ -4,6 +4,8 @@ import SelectDropDown from '../../ui/SelectDropDown.vue';
 import { commonInputHangle } from '@/utils/commonFunction';
 import { reactive, ref, watch } from 'vue';
 import { commonValues } from '@/utils/commonValues';
+import { youtubeApi } from '@/services/googleService';
+import { debounce } from 'lodash';
 
 
 // RecipeWrite.vue로부터 받는 데이터
@@ -94,9 +96,23 @@ const getData = () => ({
 })
 
 // Youtube VideoId 추출
-const handleGetVideoId = () => {
-    formValues.videoId = getYoutubeVideoId()
-}
+const handleGetVideoId = debounce( async () => {
+  const videoId = getYoutubeVideoId()
+
+  const googleApiKey = import.meta.env.VITE_API_GOOGLE_KEY
+  const url = `https://www.googleapis.com/youtube/v3/videos?part=id&id=${videoId}&key=${googleApiKey}`;
+  try {
+    const res = await youtubeApi(url);
+    
+    if(res.data.items.length > 0) {
+      formValues.videoId = videoId
+    }else {
+      formValues.videoId = null;
+    }
+  } catch (error) {
+    formValues.videoId = null;
+  }
+}, commonValues.defaultDebounce)
 
 const getYoutubeVideoId = () => {
     const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;

@@ -37,9 +37,27 @@ export const routes = [
             // 마이페이지 라우터
             {
                 path: '/mypage',
-                name: 'myPage',
                 component: () => import('../views/MyPageView.vue'),
                 meta: { requiresAuth: true },
+                children: [
+                    {
+                        path: '',
+                        name: 'myPage',
+                        component: () => import('@/components/recipe/recipeWrite/RecipeWrite.vue'),
+                        meta: { requiresAuth: true, forceRemount: true },
+                    },
+                    // {
+                    //     path: ','
+                    //     name: 'recipeEdit',
+                    //     component: () => import('../components/recipe/recipeWrite/RecipeWrite.vue'),
+                    //     meta: { requiresAuth: true, forceRemount: true },
+                    // },
+                    // {
+                    //     path: '',
+                    //     name: 'recipeDetail',
+                    //     component: () => import('../components/recipe/recipeDetail/RecipeDetail.vue'),
+                    // },
+                ]
             }
         ]
     },

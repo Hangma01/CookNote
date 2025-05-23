@@ -18,7 +18,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 // fontawesome - 필요한 아이콘 라이브러리를 추가
 import { faPenToSquare, faMagnifyingGlass, faLock, faArrowUpFromBracket, faPlus, faXmark
-       , faHeart, faBookmark, faUsers, faRankingStar, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+       , faHeart, faBookmark, faUsers, faRankingStar, faTriangleExclamation
+       , faEllipsisVertical }  from '@fortawesome/free-solid-svg-icons';
 import { faUser, faEnvelope, faHeart as farHeart, faBookmark as farBookmark, faClock
        , faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 
@@ -26,6 +27,7 @@ import { faUser, faEnvelope, faHeart as farHeart, faBookmark as farBookmark, faC
 library.add(
     faPenToSquare, faMagnifyingGlass, faLock, faArrowUpFromBracket, faPlus, faXmark
   , faHeart, faBookmark, faUsers, faRankingStar, faTriangleExclamation
+  , faEllipsisVertical
   , faUser, faEnvelope, farHeart, farBookmark, faClock, faCircleCheck
 );
 

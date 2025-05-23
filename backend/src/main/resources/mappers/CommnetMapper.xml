@@ -31,6 +31,7 @@
 		  FROM COMMENT
 		 WHERE RECIPE_ID = #{recipeId}
 		   AND STATUS = #{statusPublic}
+		   AND PARENT_COMMENT_ID IS NULL
 	</select>
 	
 	<!-- 리플 페이징 -->

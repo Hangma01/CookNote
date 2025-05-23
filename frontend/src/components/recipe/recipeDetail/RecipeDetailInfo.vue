@@ -118,7 +118,7 @@ watch(() => props.recipeDetailData, (newVal) => {
                 <span class="creat-date">{{ props.recipeDetailData?.createAt }}</span>
             </div>
             
-            <div class="recipe-user-aciton">
+            <div class="recipe-user-aciton" v-if="!props.recipeDetailData?.author">
                 <div :class="{'action' : true, 'liked' : isLike}" @click="handleRecipeLike">
                     <font-awesome-icon :icon="['fas', 'heart']" v-if="isLike" class="action-icon" />
                     <font-awesome-icon :icon="['far', 'heart']" v-else class="action-icon" />

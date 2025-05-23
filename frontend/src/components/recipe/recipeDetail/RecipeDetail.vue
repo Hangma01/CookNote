@@ -29,7 +29,7 @@ onMounted(async () => {
                 getComments(recipeId,0),
             ]);
         recipeDetailData.value = recipeDetailDataRes.data;
-        console.log(recipeDetailDataRes.data)
+
         commentsData.value = commentsDataRes.data
     } catch (e) {
         if (e.response && e.response?.data?.message) {
@@ -47,7 +47,7 @@ const loadPage = async (page = 0) => {
   try {
     const res = await getComments(recipeId, page);
     commentsData.value = res.data;
-    currentPage.value = res.data.number;
+    currentPage.value = res.data.page.number;
   } catch (e) {
     if (e.response && e.response?.data?.message) {
         alert(e.response.data.message)
@@ -86,6 +86,8 @@ const refreshComments = () => {
             <RecipeDetailCommend 
             :commentsData = "commentsData" 
             :recipeId = "recipeId" 
+            :recipeWriterId = "recipeDetailData?.writerUserId"
+            :requesterId = "recipeDetailData?.requesterId"
             @refreshComments="refreshComments"
             @changePage="loadPage"/>
         </section>
@@ -95,7 +97,7 @@ const refreshComments = () => {
 
 <style lang="scss" scoped>
 .recipe-detail-container {
-    width: 43rem;
+    width: 45rem;
     margin: auto;
     margin-bottom: 6rem;
     margin-top: 3rem;

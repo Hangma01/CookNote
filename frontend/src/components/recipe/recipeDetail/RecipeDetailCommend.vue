@@ -1,7 +1,8 @@
 <script setup>
-import { commentInsert, getComments } from '@/services/commentService';
+import { commentDelete, commentInsert, commentUpdate, getCommentReplys } from '@/services/commentService';
 import { commonInputHangle } from '@/utils/commonFunction';
-import { reactive, ref } from 'vue';
+import { errorMessages } from '@/utils/messages/errorMessages';
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
 // 부모로 받은 데이터
 const props = defineProps({ 
@@ -10,6 +11,12 @@ const props = defineProps({
     },
     recipeId: {
         type: String
+    },
+    requesterId: {
+        type: Number
+    },
+    recipeWriterId: {
+        type: Number
     }
 })
 
@@ -18,25 +25,263 @@ const emit = defineEmits(['refreshComments', 'changePage']);
 
 // inputFiled
 const formValues = reactive({
-    conent: '',
-    reply: '',
+    content: '',
+    editContent: '',
 })
 
-// 댓글 입력
-const handleContentInsert = async () => {
-    if (!formValues.conent.trim()) {
-        alert('댓글을 입력해주세요.');
-        return;
+const eidtCommentMap = reactive({});                // 보낼 댓글 수정 값
+const activeEditCommentMap = reactive({});          // 보낼 댓글 수정 활성화
+const activeCommentMenuMap = reactive({});          // 댓글 메뉴 활성화
+const commentMentItemRefs = ref({});                // 외부 클릭 시 댓글 메뉴 닫히기
+
+const replyContentMap = reactive({});               // 보낼 답글 값
+const activeReplyInputMap = reactive({});           // 보낼 답글 활성화
+const activeReplyMenuMap = reactive({});            // 답글 메뉴 활성화
+const replyMentItemRefs = ref({});                  // 외부 클릭 시 답글 메뉴 닫히기
+
+const editReplyMap = reactive({});                  // 보낼 답글 수정 값
+const activeEditReplyMap = reactive({});            // 보낼 답글 수정 활성화
+
+
+const replyListMap = reactive({});                  // 답글 리스트
+const replyPageMap = reactive({});                  // 답글 페이지
+const replySizeMap = reactive({})                   // 답글 사이즈
+const replyTotalMap = reactive({});                 // 답글 총 페이지
+
+
+// 댓글 메뉴 토글
+const toggleCommentMenu = (event, commentId) => {
+    closeReplyMenu(event);
+    event.stopPropagation();
+    activeCommentMenuMap[commentId] = !activeCommentMenuMap[commentId];
+    closeCommentMenu(event)
+};
+
+
+// 외부 클릭 시 댓글 메뉴 닫기
+const closeCommentMenu = (event) => {
+  for (const commentId in activeCommentMenuMap) {
+    const refElement = commentMentItemRefs.value[commentId];
+    if (activeCommentMenuMap[commentId] && refElement && !refElement.contains(event.target)) {
+      activeCommentMenuMap[commentId] = false;
     }
+  }
+};
+
+const setCommentMenuRef = (el, commentId) => {
+  if (el) {
+    commentMentItemRefs.value[commentId] = el;
+  } else {
+    delete commentMentItemRefs.value[commentId];
+  }
+};
+
+
+onMounted(() => {
+    document.addEventListener('click', closeCommentMenu);
+    document.addEventListener('click', closeReplyMenu);
+});
+onBeforeUnmount(() => {
+    document.removeEventListener('click', closeCommentMenu);
+    document.removeEventListener('click', closeReplyMenu);
+});
+
+
+
+
+// 댓글 입력
+const handleCommentInsert = async () => {
+    const content = formValues.content.trim()
+
+    if (!content) return alert('댓글을 입력해주세요.');
 
     try {
-        const res = await commentInsert(formValues.conent.trim(), props?.recipeId);
-        formValues.conent = ''; // 입력 필드 초기화
+        await commentInsert(content, props?.recipeId);
+        formValues.content = ''; // 입력 필드 초기화
         emit('refreshComments');
     } catch(e) {
-        console.log(e)
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message)
+        } else {
+            alert(errorMessages.BADREQUEST)
+        }
     }
 } 
+
+// 댓글 수정 입력
+const handleEditCommentUpdate = async (content, commentId) => {
+    const tirmContent = content.trim()
+    if (!tirmContent) return alert('댓글을 입력해주세요.');
+
+    try {
+        await commentUpdate(tirmContent, commentId);
+        emit('refreshComments');
+        activeEditCommentMap[commentId] = false;
+    } catch(e) {
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message)
+        } else {
+            alert(errorMessages.BADREQUEST)
+        }
+    }
+} 
+
+// 댓글 수정
+const handleCommentEdit = async (commentId, content) => {
+    eidtCommentMap[commentId] = content;
+    activeEditCommentMap[commentId] = true;
+}
+
+// 댓글 수정 취소
+const handleCommentEditCancle = async (commentId) => {
+    activeEditCommentMap[commentId] = false;
+}
+
+
+// 댓글 삭제
+const handleCommentEditDelete = async (commentId) => {
+    try {
+        await commentDelete(commentId);
+        emit('refreshComments');
+        activeEditCommentMap[commentId] = false;
+    } catch(e) {
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message)
+        } else {
+            alert(errorMessages.BADREQUEST)
+        }
+    }
+}
+
+
+// 답글 메뉴 토글
+const toggleReplyMenu = (event, commentId) => {
+    closeCommentMenu(event)
+    event.stopPropagation();
+    activeReplyMenuMap[commentId] = !activeReplyMenuMap[commentId];
+    closeReplyMenu(event)
+};
+
+// 외부 클릭 시 답글 메뉴 닫기
+const closeReplyMenu = (event) => {
+  for (const commentId in activeReplyMenuMap) {
+    const refElement = replyMentItemRefs.value[commentId];
+    if (activeReplyMenuMap[commentId] && refElement && !refElement.contains(event.target)) {
+      activeReplyMenuMap[commentId] = false;
+    }
+  }
+};
+
+const setReplyMenuRef = (el, commentId) => {
+  if (el) {
+    replyMentItemRefs.value[commentId] = el;
+  } else {
+    delete replyMentItemRefs.value[commentId];
+  }
+};
+
+// 답글 버튼 클릭
+const handleReplyBtn = async (commentId) => {
+    activeReplyInputMap[commentId] = !activeReplyInputMap[commentId];
+    if (activeReplyInputMap[commentId] && !replyListMap[commentId]) {
+        await loadReplies(commentId, 0);
+    }
+};
+
+
+
+// 답글 가져오기
+const loadReplies = async (commentId, page = 0, size = 5) => {
+  try {
+    const res = await getCommentReplys(commentId, page, size); // page 파라미터 넘김
+
+    if (!replyListMap[commentId]) {
+      replyListMap[commentId] = [];
+    }
+
+    // 기존 데이터 + 새 데이터
+    replyListMap[commentId] = [...res.data.content];
+
+    // 현재 페이지, 전체 페이지 저장
+    replyPageMap[commentId] = res.data.page.number;
+    replySizeMap[commentId] = res.data.page.size;
+    replyTotalMap[commentId] = res.data.page.totalPages;
+    
+    
+  } catch (e) {
+    delete replyListMap[commentId];
+  }
+};
+
+// 답글 더보기 클릭
+const handleLoadMoreReplies = (commentId) => {
+  const nextSize = (replySizeMap[commentId] || 5) + 5;
+  loadReplies(commentId, 0, nextSize);
+};
+
+// 답글 저장
+const handleReplyInsert = async (parentCommentId) => {
+  const content = replyContentMap[parentCommentId]?.trim();
+  if (!content) return alert('답글을 입력해주세요.');
+  
+  try {
+    await commentInsert(content, props.recipeId, parentCommentId);
+    replyContentMap[parentCommentId] = '';
+    loadReplies(parentCommentId, replyPageMap[parentCommentId])
+  } catch (e) {
+    if (e.response && e.response?.data?.message) {
+        alert(e.response.data.message)
+    } else {
+        alert(errorMessages.BADREQUEST)
+    }
+  }
+};
+
+
+// 답글 수정 입력
+const handleEditReplyUpdate = async (content, commentId, parentCommentId) => {
+    const tirmContent = content.trim()
+    if (!tirmContent) return alert('답글을 입력해주세요.');
+
+    try {
+        await commentUpdate(tirmContent, commentId);
+        loadReplies(parentCommentId, replyPageMap[parentCommentId])
+        activeEditReplyMap[commentId] = false;
+    } catch(e) {
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message)
+        } else {
+            alert(errorMessages.BADREQUEST)
+        }
+    }
+} 
+
+// 답글 수정
+const handleReplyEdit = async (commentId, content) => {
+    editReplyMap[commentId] = content;
+    activeEditReplyMap[commentId] = true;
+}
+
+// 답글 취소
+const handleReplyEditCancle = async (commentId) => {
+    activeEditReplyMap[commentId] = false;
+}
+
+// 답글 삭제
+const handleReplyEditDelete = async (commentId, parentCommentId) => {
+    try {
+        await commentDelete(commentId);
+        loadReplies(parentCommentId, replyPageMap[parentCommentId])
+        activeEditReplyMap[commentId] = false;
+    } catch(e) {
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message)
+        } else {
+            alert(errorMessages.BADREQUEST)
+        }
+    }
+}
+
 
 // 페이지 전환
 const goToPage = (page) => {
@@ -45,8 +290,16 @@ const goToPage = (page) => {
 
 
 // 댓글 제한 250자 (한글)
-const handleContentInput = (e) => commonInputHangle(e, 250, (value) => formValues.conent = value)
+const handleContentInput = (e) => commonInputHangle(e, 250, (value) => formValues.content = value)
 
+// 댓글 수정 제한 250자 (한글)
+const handleEditContentInput = (e, commentId) => commonInputHangle(e, 250, (value) => eidtCommentMap[commentId] = value)
+
+// 답글 제한 250자 (한글)
+const handleReplyInput = (e, commentId) => commonInputHangle(e, 250, (value) => replyContentMap[commentId] = value)
+
+// 답글 수정 제한 250자 (한글)
+const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value) => editReplyMap[commentId] = value)
 </script>
 
 <template>
@@ -57,11 +310,12 @@ const handleContentInput = (e) => commonInputHangle(e, 250, (value) => formValue
 
         <div class="comment-wrap">
 
+            <!-- 댓글 입력창 -->
             <div class="comment-input-filed">
                 <v-textarea
-                v-model="formValues.conent"
+                v-model="formValues.content"
                 @input="handleContentInput"
-                placeholder="댓글은250자 이내로 작성해주세요."
+                placeholder="댓글은 250자 이내로 작성해주세요."
                 rows="4"
                 no-resize
                 variant="outlined"
@@ -69,54 +323,214 @@ const handleContentInput = (e) => commonInputHangle(e, 250, (value) => formValue
                 hide-details=true
                 class="comment-text"
                 />
-                <button class="comment-insert-btn" @click="handleContentInsert">
+                <button class="comment-insert-btn" @click="(handleCommentInsert(formValues.content))">
                     등록
                 </button>
             </div>
 
+            <!-- 댓글 목록 -->
             <ul
                 v-for="(item) in commentsData.content"
-                :key="item.id"
+                :key="item.commentId"
                 class="seq-item"
             >   
                 <li class="comment-item">
-                    <div class="comment-info">
-                        <div>
-                            <img :src="item.profileImage" class="writer-profile-image"/>
+                    <div class="comment-info-wrap">
+                        <div class="comment-info">
+                            <div>
+                                <img :src="item.profileImage" class="writer-profile-image"/>
+                            </div>
+                            <span class="writer-nickname">{{ item.nickname }}</span>
+                            <div>
+                                <span class="isAuthor" v-if="recipeWriterId === item.writerId">주인장</span>
+                            </div>
                         </div>
 
-                        <span class="writer-nickname">{{ item.nickname }}</span>
+                        
+                        <div class="comment-menu-btn" >
+                            <div @click="toggleCommentMenu($event, item.commentId)" class="comment-menu-icon">
+                                <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" />
+                            </div>
+                            
+                            <div class="comment-menu" 
+                                    v-if="activeCommentMenuMap[item.commentId]" 
+                                    :ref="el => setCommentMenuRef(el, item.commentId)">
+                                <div>
+                                    <button>
+                                        신고
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <button  @click="handleCommentEdit(item.commentId, item.content)">
+                                        수정
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <button @click="handleCommentEditDelete(item.commentId)">
+                                        삭제
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="content">
+                    <div class="content" v-if="!activeEditCommentMap[item.commentId]">
                         <span>{{ item.content }}</span>
                     </div>
+
+                    <!-- 댓글 수정 -->
+                    <div class="edit-wrap" v-if="activeEditCommentMap[item.commentId]">
+                        <v-textarea
+                            v-model="eidtCommentMap[item.commentId]"
+                            @input="handleEditContentInput($event, item.commentId)"
+                            placeholder="댓글은 250자 이내로 작성해주세요."
+                            rows="3"
+                            no-resize
+                            variant="outlined"
+                            density="compact"
+                            hide-details=true
+                            class="comment-edit-input"
+                        />
+
+                        <div class="edit-btn-box">
+                            <button type="button" class="edit-btn edit-btn-cancle" @click="handleCommentEditCancle(item.commentId)">
+                                취소
+                            </button>
+                            <button type="button" class="edit-btn" @click="handleEditCommentUpdate(eidtCommentMap[item.commentId], item.commentId)">
+                                수정
+                            </button>
+                        </div>
+                    </div>
+                    
 
                     <div class="comment-info-base">
                         <div class="create-date">
                             <span>{{ item.createAt }}</span>
                         </div>
-                        
-                        <div class="line"></div>
-
-                        <button class="report-btn">
-                            신고
-                        </button>
                     </div>
                     
+                    <!-- 답글 버튼 -->
                     <div class="reply-wrap">
-                        <button class="reply-show-btn">
-                            답글
-                        </button>
+                        <button class="reply-show-btn" @click="handleReplyBtn(item.commentId)">답글</button>
+                    </div>
+
+                    <!-- 답글 입력창 -->
+                    <div v-if="activeReplyInputMap[item.commentId]">
+                        <div class="reply-input-wrap">
+                            <v-textarea
+                            v-model="replyContentMap[item.commentId]"
+                            @input="handleReplyInput($event, item.commentId)"
+                            placeholder="답글은 250자 이내로 작성해주세요."
+                            rows="3"
+                            no-resize
+                            variant="outlined"
+                            density="compact"
+                            hide-details
+                            class="reply-input-field"
+                            />
+
+                            <button @click="handleReplyInsert(item.commentId)" class="reply-insert-btn">등록</button>
+                        </div>
+
+                        <!-- 답글 목록 -->
+                        <ul>
+                            <div class="reply-list" v-if="replyListMap[item.commentId] && replyListMap[item.commentId].length > 0">
+                                <li v-for="reply in replyListMap[item.commentId]" :key="reply.commentId" class="reply-item">
+                                    <div class="reply-line-icon"></div>
+                                    <div class="reply-info-box"> 
+                                        <div class="reply-info-wrap">
+                                            <div class="reply-info">
+                                                <img :src="reply.profileImage" class="writer-profile-image" />
+                                                <span class="writer-nickname">{{ reply.nickname }}</span>
+                                                <div>
+                                                    <span class="isAuthor" v-if="recipeWriterId === item.writerId">주인장</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="comment-menu-btn">
+                                                <div class="comment-menu-icon" @click="toggleReplyMenu($event, reply.commentId)">
+                                                    <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" />
+                                                </div>
+                                                
+
+                                                <div class="comment-menu"
+                                                    v-if="activeReplyMenuMap[reply.commentId]" 
+                                                    :ref="el => setReplyMenuRef(el, reply.commentId)">
+                                                    <div>
+                                                        <button>
+                                                            신고
+                                                        </button>
+                                                    </div>
+
+                                                    <div>
+                                                        <button  @click="handleReplyEdit(reply.commentId, reply.content)">
+                                                            수정
+                                                        </button>
+                                                    </div>
+
+                                                    <div>
+                                                        <button @click="handleReplyEditDelete(reply.commentId, item.commentId)">
+                                                            삭제
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="content" v-if="!activeEditReplyMap[reply.commentId]">
+                                            <span>{{ reply.content }}</span>
+                                        </div>
+
+
+                                        <!-- 답글 수정 -->
+                                        <div class="edit-wrap" v-if="activeEditReplyMap[reply.commentId]">
+                                            <v-textarea
+                                                v-model="editReplyMap[reply.commentId]"
+                                                @input="handleEditReplyInput($event, editReplyMap[reply.commentId])"
+                                                placeholder="댓글은 250자 이내로 작성해주세요."
+                                                rows="2"
+                                                no-resize
+                                                variant="outlined"
+                                                density="compact"
+                                                hide-details=true
+                                                class="comment-edit-input"
+                                            />
+
+                                            <div class="edit-btn-box">
+                                                <button type="button" class="edit-btn edit-btn-cancle" @click="handleReplyEditCancle(reply.commentId)">
+                                                    취소
+                                                </button>
+                                                <button type="button" class="edit-btn" @click="handleEditReplyUpdate(editReplyMap[reply.commentId], reply.commentId, item.commentId)">
+                                                    수정
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="comment-info-base">
+                                            <span>{{ reply.createAt }}</span>
+                                        </div>
+
+                                    </div>
+    
+                                </li>
+
+                                <!-- 더보기 버튼 -->
+                                <li v-if="(replyPageMap[item.commentId] + 1) < replyTotalMap[item.commentId]" class="reply-show-more">
+                                    <button @click="handleLoadMoreReplies(item.commentId)">더보기</button>
+                                </li>
+                            </div>
+                        </ul>
                     </div>
                 </li>
             </ul>
 
-            <div class="pagination" v-if="commentsData.totalPages > 1">
+            <div class="pagination" v-if="commentsData?.page?.totalPages > 1">
                 <button
-                    v-for="n in commentsData.totalPages"
+                    v-for="n in commentsData?.page?.totalPages"
                     :key="n"
-                    :class="{ active: commentsData.number === n - 1 }"
+                    :class="{ active: commentsData?.page?.number === n - 1 }"
                     @click="goToPage(n - 1)"
                     >
                     {{ n }}
@@ -159,25 +573,60 @@ const handleContentInput = (e) => commonInputHangle(e, 250, (value) => formValue
             padding-bottom: 0.8rem;
             border-bottom: 1px solid rgb(224, 224, 224);
             text-align: left;
-            .comment-info {
+
+            .comment-info-wrap {
                 display: flex;
-                gap: 5px;
+                align-items: center;
+                justify-content: space-between;
 
-                .writer-profile-image {
-                    width: 2rem;
-                    
-                }
+                .comment-info {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 5px;
 
-                .writer-nickname {
-                    padding-top: 0.3rem;
-                    font-size: 0.8rem;
-                    font-weight: 600;
+                    .writer-profile-image {
+                        width: 2rem;
+                        
+                    }
+
+                    .writer-nickname {
+                        padding-top: 0.3rem;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                    }
                 }
             }
+            
 
             .content{
                 padding-left: 0.3rem;
                 font-size: 0.83rem;
+                white-space: pre-wrap;
+            }
+
+            .edit-wrap {
+                .comment-edit-input {
+                    width: 100%;
+                    border-bottom: 1px solid black;
+                    outline: none;
+                    font-size: 0.9rem;
+                }
+
+                .edit-btn-box {
+                    margin-top: 0.5rem;
+                    text-align: right;
+                    
+                    .edit-btn {
+                        border-radius: 0.5rem;
+                        font-size: 0.8rem;
+                        border: 2px solid rgb(224, 224, 224);
+                        padding: 0.3rem 0.7rem;
+                    }
+
+                    .edit-btn-cancle {
+                        margin-right: 1rem;
+                    }
+                }
             }
 
             .comment-info-base {
@@ -207,11 +656,119 @@ const handleContentInput = (e) => commonInputHangle(e, 250, (value) => formValue
             .reply-wrap{
                 margin-top: 0.2rem;
                 padding-left: 0.2rem;
+
                 .reply-show-btn {
                     font-size: 0.7rem;
                     padding: 0.1rem 0.5rem;
                     border: 1px solid rgb(224, 224, 224);
                 }
+            }
+
+            .reply-input-wrap {
+                margin-top: 1rem;
+                padding-top: 1rem;
+                padding-bottom: 0.8rem;
+                border-top: 1px solid rgb(224, 224, 224);
+                padding-left: 3rem;
+                padding-right: 3rem;
+                text-align: right;
+
+                .reply-input-field {
+                    margin: auto;
+                }
+
+                .reply-insert-btn {
+                    background-color: rgb(244, 240, 239);
+                    border-radius: 0.5rem;
+                    padding: 0.4rem 0.8rem;
+                    font-size: 0.8rem;
+                    margin-top: 0.5rem;
+                }
+
+
+            }
+
+            .reply-item{
+                padding-top: 0.5rem;
+                padding-bottom: 0.8rem;
+                border-bottom: 1px solid rgb(224, 224, 224);
+                text-align: left;
+                padding-left: 3rem;
+                padding-right: 3rem;
+                display: flex;
+
+                .reply-info-box {
+                    width: 100%;
+                .reply-info-wrap {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+
+                    .reply-info {
+                        display: flex;
+                        justify-content: space-between;
+                        gap: 5px;
+
+                        .writer-profile-image {
+                            width: 2rem;
+                            
+                        }
+                    }
+                }
+
+                }
+                
+                .reply-line-icon {
+                    position: relative;
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 10px;
+                    margin-top: 0.3rem;
+
+                    &::before, &::after {
+                        content: '';
+                        position: absolute;
+                        background-color: #ccc;
+                    }
+
+                    &::before {
+                        top: 0;
+                        left: 50%;
+                        width: 2px;
+                        height: 10px;
+                    }
+
+                    &::after {
+                        top: 63%;
+                        left: 50%;
+                        width: 10px;
+                        height: 2px;
+                        
+                    }
+                }
+
+            }
+
+            .reply-item:last-child {
+                border: none;
+                padding-bottom: 0;
+            }
+
+            .reply-show-more {
+                text-align: center;
+                font-size: 0.9rem;
+                padding-top: 0.9rem;
+
+            }
+
+            .isAuthor {
+                font-size: 0.6rem;
+                font-weight: 600;
+                border: 1px solid #03C75A;
+                height: 1.2rem;
+                border-radius: 10rem;
+                padding: 0.1rem 0.2rem;
+                color: #03C75A;
             }
         }
         .pagination {
@@ -233,6 +790,32 @@ const handleContentInput = (e) => commonInputHangle(e, 250, (value) => formValue
             }
         }
         
+    }
+
+    .comment-menu-btn {
+        color: rgb(124, 124, 124);
+        position: relative;
+
+        .comment-menu-icon {
+            cursor: pointer;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .comment-menu {
+            position: absolute;
+            background-color: white;
+            width: 5rem;
+            top: 2rem;
+            left: -1rem;
+            text-align: center;
+            border: 1px solid rgb(124, 124, 124);
+            border-radius: 0.5rem;
+            z-index: 100;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            color: black;
+        }
     }
 }
 </style>

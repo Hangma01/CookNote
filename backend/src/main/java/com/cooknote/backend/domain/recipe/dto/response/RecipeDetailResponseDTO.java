@@ -49,8 +49,11 @@ public class RecipeDetailResponseDTO {
     private String writerNickname;									// 레시피 작성자 닉네임
     private String writerProfileImage;								// 레시피 작성자 프로필 이미지
     
+    private Long requesterId;										// 요청자 UserId
+    
     private boolean isLiked;										// 좋아요 여부
     private boolean isBookmarked;									// 북마크 여부
+    private boolean isAuthor;										// 본인 게시글인지 여부
     
     private List<RecipeIngredientResponseDTO> recipeIngredients;	// 레시피 재료
     private List<RecipeSeqResponseDTO> recipeSeqs;					// 레시피 순서

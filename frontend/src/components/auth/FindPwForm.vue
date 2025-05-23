@@ -174,11 +174,12 @@ watch (
 						density="compact"
 						hide-details="auto"
 						maxlength="6"
-						v-if="isAuthCodeRequest"
+						v-if="isAuthCodeRequest" 
 						:rules="[authCodeRule]"
 						:error-messages="errorMsgAuthCode"
 					/> 
-					<v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest">
+
+					<v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest" >
 						재전송
 					</v-btn>
 				</div>     

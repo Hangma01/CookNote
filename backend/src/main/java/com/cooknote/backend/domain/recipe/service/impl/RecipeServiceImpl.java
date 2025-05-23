@@ -59,6 +59,13 @@ public class RecipeServiceImpl implements RecipeService {
 		recipeDetailResponseDTO.setServingLabel(recipeDetailResponseDTO.getServing().getLabel());
 		recipeDetailResponseDTO.setDurationLabel(recipeDetailResponseDTO.getDuration().getLabel());
 		recipeDetailResponseDTO.setLevelLabel(recipeDetailResponseDTO.getLevel().getLabel());
+		recipeDetailResponseDTO.setRequesterId(userId);
+		
+		if(recipeDetailResponseDTO.getWriterUserId().equals(userId)) {
+			recipeDetailResponseDTO.setAuthor(true);
+		} else {
+			recipeDetailResponseDTO.setAuthor(false);
+		}
 		
 		return recipeDetailResponseDTO;
 	}

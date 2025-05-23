@@ -39,14 +39,7 @@ const handleLogout = async () => {
     await router.push({ name: 'login' })
 }
 
-const fe = async () => {
-    try {
-        const res = await privateAPI.get('/users/mypage');
-        console.log(res)
-    } catch(e){
-        console.log(e)
-    }
-}
+
 // 전체 페이지 클릭 이벤트를 추가
 onMounted(() => {
     document.addEventListener('click', closeMyPageItem);
@@ -77,17 +70,17 @@ onBeforeUnmount(() => {
 
             <div class="user-menu-mypage-item" v-show="showMyPageItem" ref="myPageItemRef">
                 <ul>
-                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 1 } }"> -->
+                    <router-link :to="{ name: 'myPage' }">
                         <li class="mypage-item">
                             홈
                         </li>
-                    <!-- </router-link> -->
+                    </router-link>
 
-                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 2 } }"> -->
+        
                         <li class="mypage-item">
                             팔로워
                         </li>
-                    <!-- </router-link> -->
+
                     
                     <li class="mypage-item" @click="handleLogout">
                         로그아웃

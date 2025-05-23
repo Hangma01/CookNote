@@ -41,6 +41,10 @@ public class CommentController {
 						  			   						   , @RequestParam(value = "page", defaultValue = "0") int page
 						  			   						   , @RequestParam(value = "size", defaultValue = "10") int size) {
 		
+		// Null 체크
+		if(CommonFunctionUtil.nullCheck(recipeId)) {
+			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+		}
 		
 		return ResponseEntity.ok(commentService.getComments(recipeId, page, size));
 	}
@@ -49,11 +53,16 @@ public class CommentController {
 	public ResponseEntity<Page<CommentRepliesResponseDTO>> getReplies(@RequestParam("parentCommentId") Long parentCommentId
 				   , @RequestParam(value = "page", defaultValue = "0") int page
 				   , @RequestParam(value = "size", defaultValue = "5") int size) {
+
+		// Null 체크
+		if(CommonFunctionUtil.nullCheck(parentCommentId)) {
+			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+		}
 		
 		return ResponseEntity.ok(commentService.getCommentReplies(parentCommentId, page, size));
 	}
 	
-	// 댓글 삽입
+	// 댓글 저장
 	@PostMapping("")
 	public ResponseEntity<Void> commentInsert(@AuthenticationPrincipal CustomUserDetails customUserDetails 
 							, @Valid @RequestBody CommentInsertRequestDTO commentInsertRequestDTO

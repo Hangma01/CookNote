@@ -22,5 +22,4 @@ public class User {
 	private String profileImage;
 	private LocalDate createAt;
 	private LocalDate updateAt;
-	private boolean isDelete;
 }

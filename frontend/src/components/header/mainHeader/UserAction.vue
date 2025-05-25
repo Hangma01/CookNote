@@ -13,20 +13,24 @@ const userStore = useUserStore();
 const isLoggedIn = userStore.isLoggedIn;
 
 // 마이 페이지 아이템 이벤트
-const showMyPageItem = ref(false);
+const showMypageItem = ref(false);
 const myPageItemRef = ref(null);  
 
 // 외부 클릭 시 마이 페이지 아이템 창 닫기
-const closeMyPageItem = (event) => {
-    if (showMyPageItem && !myPageItemRef.value.contains(event.target)) {
-        showMyPageItem.value = false;
+const closeMypageItem = (event) => {
+    if (showMypageItem && !myPageItemRef.value.contains(event.target)) {
+        showMypageItem.value = false;
     }
 }
 
 // 마이 페이지 아이템 창 토글
-const handleToggleMyPageItem = (event) => {
-    showMyPageItem.value = !showMyPageItem.value
+const toggleMypageItem = (event) => {
+    showMypageItem.value = !showMypageItem.value
     event.stopPropagation();
+}
+
+const toggleShowMypageItem = () => {
+    showMypageItem.value = false
 }
 
 // 로그아웃
@@ -42,35 +46,35 @@ const handleLogout = async () => {
 
 // 전체 페이지 클릭 이벤트를 추가
 onMounted(() => {
-    document.addEventListener('click', closeMyPageItem);
+    document.addEventListener('click', closeMypageItem);
 });
 
 // 컴포넌트가 언마운트 될 때 이벤트 리스너 제거
 onBeforeUnmount(() => {
-    document.removeEventListener('click', closeMyPageItem);
+    document.removeEventListener('click', closeMypageItem);
 });
 </script>
 
 <template>
     <ul class="user-menu">
         <li class="user-menu-item">
-            <router-link :to="{ name: 'myPage' }" >
+            <!-- <router-link :to="{ name: 'mypageRecipe' }" > -->
                 <font-awesome-icon :icon="['fas', 'magnifying-glass']" style="color: #454F5B;" />
-            </router-link>
+            <!-- </router-link> -->
         </li>
 
         <li class="user-menu-item">
-            <router-link :to="{ name: 'myPage' }" v-if="!isLoggedIn" >
+            <router-link :to="{ name: 'login' }" v-if="!isLoggedIn" >
                 <font-awesome-icon :icon="['far', 'user']" style="color: #454F5B;" />
             </router-link>
 
-            <div v-if="isLoggedIn" @click="handleToggleMyPageItem" class="mypage-icon">
+            <div v-if="isLoggedIn" @click="toggleMypageItem" class="mypage-icon">
                 <font-awesome-icon :icon="['far', 'user']" style="color: #454F5B;" />
             </div>
 
-            <div class="user-menu-mypage-item" v-show="showMyPageItem" ref="myPageItemRef">
+            <div class="user-menu-mypage-item" v-show="showMypageItem" @click="toggleShowMypageItem" ref="myPageItemRef">
                 <ul>
-                    <router-link :to="{ name: 'myPage' }">
+                    <router-link :to="{ name: 'profileRecipe' }">
                         <li class="mypage-item">
                             홈
                         </li>
@@ -78,7 +82,7 @@ onBeforeUnmount(() => {
 
         
                         <li class="mypage-item">
-                            팔로워
+                            개인정보 수정
                         </li>
 
                     
@@ -93,14 +97,14 @@ onBeforeUnmount(() => {
             <router-link :to="{name : 'recipeWrite'}">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
-
+<!-- 
             <router-link :to="{name : 'recipeEdit', params: { recipeId: 4 } }" style="padding-left: 20px">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
 
             <router-link :to="{name : 'recipeDetail', params: { recipeId: 4 } }" style="padding-left: 20px">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
-            </router-link>
+            </router-link> -->
         </li>
     </ul>
 </template>

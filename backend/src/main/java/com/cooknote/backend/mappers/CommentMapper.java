@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.cooknote.backend.domain.comment.dto.request.CommentInsertRequestDTO;
 import com.cooknote.backend.domain.comment.dto.request.CommentUpdateRequestDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentRepliesResponseDTO;
+import com.cooknote.backend.domain.comment.dto.response.CommentUserWriteResponseDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentsResponseDTO;
 import com.cooknote.backend.domain.comment.entity.Comment;
 import com.cooknote.backend.domain.comment.enums.CommentStatus;
@@ -47,8 +48,7 @@ public interface CommentMapper {
 
 	
 	// 댓글 삭제
-	void commentDelete(@Param("commentId") Long commentId
-					 , @Param("commentStatus") CommentStatus delete);
+	void commentDelete(@Param("commentId") Long commentId);
 	
 	
 
@@ -59,5 +59,14 @@ public interface CommentMapper {
 
 	// 댓글 수정
 	void commentUpdate(@Param("updateDTO") CommentUpdateRequestDTO commentUpdateRequestDTO);
+
+	// 유저가 작성한 댓글 조회
+	List<CommentUserWriteResponseDTO> getCommentUserWrite(@Param("userId") Long userId
+												, @Param("size") int size
+												, @Param("offset") int offset 
+												, @Param("statusPrivateAdmin") CommentStatus statusPrivateAdmin);
+	
+	// 유저가 작성한 토탈 댓글 갯수 조회
+	int getCommentUserWriteCount(@Param("userId") Long userId);
 
 }

@@ -1,5 +1,6 @@
 <script setup>
 import { commentDelete, commentInsert, commentUpdate, getCommentReplys } from '@/services/commentService';
+import { useUserStore } from '@/stores/user';
 import { commonInputHangle } from '@/utils/commonFunction';
 import { errorMessages } from '@/utils/messages/errorMessages';
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
@@ -20,6 +21,12 @@ const props = defineProps({
     }
 })
 
+
+// 유저 스토어
+const userStore = useUserStore();
+const isLoggedIn = userStore.getIsLoggedIn;
+const userId = userStore.getUserId;
+
 // 부모 이벤트
 const emit = defineEmits(['refreshComments', 'changePage']);
 
@@ -37,7 +44,7 @@ const commentMentItemRefs = ref({});                // 외부 클릭 시 댓글 
 const replyContentMap = reactive({});               // 보낼 답글 값
 const activeReplyInputMap = reactive({});           // 보낼 답글 활성화
 const activeReplyMenuMap = reactive({});            // 답글 메뉴 활성화
-const replyMentItemRefs = ref({});                  // 외부 클릭 시 답글 메뉴 닫히기
+const replyItemRefs = ref({});                      // 외부 클릭 시 답글 메뉴 닫히기
 
 const editReplyMap = reactive({});                  // 보낼 답글 수정 값
 const activeEditReplyMap = reactive({});            // 보낼 답글 수정 활성화
@@ -165,7 +172,7 @@ const toggleReplyMenu = (event, commentId) => {
 // 외부 클릭 시 답글 메뉴 닫기
 const closeReplyMenu = (event) => {
   for (const commentId in activeReplyMenuMap) {
-    const refElement = replyMentItemRefs.value[commentId];
+    const refElement = replyItemRefs.value[commentId];
     if (activeReplyMenuMap[commentId] && refElement && !refElement.contains(event.target)) {
       activeReplyMenuMap[commentId] = false;
     }
@@ -174,9 +181,9 @@ const closeReplyMenu = (event) => {
 
 const setReplyMenuRef = (el, commentId) => {
   if (el) {
-    replyMentItemRefs.value[commentId] = el;
+    replyItemRefs.value[commentId] = el;
   } else {
-    delete replyMentItemRefs.value[commentId];
+    delete replyItemRefs.value[commentId];
   }
 };
 
@@ -315,15 +322,16 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                 <v-textarea
                 v-model="formValues.content"
                 @input="handleContentInput"
-                placeholder="댓글은 250자 이내로 작성해주세요."
+                :placeholder="isLoggedIn ? '답글은 250자 이내로 작성해주세요.' : '로그인 후 답글 작성이 가능합니다.'"
                 rows="4"
                 no-resize
                 variant="outlined"
                 density="compact"
                 hide-details=true
                 class="comment-text"
+                :disabled="!isLoggedIn"
                 />
-                <button class="comment-insert-btn" @click="(handleCommentInsert(formValues.content))">
+                <button class="comment-insert-btn" @click="(handleCommentInsert(formValues.content))" :disabled="!isLoggedIn">
                     등록
                 </button>
             </div>
@@ -338,7 +346,9 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                     <div class="comment-info-wrap">
                         <div class="comment-info">
                             <div>
-                                <img :src="item.profileImage" class="writer-profile-image"/>
+                                <router-link :to="{ name: 'profileHost', params: { hostId: item.writerId }}">
+                                    <img :src="item.profileImage" class="writer-profile-image"/>
+                                </router-link>
                             </div>
                             <span class="writer-nickname">{{ item.nickname }}</span>
                             <div>
@@ -347,7 +357,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                         </div>
 
                         
-                        <div class="comment-menu-btn" >
+                        <div class="comment-menu-btn" v-if="isLoggedIn === true">
                             <div @click="toggleCommentMenu($event, item.commentId)" class="comment-menu-icon">
                                 <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" />
                             </div>
@@ -355,19 +365,19 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                             <div class="comment-menu" 
                                     v-if="activeCommentMenuMap[item.commentId]" 
                                     :ref="el => setCommentMenuRef(el, item.commentId)">
-                                <div>
+                                <div v-if="item.writerId !== userId">
                                     <button>
                                         신고
                                     </button>
                                 </div>
 
-                                <div>
+                                <div v-if="item.writerId === userId">
                                     <button  @click="handleCommentEdit(item.commentId, item.content)">
                                         수정
                                     </button>
                                 </div>
 
-                                <div>
+                                <div v-if="item.writerId === userId">
                                     <button @click="handleCommentEditDelete(item.commentId)">
                                         삭제
                                     </button>
@@ -422,16 +432,17 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                             <v-textarea
                             v-model="replyContentMap[item.commentId]"
                             @input="handleReplyInput($event, item.commentId)"
-                            placeholder="답글은 250자 이내로 작성해주세요."
+                            :placeholder="isLoggedIn ? '답글은 250자 이내로 작성해주세요.' : '로그인 후 답글 작성이 가능합니다.'"
                             rows="3"
                             no-resize
                             variant="outlined"
                             density="compact"
                             hide-details
                             class="reply-input-field"
+                            :disabled="!isLoggedIn"
                             />
 
-                            <button @click="handleReplyInsert(item.commentId)" class="reply-insert-btn">등록</button>
+                            <button @click="handleReplyInsert(item.commentId)" class="reply-insert-btn" :disabled="!isLoggedIn">등록</button>
                         </div>
 
                         <!-- 답글 목록 -->
@@ -442,14 +453,17 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                                     <div class="reply-info-box"> 
                                         <div class="reply-info-wrap">
                                             <div class="reply-info">
-                                                <img :src="reply.profileImage" class="writer-profile-image" />
+                                            
+                                                <router-link :to="{ name: 'profileHost', params: { hostId: reply.writerId }}">
+                                                    <img :src="reply.profileImage" class="writer-profile-image" />
+                                                </router-link>
                                                 <span class="writer-nickname">{{ reply.nickname }}</span>
                                                 <div>
-                                                    <span class="isAuthor" v-if="recipeWriterId === item.writerId">주인장</span>
+                                                    <span class="isAuthor" v-if="recipeWriterId === reply.writerId">주인장</span>
                                                 </div>
                                             </div>
 
-                                            <div class="comment-menu-btn">
+                                            <div class="comment-menu-btn" v-if="isLoggedIn === true">
                                                 <div class="comment-menu-icon" @click="toggleReplyMenu($event, reply.commentId)">
                                                     <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" />
                                                 </div>
@@ -458,19 +472,19 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                                                 <div class="comment-menu"
                                                     v-if="activeReplyMenuMap[reply.commentId]" 
                                                     :ref="el => setReplyMenuRef(el, reply.commentId)">
-                                                    <div>
+                                                    <div v-if="reply.writerId !== userId">
                                                         <button>
                                                             신고
                                                         </button>
                                                     </div>
 
-                                                    <div>
+                                                    <div v-if="reply.writerId === userId">
                                                         <button  @click="handleReplyEdit(reply.commentId, reply.content)">
                                                             수정
                                                         </button>
                                                     </div>
 
-                                                    <div>
+                                                    <div v-if="reply.writerId === userId">
                                                         <button @click="handleReplyEditDelete(reply.commentId, item.commentId)">
                                                             삭제
                                                         </button>
@@ -699,22 +713,28 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
 
                 .reply-info-box {
                     width: 100%;
-                .reply-info-wrap {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
 
-                    .reply-info {
+                    .writer-nickname {
+                        padding-top: 0.3rem;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                    }
+                    .reply-info-wrap {
                         display: flex;
+                        align-items: center;
                         justify-content: space-between;
-                        gap: 5px;
 
-                        .writer-profile-image {
-                            width: 2rem;
-                            
+                        .reply-info {
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 5px;
+
+                            .writer-profile-image {
+                                width: 2rem;
+                                
+                            }
                         }
                     }
-                }
 
                 }
                 

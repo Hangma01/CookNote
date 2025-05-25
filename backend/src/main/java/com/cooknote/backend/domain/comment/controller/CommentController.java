@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cooknote.backend.domain.comment.dto.request.CommentInsertRequestDTO;
 import com.cooknote.backend.domain.comment.dto.request.CommentUpdateRequestDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentRepliesResponseDTO;
+import com.cooknote.backend.domain.comment.dto.response.CommentUserWriteResponseDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentsResponseDTO;
 import com.cooknote.backend.domain.comment.service.CommentService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.utils.commonFunction.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class CommentController {
 
 	private final CommentService commentService;
 	
-	// 댓글 목록 조회
+	// 특정 레시피 댓글 목록 조회
 	@GetMapping("")
 	public ResponseEntity<Page<CommentsResponseDTO>> getComments(@RequestParam("recipeId") Long recipeId
 						  			   						   , @RequestParam(value = "page", defaultValue = "0") int page
@@ -47,6 +48,15 @@ public class CommentController {
 		}
 		
 		return ResponseEntity.ok(commentService.getComments(recipeId, page, size));
+	}
+	
+	// 유저가 작성한 댓글 목록 조회
+	@GetMapping("/user")
+	public ResponseEntity<Page<CommentUserWriteResponseDTO>> getCommentUserWrite(@AuthenticationPrincipal CustomUserDetails customUserDetails 
+						  			   						   		, @RequestParam(value = "page", defaultValue = "0") int page
+						  			   						   		, @RequestParam(value = "size", defaultValue = "10") int size) {
+		
+		return ResponseEntity.ok(commentService.getCommentUserWrite(customUserDetails.getUserId(), page, size));
 	}
 	
 	@GetMapping("/replies")

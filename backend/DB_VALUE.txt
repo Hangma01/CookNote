@@ -20,13 +20,30 @@ INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '반찬' );
 INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '디저트' );
 INSERT INTO CATEGORY_PURPOSE ( TYPE ) VALUES ( '기타' );
 
+-- 게시글을 불러오려면
+
 -- 인덱스
 -- 레시피
 CREATE INDEX idx_recipe_writer_id ON RECIPE(WRITER_ID);
 CREATE INDEX idx_recipe_recipe_id ON RECIPE(RECIPE_ID);
+CREATE INDEX idx_recipe_cateogry_cuisine_id ON RECIPE(CATEGORY_CUISINE_ID);
+CREATE INDEX idx_recipe_cateogry_purpose_id ON RECIPE(CATEGORY_PURPOSE_ID);
+CREATE INDEX idx_recipe_status ON RECIPE(STATUS);
+
+-- 레시피 좋아요
+CREATE INDEX idx_recipe_like_recipe_id ON RECIPE_LIKE(RECIPE_ID);
+CREATE INDEX idx_recipe_like_user_id ON RECIPE_LIKE(USER_ID);
+
+-- 북마크
+CREATE INDEX idx_bookmark_recipe_id ON RECIPE_BOOKMARK(RECIPE_ID);
+CREATE INDEX idx_bookmark_user_id ON RECIPE_BOOKMARK(USER_ID);
 
 -- 레시피 순서
 CREATE INDEX idx_recipe_seq_recipe_id ON RECIPE_SEQ(RECIPE_ID);
 
 -- 레시피 재료
 CREATE INDEX idx_recipe_ingredient_recipe_id ON RECIPE_INGREDIENT(RECIPE_ID);
+
+-- 팔로우
+CREATE INDEX idx_follow_follower ON FOLLOW(FOLLOWER_ID);
+CREATE INDEX idx_follow_following ON FOLLOW(FOLLOWING_ID);

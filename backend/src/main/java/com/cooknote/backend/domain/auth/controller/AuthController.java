@@ -19,7 +19,7 @@ import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.utils.commonFunction.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

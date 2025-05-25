@@ -36,27 +36,46 @@ export const routes = [
             },
             // 마이페이지 라우터
             {
-                path: '/mypage',
-                component: () => import('../views/MyPageView.vue'),
+                path: '/profile',
+                component: () => import('../views/ProfileView.vue'),
                 meta: { requiresAuth: true },
                 children: [
                     {
                         path: '',
-                        name: 'myPage',
-                        component: () => import('@/components/recipe/recipeWrite/RecipeWrite.vue'),
-                        meta: { requiresAuth: true, forceRemount: true },
+                        component: () => import('@/components/profile/ProfileHome.vue'),
+                        children: [
+                            {
+                                path: 'recipe',
+                                name: 'profileRecipe',
+                                component: () => import('@/components/profile/ProfileRecipe.vue'),
+                            },
+                            {
+                                path: 'bookmark',
+                                name: 'profileBookmark',
+                                component: () => import('@/components/profile/ProfileBookmark.vue'),
+                            },
+                            {
+                                path: 'comment',
+                                name: 'profileComment',
+                                component: () => import('@/components/profile/ProfileComment.vue'),
+                            },
+                            {
+                                path: 'like',
+                                name: 'profileLike',
+                                component: () => import('@/components/profile/ProfileLike.vue'),
+                            },
+                            {
+                                path: 'follow',
+                                name: 'profileFollow',
+                                component: () => import('@/components/profile/ProfileFollow.vue'),
+                            },
+                        ]
                     },
-                    // {
-                    //     path: ','
-                    //     name: 'recipeEdit',
-                    //     component: () => import('../components/recipe/recipeWrite/RecipeWrite.vue'),
-                    //     meta: { requiresAuth: true, forceRemount: true },
-                    // },
-                    // {
-                    //     path: '',
-                    //     name: 'recipeDetail',
-                    //     component: () => import('../components/recipe/recipeDetail/RecipeDetail.vue'),
-                    // },
+                    {
+                        path: ':hostId',
+                        name: 'profileHost',
+                        component: () => import('@/components/profile/ProfileHost.vue'),
+                    },
                 ]
             }
         ]

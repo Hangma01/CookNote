@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import { login } from '@/services/authService';
 import { useUserStore } from '@/stores/user';
 import { defaultIdRule, defaultPwRule } from '@/utils/rules';
+import { jwtDecode } from 'jwt-decode';
 
 // 화면 전환
 const router = useRouter();
@@ -37,8 +38,13 @@ const handleLogin = debounce(async () => {
     try {
 		  const res = await login({...formValues})
       const accessToken = res.headers[commonValues.AUTHORIZATION_HEADER]
-  
-      userStore.login(accessToken)
+
+      // jwt 디코딩
+      const token = accessToken.replace('Bearer ', '')
+      const decodedToken = jwtDecode(token)
+      const userId = decodedToken.userId  
+
+      userStore.login(accessToken, userId)
   
       router.replace({name : "mainPage"})
     } catch (e) {

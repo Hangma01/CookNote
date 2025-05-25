@@ -15,7 +15,9 @@ import { RouterView } from 'vue-router'
   font-family: "Noto Sans KR", Helvetica, "Helvetica Neue", Arial, "sans-serif";
 }
 
-
+body {
+  overflow-x: auto;
+}
 a{
   color: black;
   text-decoration: none;

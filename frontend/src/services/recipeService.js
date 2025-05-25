@@ -37,6 +37,11 @@ export const getDetailRecipe = async (recipeId) => {
     }
 }
 
+// 레시피 좋아요 데이터 가져오기
+export const getRecipeLike = async (page = 0) => {
+    return await privateAPI.get(`/recipe/like?page=${page}`)    
+}
+
 // 레시피 좋아요 생성
 export const recipeLikeInsert = async (recipeId) => {
     return await privateAPI.post(`/recipe/like`, { recipeId })
@@ -47,6 +52,11 @@ export const recipeLikeDelete = async (recipeId) => {
     return await privateAPI.delete(`/recipe/like`, { params: { recipeId } })
 }
 
+// 레시피 북마크 데이터 가져오기
+export const getRecipeBookmark = async (page = 0) => {
+    return await privateAPI.get(`/recipe/bookmark?page=${page}`)    
+}
+
 // 레시피 북마크 생성
 export const recipeBookmarkInsert = async (recipeId) => {
     return await privateAPI.post(`/recipe/bookmark`, { recipeId })
@@ -55,4 +65,19 @@ export const recipeBookmarkInsert = async (recipeId) => {
 // 레시피 북마크 삭제
 export const recipeBookmarkDelete = async (recipeId) => {
     return await privateAPI.delete(`/recipe/bookmark`, { params: { recipeId } })
+}
+
+// 공개 호스트 레시피 가져오기
+export const getHostRecipePublic = async (hostId, page = 0) => {
+    return await publicAPI.get(`/recipe/public/host?hostId=${hostId}&page=${page}`)
+}
+
+// 공개 본인 레시피 가져오기
+export const getRecipePublic = async (page = 0) => {
+    return await privateAPI.get(`/recipe/public?page=${page}`)
+}
+
+// 비공개 본인 레시피 가져오기
+export const getRecipePrivate = async (page = 0) => {
+    return await privateAPI.get(`/recipe/private?page=${page}`)
 }

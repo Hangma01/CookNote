@@ -14,7 +14,6 @@
         <result property="profileImage" column="PROFILE_IMAGE"/>
         <result property="createAt" column="CREATE_AT"/>
         <result property="updateAt" column="UPDATE_AT"/>
-        <result property="isDelete" column="IS_DELETE"/>
     </resultMap>
     
     
@@ -32,4 +31,142 @@
 		  FROM USER
 	 	 WHERE ID = #{id}
 	</select>   
+	
+	<!-- 호스트 프로필 가져오기 -->
+	<select id="getHostProfile" resultType="UserHostProfileResponseDTO">
+		SELECT U.NICKNAME	   AS NICKNAME
+			 , U.PROFILE_IMAGE AS PROFILE_IMAGE
+			 , SUM(
+			 	   CASE 
+			 	   WHEN R.STATUS = 'PUBLIC' 
+			 	   THEN 1 
+			 	   ELSE 0 
+			 	    END
+		     ) 				   AS RECIPE_PUBLIC_COUNT
+		     , SUM(
+		     	   CASE 
+		    	   WHEN R.STATUS 
+		     		 IN ('PRIVATE', 'PRIVATE_ADMIN') 
+		     	   THEN 1 
+		     	   ELSE 0 
+		     		END
+		     ) 				   AS RECIPE_PRIVATE_COUNT
+		     , (
+		     	SELECT COUNT(FOLLOWING_ID) 
+		     	  FROM FOLLOW 
+		     	 WHERE FOLLOWING_ID = #{hostId}
+		     ) 				   AS FOLLOWING_COUNT
+		     , (
+		     	SELECT COUNT(FOLLOWER_ID) 
+		     	  FROM FOLLOW 
+		     	 WHERE FOLLOWER_ID = #{hostId}
+		     ) 				   AS FOLLOWER_COUNT
+		     <if test="userId != null"> <!-- 본인 프로필인지 확인을 위함 -->
+		     , EXISTS (
+		  				   SELECT 1 
+		  				   FROM FOLLOW 
+		  				   WHERE FOLLOWER_ID = #{userId} 
+		  				     AND FOLLOWING_ID = #{hostId}
+					  ) 				AS IS_FOLLOW
+		      </if>
+		 FROM USER 			    AS U
+		 LEFT JOIN RECIPE 	    AS R 
+		   ON U.USER_ID = R.WRITER_ID
+		WHERE USER_ID = #{hostId}
+	</select>
+	
+	<!-- 본인 프로필 가져오기 -->
+	<select id="getProfile" resultType="UserProfileResponseDTO">
+		SELECT U.NICKNAME	   AS NICKNAME
+			 , U.PROFILE_IMAGE AS PROFILE_IMAGE
+			 , SUM(
+			 	   CASE 
+			 	   WHEN R.STATUS = 'PUBLIC' 
+			 	   THEN 1 
+			 	   ELSE 0 
+			 	    END
+		     ) 				   AS RECIPE_PUBLIC_COUNT
+		     , SUM(
+		     	   CASE 
+		    	   WHEN R.STATUS 
+		     		 IN ('PRIVATE', 'PRIVATE_ADMIN') 
+		     	   THEN 1 
+		     	   ELSE 0 
+		     		END
+		     ) 				   AS RECIPE_PRIVATE_COUNT
+		     , (
+		     	SELECT COUNT(FOLLOWING_ID) 
+		     	  FROM FOLLOW 
+		     	 WHERE FOLLOWING_ID = #{userId}
+		     ) 				   AS FOLLOWER_COUNT
+		     , (
+		     	SELECT COUNT(FOLLOWER_ID) 
+		     	  FROM FOLLOW 
+		     	 WHERE FOLLOWER_ID = #{userId}
+		     ) 				   AS FOLLOWING_COUNT
+		     
+		 FROM USER 			    AS U
+		 LEFT JOIN RECIPE 	    AS R 
+		   ON U.USER_ID = R.WRITER_ID
+		WHERE USER_ID = #{userId}
+	</select>
+	
+	<!-- 팔로워 정보 조회 -->
+	<select id="getFollower" resultType="UserFollowerResponseDTO">
+		SELECT U.USER_ID AS FOLLOWER_ID
+		     , U.NICKNAME AS FOLLOWER_NICKNAME
+		     , U.PROFILE_IMAGE FOLLOWER_PROFILE_IMAGE
+ 			 , CASE
+ 			   WHEN F2.FOLLOWING_ID IS NOT NULL
+ 			   THEN TRUE
+ 			   ELSE FALSE
+ 			    END AS IS_FOLLOWING_BACK
+ 	   	  FROM FOLLOW AS F1
+    	  JOIN USER AS U 
+    	    ON F1.FOLLOWER_ID = U.USER_ID
+     LEFT JOIN FOLLOW AS F2
+            ON F1.FOLLOWER_ID = F2.FOLLOWING_ID
+    	 WHERE F1.FOLLOWING_ID = #{userId}
+	</select>
+	
+	<!-- 팔로잉 정보 조회 -->
+	<select id="getFollowing" resultType="UserFollowingResponseDTO">
+		SELECT U.USER_ID AS FOLLOWING_ID
+		     , U.NICKNAME AS FOLLOWING_NICKNAME
+		     , U.PROFILE_IMAGE FOLLOWING_PROFILE_IMAGE
+ 	   	  FROM FOLLOW AS F
+    	  JOIN USER AS U 
+    	    ON F.FOLLOWING_ID = U.USER_ID
+    	 WHERE F.FOLLOWER_ID = #{userId}
+	</select>
+	
+	<!-- 유저 존재 여부 -->
+	<select id="existsUser" resultType="boolean">
+		SELECT EXISTS (
+			   			SELECT 1 
+				 		  FROM USER 						<!-- 유저 테이블 -->
+						 WHERE USER_ID = #{userId}		
+						)
+	</select>
+	
+	<!-- 팔로우 하기 -->
+	<insert id="insertFollow">
+		INSERT INTO FOLLOW(
+						   FOLLOWER_ID
+						 , FOLLOWING_ID
+	    )
+	    VALUES (
+	   		    #{userId}
+	   		  , #{followId}
+	   		    )
+	</insert>
+	
+	<!-- 팔로우 취소 -->
+	<delete id="deleteFollow">
+		DELETE
+		  FROM FOLLOW
+		 WHERE FOLLOWER_ID = #{userId}
+		   AND FOLLOWING_ID = #{followId}
+	</delete>
+
 </mapper>

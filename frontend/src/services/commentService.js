@@ -32,3 +32,7 @@ export const commentDelete = async (commentId) => {
 export const getCommentReplys = async (parentCommentId, page, size) => {
     return await publicAPI.get(`/comment/replies?parentCommentId=${parentCommentId}&page=${page}&size=${size}`
 )}
+
+export const getCommentUser = async(page) => {
+    return await privateAPI.get(`/comment/user`)
+}

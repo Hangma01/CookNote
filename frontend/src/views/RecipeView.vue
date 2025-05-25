@@ -5,7 +5,6 @@ import { RouterView, useRoute } from 'vue-router';
 const route = useRoute()
 
 const routerKey = computed(() => {
-  // meta에 forceRemount가 있을 경우에만 key 부여
   return route.meta.forceRemount ? `${route.name}-${route.params.recipeId || 'new'}` : undefined
 })
 </script>

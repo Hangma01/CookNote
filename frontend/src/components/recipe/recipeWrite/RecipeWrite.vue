@@ -83,9 +83,9 @@ const handleRecipeSave = debounce (async () => {
         //서버에 전송
         try {
             if (isEditMode.value) {
-                const editRes = await editRecipe(formValues)
+                await editRecipe(formValues)
             } else {
-                const saveRes = await saveRecipe(formValues)
+                await saveRecipe(formValues)
             }
             router.replace({ name: 'mainPage'});
         } catch (e) {
@@ -104,7 +104,7 @@ const handleRecipeDelete = debounce (async () => {
     const proceed = confirm("레시피를 정말 삭제하시겠습니까?");
     if (proceed) {
         try {
-            const res = await deleteRecipe(recipeId)
+            await deleteRecipe(recipeId)
             
             router.replace({ name: 'mainPage'});
         } catch (e) {

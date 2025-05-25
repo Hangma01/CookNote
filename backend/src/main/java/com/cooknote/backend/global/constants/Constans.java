@@ -28,10 +28,18 @@ public class Constans {
     // Method
     public static final String METHOD_POST_TEXT = "POST";
     
+    // S3
+    public static final String S3_TEMP_IMAGES_PATH = "TempImages/";
+    public static final String S3_TEMP_IMAGES_FULL_PATH = "https://cooknote98.s3.ap-northeast-2.amazonaws.com/TempImages/";
+    public static final String S3_MOVE_RECIPE_THUMBNAILS_PATH = "Recipe/Thumbnails/";
+    public static final String S3_MOVE_RECIPE_SEQ_IMAGES_PATH = "Recipe/SeqImages/";
+    public static final String S3_CONTENT_TYPE = "image/";
+    
+    
     // ETC...
     public static final int SECOND_MS = 1000;
-    public static final int PW_RESET_TOKEN_EXPIRE = 120; 
-    
+    public static final int PW_RESET_TOKEN_EXPIRE = 3600; 
+    public static final String DEFALUT_PROFILE_IMAGE = "https://cooknote98.s3.ap-northeast-2.amazonaws.com/Default/Profile/default_profile.jpg";
     
     
 }

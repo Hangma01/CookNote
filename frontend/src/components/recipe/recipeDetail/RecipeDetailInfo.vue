@@ -100,10 +100,11 @@ watch(() => props.recipeDetailData, (newVal) => {
     <div class="recipe-detail-info-section">
         <div class="thumbnail-wrap">
             <img :src="props.recipeDetailData?.thumbnail" class="thumbnail" alt="thumbnail" v-if="props.recipeDetailData"/>
-            
             <div class="writer-profile" >
                 <div class="writer-profile-image-box" v-if="props.recipeDetailData">
-                     <img :src="props.recipeDetailData?.writerProfileImage" class="writer-profile-image" alt="writer-profile" />
+                    <router-link :to="{ name: 'profileHost', params: { hostId: props.recipeDetailData?.writerUserId }}">
+                        <img :src="props.recipeDetailData?.writerProfileImage" class="writer-profile-image" alt="writer-profile" />
+                    </router-link>
                 </div>
 
                 <div class="writer-nickname">
@@ -127,7 +128,7 @@ watch(() => props.recipeDetailData, (newVal) => {
                 <div :class="{'action' : true, 'bookmarked' : isBookmark }" @click="handleRecipeBookmark">
                     <font-awesome-icon :icon="['fas', 'bookmark']" v-if="isBookmark" class="action-icon" />
                     <font-awesome-icon :icon="['far', 'bookmark']" v-else class="action-icon" />
-                    <p class="icon-text">책갈피</p>
+                    <p class="icon-text">북마크</p>
                 </div>
 
                 <div class="action" @click="handleRecipeReport">

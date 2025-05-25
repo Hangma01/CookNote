@@ -33,7 +33,7 @@ const isAuthCodeRequest = ref(false)      	// 메일 인증 요청 토글
 const isAtuhCodeimer = ref(false)						// 메일 인증 시간 제한
 
 // 타이머를 2분으로 설정하고 타이머 종료시 동작
-const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(15, () => {
+const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(180, () => {
   isAtuhCodeimer.value = false
 });
 
@@ -213,7 +213,7 @@ watch (
 	flex-direction: column;
 	justify-content: space-between;
 	gap: 1.5rem;
-	height: 18rem;
+	height: 19rem;
 
 	.find-pw-content {
 		display: flex;

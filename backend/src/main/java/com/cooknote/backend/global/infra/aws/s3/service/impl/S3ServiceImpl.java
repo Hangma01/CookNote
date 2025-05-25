@@ -25,6 +25,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.util.IOUtils;
+import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.S3ErrorCode;
 import com.cooknote.backend.global.error.excption.CustomS3Exception;
 import com.cooknote.backend.global.infra.aws.s3.service.S3Service;
@@ -88,7 +89,7 @@ public class S3ServiceImpl implements S3Service {
 		String extention = originalFilename.substring(originalFilename.lastIndexOf(".") + 1); 
 
 		// 변경된 파일 명
-		String s3FileName = "TempImages/" + UUID.randomUUID().toString().substring(0, 10) + originalFilename; 
+		String s3FileName = Constans.S3_TEMP_IMAGES_PATH + UUID.randomUUID().toString().substring(0, 10) + originalFilename; 
 
 		InputStream fileInputStream  = image.getInputStream();
 		// 이미지를 byte[]로 변환
@@ -96,7 +97,7 @@ public class S3ServiceImpl implements S3Service {
 
 		// metadata 생성
 		ObjectMetadata metadata = new ObjectMetadata();
-		metadata.setContentType("image/" + extention);
+		metadata.setContentType(Constans.S3_CONTENT_TYPE + extention);
 		metadata.setContentLength(bytes.length);
 		
 		// S3에 요청할 때 사용할 byteInputStream 생성
@@ -147,6 +148,7 @@ public class S3ServiceImpl implements S3Service {
 				}
 			}
 		} catch (Exception e) {
+			log.warn("삭제 중 실패한 이미지: " + imageUrls.toString());
 			throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
 		}
 	}
@@ -170,7 +172,7 @@ public class S3ServiceImpl implements S3Service {
 		} catch (Exception e) {
 
 			try {
-				// 이미지 복원
+				// 복사한 이미지 삭제
 				amazonS3.deleteObject(new DeleteObjectRequest(bucketName, imageDestinationKey));
 			} catch (Exception ex) {
 				log.warn("삭제 실패 위치한 이미지 : " + imageDestinationKey );

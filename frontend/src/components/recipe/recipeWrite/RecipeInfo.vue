@@ -82,8 +82,8 @@ const validation = () => {
 
 // RecipeWrite.vue에게 보낼 데이터
 const getData = () => ({
-    title: formValues.title,
-    description: formValues.description,
+    title: formValues.title.trim(),
+    description: formValues.description.trim(),
     thumbnail: imageFile.value,
     videoId: formValues.videoId,
     serving: formValues.serving?.name,

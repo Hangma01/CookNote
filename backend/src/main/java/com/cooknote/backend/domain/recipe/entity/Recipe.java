@@ -1,6 +1,7 @@
 package com.cooknote.backend.domain.recipe.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.cooknote.backend.domain.recipe.enums.RecipeDuration;
 import com.cooknote.backend.domain.recipe.enums.RecipeLevel;
@@ -34,4 +35,6 @@ public class Recipe {
     private int categoryCuisineId;		// 카테고리 - 요리 종류 (FK)
     private int categoryPurposeId;		// 카테고리 - 요리 목적 (FK)
     private Long writerId;				// 작성자 (FK)
+    
+    private List<RecipeSeq> recipeSeqs;	// 레시피 순서 
 }

@@ -10,9 +10,9 @@
         </div>
 
         <div class="cardlist">
-            <div>
+            <router-link :to="{ name: 'profileHost', params: { hostId: 1 }   }">
                 <img src="https://cooknote98.s3.ap-northeast-2.amazonaws.com/Recipe/Thumbnails/e28af3e7-d5eea474627c05b529719c37a400c60ca1.jpg" class="image"/>
-            </div>
+            </router-link>
 
             <div>
 

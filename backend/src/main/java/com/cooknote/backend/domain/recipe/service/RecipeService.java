@@ -1,11 +1,18 @@
 package com.cooknote.backend.domain.recipe.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeUpdateRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeBookmarkResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeDetailResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeLikeResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 
 import jakarta.validation.Valid;
@@ -14,32 +21,44 @@ import jakarta.validation.Valid;
 public interface RecipeService {
 	
 	// 레시피 상세 조회
-	public RecipeDetailResponseDTO getRecipeDetail(Long userId, Long recipeId);
+	RecipeDetailResponseDTO getRecipeDetail(Long userId, Long recipeId);
 	
 	
 	// 레시피 저장
-	public void recipeSave(Long userId, RecipeSaveRequestDTO saveRecipeRequestDTO);
+	void recipeSave(Long userId, RecipeSaveRequestDTO saveRecipeRequestDTO);
 
 	// 레시피 수정 조회
-	public RecipeEditResponseDTO getRecipeForEdit(Long userId, Long recipeId);
+	RecipeEditResponseDTO getRecipeForEdit(Long userId, Long recipeId);
 
 	// 레시피 수정
-	public void recipeUpdate(Long userId, @Valid RecipeUpdateRequestDTO recipeUpdateRequestDTO);
+	void recipeUpdate(Long userId, @Valid RecipeUpdateRequestDTO recipeUpdateRequestDTO);
 
+	// 레시피 삭제
+	void recipeDelete(Long userId, Long recipeId);
 
-	public void recipeDelete(Long userId, Long recipeId);
-
-
+	// 레시피 좋아요 생성
 	void recipeLikeInsert(Long userId, Long recipeId);
 
-
+	// 레시피 좋아요 삭제
 	void recipeLikeDelete(Long userId, Long recipeId);
 
-
+	// 레시피 북마크 추가
 	void recipeBookmarkInsert(Long userId, Long recipeId);
 
-
+	// 레시피 북마크 삭제
 	void recipeBookmarkDelete(Long userId, Long recipeId);
 
+	// 공개 레시피 조회
+	Page<RecipePublicResponseDTO> getRecipePublic(Long accountId, int page, int size);
+
+	// 비공개 레시피 조회
+	Page<RecipePrivateResponseDTO> getRecipePrivate(Long userId, int page, int size);
+
+	// 좋아요한 공개 레시피 조회
+	Page<RecipeLikeResponseDTO> getLikeRecipe(Long userId, int page, int size);	
 	
+	// 북마크한 공개 레시피 조회
+	Page<RecipeBookmarkResponseDTO> getBookmarkRecipe(Long userId, int page, int size);
+
+
 }

@@ -56,7 +56,7 @@ const authCodeValue = ref('')                 // 메일 인증 input-field
 
 
 // 타이머를 2분으로 설정하고 타이머 종료시 동작
-const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(15, () => {
+const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(180, () => {
   isAtuhCodeimer.value = false
 });
 
@@ -409,7 +409,7 @@ watch(() => formValues.email, () => {
     flex-direction: column;
     justify-content: space-between;
     gap: 1.5rem;
-    height: 36rem;
+    height: 37rem;
 
     .join-content {
         display: flex;

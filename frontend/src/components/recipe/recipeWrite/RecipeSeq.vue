@@ -62,10 +62,10 @@ const getData = () => {
   return {
     seqs: recipeSeq.map(item => ({
       step: item.step,
-      description: item.description,
+      description: item.description.trim(),
       image: item.image
     })),
-    tip: recipeTip.value.trim() ? recipeTip.value : ''
+    tip: recipeTip.value?.trim() ? recipeTip.value : ''
   }
 }
 

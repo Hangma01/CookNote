@@ -1,7 +1,9 @@
-package com.cooknote.backend.global.utils.commonFunction;
+package com.cooknote.backend.global.utils.common;
 
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+
+import com.cooknote.backend.global.auth.CustomUserDetails;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +25,15 @@ public class CommonFunctionUtil {
 	public static boolean nullCheck(Long check) {
 		
 		if(check == null) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public static boolean authCheck(CustomUserDetails customUserDetails) {
+		
+		if(customUserDetails != null) {
 			return true;
 		}
 		

@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import com.cooknote.backend.domain.comment.dto.request.CommentInsertRequestDTO;
 import com.cooknote.backend.domain.comment.dto.request.CommentUpdateRequestDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentRepliesResponseDTO;
+import com.cooknote.backend.domain.comment.dto.response.CommentUserWriteResponseDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentsResponseDTO;
 import com.cooknote.backend.domain.comment.entity.Comment;
 import com.cooknote.backend.domain.comment.enums.CommentStatus;
 import com.cooknote.backend.domain.comment.service.CommentService;
+import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.utils.pageable.RequestList;
@@ -93,17 +95,15 @@ public class CommentServiceImpl implements CommentService {
 		
 		// 댓글이 있는지 확인 또는 상태가 PUBLIC 아니면 NULL
 		if(comment == null) {			
-			log.info("정보없음");
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 		
 		// 본인이 맞는지
 		if(!comment.getWriterId().equals(userId)) {
-			log.info("본인아님");
 			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
 		} 
 		
-		commentMapper.commentDelete(commentId, CommentStatus.DELETE);
+		commentMapper.commentDelete(commentId);
 	}
 
 	// 댓글 수정
@@ -129,5 +129,17 @@ public class CommentServiceImpl implements CommentService {
 		
 		commentMapper.commentUpdate(commentUpdateRequestDTO);
 		
+	}
+
+	// 유저가 작성한 댓글 조회
+	@Override
+	public Page<CommentUserWriteResponseDTO> getCommentUserWrite(Long userId, int page,int size) {
+		
+		
+		int offset = page * size;
+		List<CommentUserWriteResponseDTO> comments = commentMapper.getCommentUserWrite(userId, size, offset, CommentStatus.PRIVATE_ADMIN);
+		int total = commentMapper.getCommentUserWriteCount(userId);
+		
+		return new PageImpl<>(comments, PageRequest.of(page, size), total);
 	}
 }

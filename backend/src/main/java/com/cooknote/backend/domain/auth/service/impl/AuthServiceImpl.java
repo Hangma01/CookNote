@@ -94,6 +94,7 @@ public class AuthServiceImpl implements AuthService{
 				.name(userJoinRequestDTO.getName())
 				.nickname(userJoinRequestDTO.getNickname())
 				.email(userJoinRequestDTO.getEmail())
+				.profileImage(Constans.DEFALUT_PROFILE_IMAGE)
 				.build();
 		
 		authMapper.userJoin(reqUser);	

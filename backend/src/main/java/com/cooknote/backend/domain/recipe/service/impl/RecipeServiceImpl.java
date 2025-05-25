@@ -2,23 +2,33 @@ package com.cooknote.backend.domain.recipe.service.impl;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSeqRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeUpdateRequestDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeBookmarkResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeDetailResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeLikeResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.entity.Recipe;
+import com.cooknote.backend.domain.recipe.entity.RecipeSeq;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.recipe.service.RecipeService;
+import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.RecipeErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
@@ -87,7 +97,7 @@ public class RecipeServiceImpl implements RecipeService {
         
         long start = System.currentTimeMillis();
 		// 이동한 썸네일 url
-		String moveThumbnailUrl = s3Service.moveImage(thumbnail, "Recipe/Thumbnails/");
+		String moveThumbnailUrl = s3Service.moveImage(thumbnail, Constans.S3_MOVE_RECIPE_THUMBNAILS_PATH);
 		moveImageUrls.add(moveThumbnailUrl);
         long end = System.currentTimeMillis();
 
@@ -103,7 +113,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 
         // 이동한 레시피 순서 이미지 url
-        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, "Recipe/SeqImages/");
+        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, Constans.S3_MOVE_RECIPE_SEQ_IMAGES_PATH);
          end = System.currentTimeMillis();
 
         
@@ -156,6 +166,10 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public RecipeEditResponseDTO getRecipeForEdit(Long userId, Long recipeId) {
 		
+		
+		// 레시피 존재 여부 및 본인 확인
+		checkSelfRecipeExists(userId, recipeId);
+		
 		// 레시피 데이터 가져오기
 		RecipeEditResponseDTO recipeEditResponseDTO = recipeMapper.getRecipeForEdit(userId, recipeId);
 		
@@ -197,7 +211,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 
         if(isTempImage(newThumbnail)) {
-        	currentThumbnailUrl = s3Service.moveImage(newThumbnail, "Recipe/Thumbnails/");
+        	currentThumbnailUrl = s3Service.moveImage(newThumbnail, Constans.S3_MOVE_RECIPE_THUMBNAILS_PATH);
     		moveImageUrls.add(currentThumbnailUrl);
     		oldImageUrls.add(oldThumbnail);
         } else {
@@ -230,7 +244,7 @@ public class RecipeServiceImpl implements RecipeService {
         
      
         // 이동한 레시피 순서 이미지 url
-        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, "Recipe/SeqImages/");
+        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, Constans.S3_MOVE_RECIPE_SEQ_IMAGES_PATH);
 
         try {
         	// 레시피 저장
@@ -303,11 +317,27 @@ public class RecipeServiceImpl implements RecipeService {
 	@Transactional
 	public void recipeDelete(Long userId, Long recipeId) {
 		
-		// 레시피 존재 여부 및 본인 확인
-		checkSelfRecipeExists(userId, recipeId);
+		// 삭제할 이미지 리스트 가져오기
+		Recipe recipe = recipeMapper.getRecipeDeleteImage(userId, recipeId);
+		
+		if(recipe == null) {
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
+		// 이미지 삭제
+		List<String> recipeImages = new ArrayList<>();
+		List<RecipeSeq> recipeSeqs = recipe.getRecipeSeqs();
+		
+		recipeImages.add(recipe.getThumbnail());
+		
+		for(RecipeSeq recipeSeq : recipeSeqs) {
+			recipeImages.add(recipeSeq.getImage());
+		}
 		
 		// 삭제 처리
-		recipeMapper.recipeDelete(userId, recipeId, RecipeStatus.DELETE);
+		recipeMapper.recipeDelete(userId, recipeId);
+		
+		// s3 삭제
+		s3Service.deleteImagesFromS3(recipeImages);
 	}
 	
 	@Override
@@ -345,9 +375,9 @@ public class RecipeServiceImpl implements RecipeService {
 	}
 	
 	
+	// 북마크 삭제
 	@Override
 	@Transactional
-	// 북마크 삭제
 	public void recipeBookmarkDelete(Long userId, Long recipeId) {
 		
 		// 레시피 존재 여부 확인
@@ -356,9 +386,51 @@ public class RecipeServiceImpl implements RecipeService {
 		recipeMapper.recipeBookmarkDelete(userId, recipeId);
 	}
 	
+	// 공개 레시피 조회
+	@Override
+	public Page<RecipePublicResponseDTO> getRecipePublic(Long accountId, int page, int size) {
+		int offset = page * size;
+		List<RecipePublicResponseDTO> recipesPublic = recipeMapper.getRecipePublic(accountId, size, offset, RecipeStatus.PUBLIC);
+		int total = recipeMapper.recipesPublicCount(accountId, RecipeStatus.PUBLIC);
+		return new PageImpl<>(recipesPublic, PageRequest.of(page, size), total);
+	}
+
+	
+	// 비공개 레시피 조회
+	@Override
+	public Page<RecipePrivateResponseDTO> getRecipePrivate(Long userId, int page, int size) {
+		int offset = page * size;
+		List<RecipePrivateResponseDTO> recipesPrivate = recipeMapper.getRecipePrivate(userId, size, offset, RecipeStatus.PRIVATE, RecipeStatus.PRIVATE_ADMIN);
+		int total = recipeMapper.recipesPrivateCount(userId, RecipeStatus.PRIVATE, RecipeStatus.PRIVATE_ADMIN);
+		
+		return new PageImpl<>(recipesPrivate, PageRequest.of(page, size), total);
+	}
+	
+	// 좋아요한 레시피 조회
+	@Override
+	public Page<RecipeLikeResponseDTO> getLikeRecipe(Long userId, int page, int size) {
+		int offset = page * size;
+		List<RecipeLikeResponseDTO> recipesLiked = recipeMapper.getRecipeLike(userId, size, offset);
+		int total = recipeMapper.recipeLikeCount(userId);
+		
+		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
+	}
+
+	// 북마크한 레시피 조회
+	@Override
+	public Page<RecipeBookmarkResponseDTO> getBookmarkRecipe(Long userId, int page, int size) {
+		int offset = page * size;
+		List<RecipeBookmarkResponseDTO> recipesBookmarked = recipeMapper.getRecipeBookmark(userId, size, offset);
+		int total = recipeMapper.recipeBookmarkCount(userId);
+		
+		return new PageImpl<>(recipesBookmarked, PageRequest.of(page, size), total);
+	}
+	
+	
+	
 	// 임시 파일 체크
 	private boolean isTempImage(String url) {
-	    return url!= null && url.contains("https://cooknote98.s3.ap-northeast-2.amazonaws.com/TempImages/");
+	    return url!= null && url.contains(Constans.S3_TEMP_IMAGES_FULL_PATH);
 	}
 	
 	// 레시피 상태 코드 체크

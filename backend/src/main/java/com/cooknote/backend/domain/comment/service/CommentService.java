@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import com.cooknote.backend.domain.comment.dto.request.CommentInsertRequestDTO;
 import com.cooknote.backend.domain.comment.dto.request.CommentUpdateRequestDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentRepliesResponseDTO;
+import com.cooknote.backend.domain.comment.dto.response.CommentUserWriteResponseDTO;
 import com.cooknote.backend.domain.comment.dto.response.CommentsResponseDTO;
+import com.cooknote.backend.global.auth.CustomUserDetails;
 
 import jakarta.validation.Valid;
 
@@ -30,6 +32,8 @@ public interface CommentService {
 	
 	// 댓글 수정
 	void commentUpdate(Long userId, CommentUpdateRequestDTO commentUpdateRequestDTO);
+
+	Page<CommentUserWriteResponseDTO> getCommentUserWrite(Long userId, int page, int size);
 
 
 

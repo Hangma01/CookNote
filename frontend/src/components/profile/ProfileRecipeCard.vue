@@ -1,23 +1,42 @@
 <script setup>
+import { commonValues } from '@/utils/commonValues';
+
 
 const props = defineProps({ 
     recipeData: { // 레시피 수정 시 오는 데이터
         type: Object    
     },
+    recipeStatus: {
+        type: String,
+        default: commonValues.PUBLIC_TEXT
+    }
 })
 </script>
 
 <template>
     <div class="recipe-image">
-        <router-link :to="{name : 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }">
-            <img :src="props.recipeData?.thumbnail" class="image"/>
+        <router-link
+            v-if="props.recipeStatus === commonValues.PUBLIC_TEXT"
+            :to="{ name: 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }"
+        >
+            <img :src="props.recipeData?.thumbnail" class="image" />
         </router-link>
+
+        <span v-else>
+            <img :src="props.recipeData?.thumbnail" class="image" />
+        </span>
     </div>
     <div class="recipe-info">
         <div class="recipe-title">
-            <router-link :to="{name : 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }">
+            <router-link 
+                v-if="props.recipeStatus === commonValues.PUBLIC_TEXT"
+                :to="{name : 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }">
                 <span>{{ props.recipeData?.title }}</span>
             </router-link>
+
+            <span v-else>
+                <span>{{ props.recipeData?.title }}</span>
+            </span>
         </div>
 
         <div class="recipe-summary">
@@ -67,6 +86,7 @@ const props = defineProps({
         text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         word-break: break-word;
         font-size: 0.8rem;

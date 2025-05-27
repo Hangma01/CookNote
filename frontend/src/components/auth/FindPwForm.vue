@@ -33,7 +33,7 @@ const isAuthCodeRequest = ref(false)      	// 메일 인증 요청 토글
 const isAtuhCodeimer = ref(false)						// 메일 인증 시간 제한
 
 // 타이머를 2분으로 설정하고 타이머 종료시 동작
-const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(180, () => {
+const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(commonValues.MAIL_AUTH_TIMER, () => {
   isAtuhCodeimer.value = false
 });
 
@@ -55,7 +55,7 @@ const handleUserFindPwRequest = async () => {
   if (isFormVal.valid) { 
 		try {
 			resetTimer();   
-  		startTimer();
+  		    startTimer();
 			isAtuhCodeimer.value = true
 
 			const res = await userFindPwAuth({ ...formValues })
@@ -77,19 +77,19 @@ const handleUserFindPwRequest = async () => {
 // 메일 재전송
 const handleSendMailAuthCodeRetry = async () => {
 
-  try {
-    const res = await sendMailAuthCode(formValues.email);
+    try {
+        const res = await sendMailAuthCode(formValues.email);
 
-		resetTimer();   
-  	startTimer();
-		isAtuhCodeimer.value = true
+        resetTimer();   
+        startTimer();
+        isAtuhCodeimer.value = true
 
-    isSuccessAuthCode.value = false;
-    authCodeValue.value = '';
-    alert(successMessage.authMailRetry);
-  } catch (e) {
-    alert(errorMessages.BADREQUEST);
-  }
+        isSuccessAuthCode.value = false;
+        authCodeValue.value = '';
+        alert(successMessage.AUTH_MAIL_RETRY_SUCCESS_MESSAGE);
+    } catch (e) {
+        alert(errorMessages.BADREQUEST);
+    }
 }
 
 
@@ -98,7 +98,7 @@ const handleFindPw = debounce(async () => {
 
 	const isFormVal = await formRef.value.validate()
 	if(!isAtuhCodeimer.value){
-		alert("메일 인증 시간이 초과했습니다. 재전송을 해주세요.")
+		alert(errorMessages.MAIL_AUTH_TIME_OVER_MESSAGE)
 	} else if (isFormVal.valid) {
 		await commonVerifyMailAuthCode(
 			formValues.email,
@@ -124,21 +124,20 @@ const handleFindPw = debounce(async () => {
 
 
 
-watch (
-  () => ({ ...formValues }),
-  (newVal, oldVal) => {
+watch (() => ({ ...formValues }),
+    (newVal, oldVal) => {
     if (
         isAuthCodeRequest.value &&
         Object.keys(newVal).some(key => newVal[key] !== oldVal[key])
     ) {
-      isAuthCodeRequest.value = false;
-      authCodeValue.value = '';
-      errorMsgAuthCode.value = '';
-      isSuccessAuthCode.value = false;
+        isAuthCodeRequest.value = false;
+        authCodeValue.value = '';
+        errorMsgAuthCode.value = '';
+        isSuccessAuthCode.value = false;
     }
-  },
-  { deep: true }  // formValues 내부 값들을 추적 가능하게 함
-)
+    },
+        { deep: true }  // formValues 내부 값들을 추적 가능하게 함
+    )
 </script>
 
 <template>
@@ -152,6 +151,7 @@ watch (
 				density="compact"
 				hide-details="auto"
 				:rules="[defaultIdRule]"
+				autocomplete="off"
 			/>
 
 			<v-text-field
@@ -162,6 +162,7 @@ watch (
 				density="compact"
 				hide-details="auto"
 				:rules="[emailRule]"
+				autocomplete="off"
 			/>
 
 			<div> 
@@ -177,18 +178,13 @@ watch (
 						v-if="isAuthCodeRequest" 
 						:rules="[authCodeRule]"
 						:error-messages="errorMsgAuthCode"
+						autocomplete="off"
 					/> 
 
 					<v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest" >
 						재전송
 					</v-btn>
 				</div>     
-<!-- 
-				<div v-if="isSuccessAuthCode" class="success-message">
-					<span>
-						인증에 성공했습니다.
-					</span>
-				</div> -->
 
 				<div class="timer" v-if="isAuthCodeRequest">
 					<span>{{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>

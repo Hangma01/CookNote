@@ -21,9 +21,11 @@ public interface S3Service {
 	// 여러개의 이미지를 삭제하는 메서드이다.
 	public void deleteImagesFromS3(List<String> imageUrls);
 	
+	public void deleteFolderFromS3(String folderPrefix);
+	
 	// 이미지 위치를 옮기는 메서드이다.
-	public String moveImage(String image, String targetFolder);
+	public String moveImage(String image, Long userId, String targetFolder, String formatNow);
 
 	// 여러개의 이미지 위치를 옮기는 메서드이다.
-	public List<String> moveImages(List<String> images, String targetFolder);
+	public List<String> moveImages(List<String> images, Long userId, String targetFolder, String formatNow);
 }

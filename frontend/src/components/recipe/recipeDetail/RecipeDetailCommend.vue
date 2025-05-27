@@ -346,7 +346,11 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                     <div class="comment-info-wrap">
                         <div class="comment-info">
                             <div>
-                                <router-link :to="{ name: 'profileHost', params: { hostId: item.writerId }}">
+                                <router-link 
+                                            :to="item.writerId === userId 
+                                                ? { name: 'profileRecipe'}
+                                                : { name: 'profileHost', params: { hostId: item.writerId }}"
+                                >
                                     <img :src="item.profileImage" class="writer-profile-image"/>
                                 </router-link>
                             </div>
@@ -454,7 +458,11 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                                         <div class="reply-info-wrap">
                                             <div class="reply-info">
                                             
-                                                <router-link :to="{ name: 'profileHost', params: { hostId: reply.writerId }}">
+                                                <router-link 
+                                                            :to="reply.writerId === userId
+                                                            ? { name: 'profileRecipe' }
+                                                            : { name: 'profileHost', params: { hostId: reply.writerId }}"
+                                                >
                                                     <img :src="reply.profileImage" class="writer-profile-image" />
                                                 </router-link>
                                                 <span class="writer-nickname">{{ reply.nickname }}</span>

@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecipeIngredientResponseDTO {
+	private Long ingredientId;
     private String name;
-	
 	private String quantity;
-    
 	private String remark;
 }

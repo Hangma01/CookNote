@@ -71,28 +71,30 @@ watch(() => props.modelValue, (newVal) => {
 </script>
 
 <template>
-  <div
-    :class="['image-uploader', props.sizeClass]"
-    @dragover.prevent
-    @drop.prevent="onFileChange($event.dataTransfer.files)"
-    @click="$refs.fileInput.click()"
-  >
-    <input
-      type="file"
-      ref="fileInput"
-      accept="image/*"
-      hidden
-      @change="onFileChange($event.target.files)"
-    />
-    <div v-if="imageUrl" class="preview-img-wrap">
-      <img :src="imageUrl" alt="preview" class="preview-img"/>
+    <div
+        :class="['image-uploader', props.sizeClass]"
+        @dragover.prevent
+        @drop.prevent="onFileChange($event.dataTransfer.files)"
+        @click="$refs.fileInput.click()"
+    >
+        <input
+            type="file"
+            ref="fileInput"
+            accept="image/*"
+            hidden
+            @change="onFileChange($event.target.files)"
+        />
+
+        <div v-if="imageUrl" class="preview-img-wrap">
+            <img :src="imageUrl" alt="preview" class="preview-img"/>
+        </div>
+
+        <div v-else>
+            <div :class="['placeholder', props.sizeClass]">
+                <font-awesome-icon :icon="['fas', 'plus']"/>
+            </div>
+        </div>
     </div>
-    <div v-else>
-      <div :class="['placeholder', props.sizeClass]">
-        <font-awesome-icon :icon="['fas', 'plus']"/>
-      </div>
-    </div>
-  </div>
 </template>
 
 <style lang="scss" scoped >

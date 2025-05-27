@@ -1,5 +1,6 @@
 package com.cooknote.backend.domain.recipe.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class RecipeDetailResponseDTO {
     private int categoryPurposeId;									// 카테고리 - 요리 목적 (FK)
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date createAt;											// 생성 날짜
+    private LocalDateTime createAt;									// 생성 날짜
     
     private Long writerUserId;										// 레피시 작성자 번호
     private String writerNickname;									// 레시피 작성자 닉네임

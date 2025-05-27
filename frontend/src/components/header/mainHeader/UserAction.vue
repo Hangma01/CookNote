@@ -58,9 +58,9 @@ onBeforeUnmount(() => {
 <template>
     <ul class="user-menu">
         <li class="user-menu-item">
-            <!-- <router-link :to="{ name: 'mypageRecipe' }" > -->
+            <router-link :to="{ name: 'search' }" >
                 <font-awesome-icon :icon="['fas', 'magnifying-glass']" style="color: #454F5B;" />
-            <!-- </router-link> -->
+            </router-link>
         </li>
 
         <li class="user-menu-item">
@@ -80,11 +80,11 @@ onBeforeUnmount(() => {
                         </li>
                     </router-link>
 
-        
+                    <router-link :to="{ name: 'profileEdit' }">
                         <li class="mypage-item">
                             개인정보 수정
                         </li>
-
+                    </router-link>
                     
                     <li class="mypage-item" @click="handleLogout">
                         로그아웃
@@ -97,14 +97,6 @@ onBeforeUnmount(() => {
             <router-link :to="{name : 'recipeWrite'}">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
             </router-link>
-<!-- 
-            <router-link :to="{name : 'recipeEdit', params: { recipeId: 4 } }" style="padding-left: 20px">
-                <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
-            </router-link>
-
-            <router-link :to="{name : 'recipeDetail', params: { recipeId: 4 } }" style="padding-left: 20px">
-                <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #454F5B;" />
-            </router-link> -->
         </li>
     </ul>
 </template>

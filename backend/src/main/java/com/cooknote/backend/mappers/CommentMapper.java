@@ -50,11 +50,13 @@ public interface CommentMapper {
 	// 댓글 삭제
 	void commentDelete(@Param("commentId") Long commentId);
 	
-	
+
+	// 댓글 삭제 - 기존 정보 조회
+	Comment findDeleteComment(@Param("commentId") Long commentId);
 
 	// 댓글 수정 - 기존 정보 조회
-	Comment findComment(@Param("commentId") Long commentId
-					  , @Param("statusPublic") CommentStatus statusPublic);
+	Comment findUpdateComment(@Param("commentId") Long commentId
+					  		, @Param("statusPublic") CommentStatus statusPublic);
 
 
 	// 댓글 수정
@@ -68,5 +70,6 @@ public interface CommentMapper {
 	
 	// 유저가 작성한 토탈 댓글 갯수 조회
 	int getCommentUserWriteCount(@Param("userId") Long userId);
+
 
 }

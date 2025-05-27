@@ -96,8 +96,13 @@ public class WebSecurityConfig {
 		// 경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-						.requestMatchers("/login", "/logout", "/auth/**", "/mail/**","/s3/**").permitAll()
-						.requestMatchers(HttpMethod.GET, "/recipe/*", "/comment", "/comment/replies", "/user/profile/host", "/recipe/public/host").permitAll()
+						.requestMatchers("/login", "/logout", "/auth/**", "/mail/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/recipe/public", "/recipe/private", "/recipe/edit", "/recipe/like", "/recipe/bookmark").authenticated()
+						.requestMatchers(HttpMethod.GET, "/recipe/*", "/recipe/public/host", "/recipe/search/*"
+													   , "/comment", "/comment/replies"
+													   , "/user/profile/host"
+													   , "/recipe/public/host"
+													   , "/category").permitAll()
 						.anyRequest().authenticated());
 
 		

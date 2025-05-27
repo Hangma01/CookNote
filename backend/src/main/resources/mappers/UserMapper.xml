@@ -3,22 +3,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.cooknote.backend.mappers.UserMapper">
-
-	<resultMap id="UserResultMap" type="User">
-        <id property="userId" column="USER_ID"/>
-        <result property="id" column="ID"/>
-        <result property="name" column="NAME"/>
-        <result property="password" column="PASSWORD"/>
-        <result property="email" column="EMAIL"/>
-        <result property="nickname" column="NICKNAME"/>
-        <result property="profileImage" column="PROFILE_IMAGE"/>
-        <result property="createAt" column="CREATE_AT"/>
-        <result property="updateAt" column="UPDATE_AT"/>
-    </resultMap>
     
-    
+    <!-- 로그인 회원 정보 가져오기 -->
+	<select id="getLoginUser" resultType="User">
+		SELECT USER_ID
+			 , ID
+			 , PASSWORD
+		  FROM USER
+	 	 WHERE ID = #{id}
+	</select>   
+	
 	<!-- 회원 정보 가져오기 -->
-	<select id="getUser" resultMap="UserResultMap">
+	<select id="getUser" resultType="User">
 		SELECT USER_ID
 			 , ID
 			 , NAME
@@ -29,12 +25,13 @@
 			 , CREATE_AT
 			 , UPDATE_AT
 		  FROM USER
-	 	 WHERE ID = #{id}
+	 	 WHERE USER_ID = #{userId}
 	</select>   
 	
 	<!-- 호스트 프로필 가져오기 -->
 	<select id="getHostProfile" resultType="UserHostProfileResponseDTO">
-		SELECT U.NICKNAME	   AS NICKNAME
+		SELECT U.USER_ID	   AS HOST_ID
+			 , U.NICKNAME	   AS NICKNAME
 			 , U.PROFILE_IMAGE AS PROFILE_IMAGE
 			 , SUM(
 			 	   CASE 
@@ -169,4 +166,42 @@
 		   AND FOLLOWING_ID = #{followId}
 	</delete>
 
+	<!-- 프로필 수정 -->
+	<update id="userProfileUpdate">
+		UPDATE USER
+		 <set>
+			<if test="updateNickname != null">
+			   NICKNAME = #{updateNickname},
+			</if>
+			<if test="moveProfileUrl != null">
+			   PROFILE_IMAGE = #{moveProfileUrl}
+			</if>
+		 </set>
+		 WHERE USER_ID = #{userId}
+	</update>
+	
+	<!-- 유저 수정 정보 조회 -->
+	<select id="getUserProfileEditInfo" resultType="UserProfileEditInfoResponseDTO">
+		SELECT PROFILE_IMAGE
+			 , NAME
+			 , EMAIL
+			 , NICKNAME
+			 , CREATE_AT
+			 , UPDATE_AT
+		  FROM USER
+		 WHERE USER_ID = #{userId}
+	</select>
+	
+	<!-- 비밀번호 수정 -->
+	<update id="pwUpdate">
+		UPDATE USER
+		   SET PASSWORD = #{newPw}
+		 WHERE USER_ID = #{userId}
+	</update>
+	
+	<delete id="userDelete">
+		DELETE
+		  FROM USER
+		 WHERE USER_ID = #{userId}
+	</delete>
 </mapper>

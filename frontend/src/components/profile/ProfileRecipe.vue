@@ -2,19 +2,21 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import ProfileRecipeCard from './ProfileRecipeCard.vue';
 import { errorMessages } from '@/utils/messages/errorMessages';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { deleteRecipe, getRecipePrivate, getRecipePublic } from '@/services/recipeService';
 import { useUserStore } from '@/stores/user';
-import { getUserProfile } from '@/services/userService';
+import { commonValues } from '@/utils/commonValues';
+import { loadProfile } from '@/utils/commonFunction';
 
 // 화면 전환
 const router = useRouter()
+const route = useRoute();
 
 // 유저 스토어
 const userStore = useUserStore();
 const userProfile = computed(() => userStore.getProfile);
 
-const activeTab = ref('PUBLIC')
+const activeTab = ref(commonValues.PUBLIC_TEXT)
 
 const activeRecipeMenuMap = reactive({});           // 게시글 메뉴 활성화
 const recipeItemRefs = ref({});                     // 외부 클릭 시 게시글 메뉴 닫히기
@@ -92,16 +94,11 @@ const handleRecipeDelete = async(recipeId) => {
         try {
             await deleteRecipe(recipeId)
         
-            const res = await getUserProfile()
+            loadProfile(false)
 
-            userStore.setProfile({
-                              ...res.data
-                            , isHostProfile: false
-            })
-
-            if (activeTab.value === 'PUBLIC') {
+            if (activeTab.value === commonValues.PUBLIC_TEXT) {
                 loadRecipPublic();
-            } else if (activeTab.value === 'PRIVATE') {
+            } else if (activeTab.value === commonValues.PRIVATE_TEXT) {
                 loadRecipPrivate();
             }
              
@@ -118,18 +115,25 @@ const handleRecipeDelete = async(recipeId) => {
 }
 
 const goToPage = (page) => {
-    if (activeTab.value === 'PUBLIC') {
+    if (activeTab.value === commonValues.PUBLIC_TEXT) {
         loadRecipPublic(page);
-    } else if (activeTab.value === 'PRIVATE') {
+    } else if (activeTab.value === commonValues.PRIVATE_TEXT) {
         loadRecipPrivate(page);
     }
 };
 
 onMounted(async () => {
+
+    const tabFromQuery = route.query.tab;
+
+    if (tabFromQuery === commonValues.PRIVATE_TEXT || tabFromQuery === commonValues.PUBLIC_TEXT) {
+        activeTab.value = tabFromQuery;
+    }
+
     try {
-        if (activeTab.value === 'PUBLIC') {
+        if (activeTab.value === commonValues.PUBLIC_TEXT) {
             loadRecipPublic();
-        } else if (activeTab.value === 'PRIVATE') {
+        } else if (activeTab.value === commonValues.PRIVATE_TEXT) {
             loadRecipPrivate();
         } 
     } catch (e) {
@@ -139,7 +143,7 @@ onMounted(async () => {
             alert(errorMessages.BADREQUEST)
         }
 
-        router.push({ name : 'mainPage'})
+        window.location.reload()
     }
     
     document.addEventListener('click', closeRecipeMenu);
@@ -149,10 +153,15 @@ onBeforeUnmount(() => {
     document.removeEventListener('click', closeRecipeMenu);
 });
 
+const updateTab = (tab) => {
+  activeTab.value = tab;
+  router.replace({ query: { tab } });
+};
+
 watch(activeTab, (newTab) => {
-  if (newTab === 'PUBLIC') {
+  if (newTab === commonValues.PUBLIC_TEXT) {
     loadRecipPublic()
-  } else if (newTab === 'PRIVATE') {
+  } else if (newTab === commonValues.PRIVATE_TEXT) {
     loadRecipPrivate() 
   }
 })
@@ -161,15 +170,15 @@ watch(activeTab, (newTab) => {
 <template>
     <ul class="nav">
         <li 
-            :class="['nav-item', { selected: activeTab === 'PUBLIC'}]"
-            @click="activeTab = 'PUBLIC'"
+            :class="['nav-item', { selected: activeTab === commonValues.PUBLIC_TEXT}]"
+            @click="updateTab(commonValues.PUBLIC_TEXT)"
         >
             공개({{ userProfile?.recipePublicCount || 0 }})
         </li>
 
         <li
-            :class="['nav-item', { selected: activeTab === 'PRIVATE'}]"
-            @click="activeTab = 'PRIVATE'"
+            :class="['nav-item', { selected: activeTab === commonValues.PRIVATE_TEXT}]"
+            @click="updateTab(commonValues.PRIVATE_TEXT)"
         >
             비공개({{ userProfile?.recipePrivateCount || 0 }})
         </li>
@@ -182,7 +191,7 @@ watch(activeTab, (newTab) => {
                 v-for="(item) in recipeData?.content"
                 :key="item.recipeId"
             >
-                <ProfileRecipeCard :recipeData = "item" />
+                <ProfileRecipeCard :recipeData = "item" :recipeStatus = "activeTab" />
 
                 <div class="menu-wrap">
                 <div class="menu-icon" @click="toggleRecipeMenu($event, item.recipeId)">
@@ -193,13 +202,13 @@ watch(activeTab, (newTab) => {
                 <div class="menu"
                         v-if="activeRecipeMenuMap[item.recipeId]" 
                         :ref="el => setRecipeMenuRef(el, item.recipeId)">
-                        <div v-if="item.privateAdmin !== true" >
+                        <div v-if="item.privateAdmin !== true" class="btn">
                             <router-link :to="{name : 'recipeEdit', params: { recipeId: item.recipeId } }">
                                 수정
                             </router-link>
                         </div>
 
-                        <div>
+                        <div :class="[item.privateAdmin !== true ? 'btn' : 'btn-solo']">
                             <button @click="handleRecipeDelete(item.recipeId)">
                                 삭제
                             </button>
@@ -234,7 +243,6 @@ watch(activeTab, (newTab) => {
         cursor: pointer;
         position: relative;
         margin-bottom: -1px; // 하단 border 없애기 위해 올려줌
-;
     }
 
     .nav-item.selected {
@@ -269,12 +277,20 @@ watch(activeTab, (newTab) => {
             top: 2rem;
             left: -1rem;
             text-align: center;
-            border: 1px solid rgb(124, 124, 124);
+            border: 1px solid rgb(200, 200, 200);
             border-radius: 0.5rem;
             z-index: 100;
-            padding-top: 0.2rem;
+            padding-top: 0.1rem;
             padding-bottom: 0.2rem;
             color: black;
+
+            .btn:hover{
+                background-color: #c09370;
+            }
+
+            .btn-solo:hover{
+                background-color: white;
+            }
         }
     }
 

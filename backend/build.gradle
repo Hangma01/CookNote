@@ -32,6 +32,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis' 			/* Redis 의존성 추가 */
 	implementation 'org.springframework.boot:spring-boot-starter-validation'			/* 유효성 검사 의종성 추가 */
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'									/* JWT 의존성 추가*/
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'										/* JXAB는 Java에서 xml을 Java Object로 맵할 수 있게 도와준다. */
+	implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'									
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	compileOnly 'org.projectlombok:lombok'

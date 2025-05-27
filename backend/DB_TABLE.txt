@@ -86,7 +86,7 @@ CREATE TABLE `RECIPE` (
 	`VIDEO_ID` VARCHAR(11),															-- 동영상 아이디
 	`TIP` VARCHAR(400),																-- 요리 팁
 	`STATUS` ENUM("PRIVATE", "PUBLIC", "PRIVATE_ADMIN") NOT NULL, 					-- 레시피 상태
-	`CREATE_AT` DATETIME NOT NULL DEFAULT NOW(),									-- 생성일
+	`CREATE_AT` DATETIME NOT NULL,													-- 생성일
 	`UPDATE_AT` DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW(),					-- 수정일
 	`CATEGORY_CUISINE_ID` INT NOT NULL,												-- 카테고리 요리 종류 (FK)
 	`CATEGORY_PURPOSE_ID` INT NOT NULL,												-- 카테고리 목적 종류 (FK)
@@ -121,6 +121,7 @@ CREATE TABLE `RECIPE_INGREDIENT` (
 -- 레시피 좋아요 테이블
 CREATE TABLE `RECIPE_LIKE` (
 	`RECIPE_LIKE_ID` BIGINT AUTO_INCREMENT,							-- 레시피 좋아요 Key
+	`CREATE_AT` DATETIME NOT NULL DEFAULT NOW(),					-- 생성일
 	`USER_ID` BIGINT NOT NULL,										-- 회원 (FK)
 	`RECIPE_ID` BIGINT NOT NULL,									-- 레시피 (FK)
 	PRIMARY KEY (`RECIPE_LIKE_ID`),
@@ -131,6 +132,7 @@ CREATE TABLE `RECIPE_LIKE` (
 -- 레시피 북마크 테이블
 CREATE TABLE `RECIPE_BOOKMARK` (
 	`BOOKMARK_ID` BIGINT AUTO_INCREMENT,							-- 레시피 북마크 Key,
+	`CREATE_AT` DATETIME NOT NULL DEFAULT NOW(),					-- 생성일
 	`USER_ID` BIGINT NOT NULL,										-- 회원 (FK)
 	`RECIPE_ID` BIGINT NOT NULL,									-- 레시피 (FK)
 	PRIMARY KEY (`BOOKMARK_ID`),

@@ -11,8 +11,8 @@ import com.cooknote.backend.global.infra.mail.dto.response.VerifyAuthCodeRespons
 import com.cooknote.backend.global.infra.mail.service.MailService;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.message.SuccessMessage;
+import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 import com.cooknote.backend.global.utils.content.MailContent;
-import com.cooknote.backend.global.utils.random.RandomAuthCodeUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class MailServiceImpl implements MailService {
     	long start = System.currentTimeMillis();
     	
     	
-		String authCode = RandomAuthCodeUtil.createAuthCode();
+		String authCode = CommonFunctionUtil.createMailAuthCode();
 		String content = MailContent.createAuthCodeContent(authCode);
 		String mailAuthRedisKey = Constans.MAIL_AUTH_PREFIX + email;
 

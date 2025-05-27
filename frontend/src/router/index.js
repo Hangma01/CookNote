@@ -22,23 +22,21 @@ router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
     const isLoggedIn = userStore.getIsLoggedIn
 
-
-    if (to.name === 'myPage' && !isLoggedIn) {
-        next({ name: 'login' }) 
-    } else if (to.meta.requiresFlow &&  from.name !== 'userFindId' && to.name === 'userFindIdResult') {
+    if (to.meta.requiresFlow &&  from.name !== 'userFindId' && to.name === 'userFindIdResult') {
         next({ name: 'userFindId'})
     } else if (to.meta.requiresFlow &&  from.name !== 'userFindPw' && to.name === 'pwReset') {
         next({ name: 'userFindPw' }) 
-    } else if ((to.name === 'recipeWrite' || to.name === 'recipeEdit') && !isLoggedIn) {
-        const proceed = confirm("레시피 작성을 위해서 로그인이 필요합니다. 로그인 페이지로 이동할까요?");
+    } else if (to.matched.some(record => record.meta.requiresAuth) && !isLoggedIn) {
+        const proceed = confirm('로그인이 필요한 페이지입니다. 로그인하시겠습니까?');
+        
         if (proceed) {
-            next({ name: 'login'})
-        }    
+            next({ name: 'login' });
+        } else {
+            next(from.fullPath); // 이전페이지로
+        }
     } else {
-        next()
+        next(); // 통과
     }
-
-    
 })
 
 export default router

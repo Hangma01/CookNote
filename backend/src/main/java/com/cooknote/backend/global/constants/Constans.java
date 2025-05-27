@@ -31,9 +31,11 @@ public class Constans {
     // S3
     public static final String S3_TEMP_IMAGES_PATH = "TempImages/";
     public static final String S3_TEMP_IMAGES_FULL_PATH = "https://cooknote98.s3.ap-northeast-2.amazonaws.com/TempImages/";
-    public static final String S3_MOVE_RECIPE_THUMBNAILS_PATH = "Recipe/Thumbnails/";
-    public static final String S3_MOVE_RECIPE_SEQ_IMAGES_PATH = "Recipe/SeqImages/";
+    public static final String S3_MOVE_RECIPE_PATH = "Recipe/";
+    public static final String S3_MOVE_USER_PROFILE_PATH = "UserProfile/";
     public static final String S3_CONTENT_TYPE = "image/";
+    public static final String S3_DEFAULT_START_WITH = "Default";
+    
     
     
     // ETC...

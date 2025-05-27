@@ -5,58 +5,38 @@
 <template>
     <ul class="nav-menu">
         <li class="nav-menu-item">
-            <div class="menu-item menu-category">
-                음식 카테고리
-            </div>
-            
-            <div class="nav-category-item">
-                <ul>
-                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 1 } }"> -->
-                        <li class="categoy-item">
-                            한식
-                        </li>
-                    <!-- </router-link> -->
-
-                    <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorytype: 2 } }"> -->
-                        <li class="categoy-item">
-                            중식
-                        </li>
-                    <!-- </router-link> -->
-                </ul>
-            </div>
-        </li>
-
-        <li class="nav-menu-item">
-            <!-- <router-link :to="{ name: 'recipesSearch',  query: { serving: 1 } }"> -->
+            <router-link :to="{ name: 'search',  query: { keyword: '', categorycuisine: 0, categorypurpose: 3, page: 0 } }">
                 <div class="menu-item">
-                    혼밥 레시피
+                    <span>혼밥 레시피</span>
                 </div>
-            <!-- </router-link> -->
+            </router-link>
         </li>
 
         <li class="nav-menu-item">
-            <!-- <router-link :to="{ name: 'recipesSearch',  query: { categorypurpose: 2 } }"> -->
+            <router-link :to="{ name: 'search',  query: { keyword: '', categorycuisine: 0, categorypurpose: 1, page: 0 } }">
                 <div class="menu-item">
-                    다이어트 레시피
+                    <span>다이어트 레시피</span>
                 </div>
-            <!-- </router-link> -->
+            </router-link>
+        </li>
+
+        <li class="nav-menu-item">
+            <router-link :to="{ name: 'searchIngredient' }">
+                <div class="menu-item">
+                    <span>재료 검색</span>
+                </div>
+            </router-link>
         </li>
 
         <li class="nav-menu-item">
             <div class="menu-item">
-                재료 검색
+                <span>쉐프 검색</span>
             </div>
         </li>
 
         <li class="nav-menu-item">
             <div class="menu-item">
-                쉐프 검색
-            </div>
-        </li>
-
-        <li class="nav-menu-item">
-            <div class="menu-item">
-                팔로워 레시피
+                <span>팔로워 레시피</span>
             </div>
         </li>
     </ul>
@@ -76,46 +56,25 @@
     .nav-menu-item {
         position: relative;
         font-size: 1rem;
+        font-weight: 500;
         cursor: pointer;
         width: 7rem;
         text-align: center;
+
         
         .menu-item {
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #424242;
         }
 
-        .nav-category-item {
-            position: absolute;
-            display: none;
-            border: 1px solid #eee;
-            background-color: #fff;
-            border-bottom-right-radius: 0.5rem;
-            border-bottom-left-radius: 0.5rem;
-            padding-bottom: 0.3rem;
-
-            .categoy-item {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 6px 0;
-                
-            }
-
-            .categoy-item:hover{
-                background-color:#c09370;
-            }
-        }
-
-        .menu-category:hover + .nav-category-item {
-            display: block;
-        }
-
-        .nav-category-item:hover {
-            display: block;
+        .menu-item:hover {
+            color: #BF917E;
         }
     }
+
+
 }
 </style>

@@ -18,17 +18,17 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 // fontawesome - 필요한 아이콘 라이브러리를 추가
 import { faPenToSquare, faMagnifyingGlass, faLock, faArrowUpFromBracket, faPlus, faXmark
-       , faHeart, faBookmark, faUsers, faRankingStar, faTriangleExclamation
+       , faHeart, faBookmark, faUsers, faRankingStar, faTriangleExclamation, faCamera
        , faEllipsisVertical, faUtensils, faMessage}  from '@fortawesome/free-solid-svg-icons';
 import { faUser, faEnvelope, faHeart as farHeart, faBookmark as farBookmark, faClock
-       , faCircleCheck } from '@fortawesome/free-regular-svg-icons';
+       , faCircleCheck, faMessage as farMessage } from '@fortawesome/free-regular-svg-icons';
 
 // fontawesome - 사용할 아이콘을 라이브러리에 추가
 library.add(
     faPenToSquare, faMagnifyingGlass, faLock, faArrowUpFromBracket, faPlus, faXmark
-  , faHeart, faBookmark, faUsers, faRankingStar, faTriangleExclamation
+  , faHeart, faBookmark, faUsers, faRankingStar, faTriangleExclamation, faCamera
   , faEllipsisVertical, faUtensils, faMessage
-  , faUser, faEnvelope, farHeart, farBookmark, faClock, faCircleCheck
+  , faUser, faEnvelope, farHeart, farBookmark, faClock, faCircleCheck, farMessage
 );
 
 import App from './App.vue'

@@ -24,6 +24,7 @@ import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.S3ErrorCode;
@@ -128,9 +129,15 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public void deleteImageFromS3(String imageUrl) {
 		String key = getKeyFromImageUrl(imageUrl);
+
+		if (key.startsWith(Constans.S3_DEFAULT_START_WITH)) {
+		    return;
+		}
+		
 		try {
 			amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
 		} catch (Exception e) {
+			log.warn("삭제 중 실패한 이미지: " + imageUrl.toString());
 			throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
 		}
 	}
@@ -153,14 +160,38 @@ public class S3ServiceImpl implements S3Service {
 		}
 	}
 	
+	// 폴더 삭제
+	@Override
+	public void deleteFolderFromS3(String folderPrefix) {
+	    try {
+	        List<S3ObjectSummary> objects = amazonS3.listObjects(bucketName, folderPrefix).getObjectSummaries();
+
+	        for (S3ObjectSummary object : objects) {
+	            amazonS3.deleteObject(bucketName, object.getKey());
+	        }
+
+	        // 마지막으로 "폴더 객체" 자체도 삭제 시도
+	        if (!folderPrefix.endsWith("/")) {
+	            folderPrefix += "/";
+	        }
+	        amazonS3.deleteObject(bucketName, folderPrefix);
+
+	    } catch (Exception e) {
+	        throw new CustomS3Exception(S3ErrorCode.IO_EXCEPTION_ON_IMAGE_DELETE);
+	    }
+	}
+	
 	
 	// 이미지의 위치를 옮기는 메서드이다.
 	@Override
-	public String moveImage(String imageUrl, String targetFolder) {
+	public String moveImage(String imageUrl, Long userId, String targetFolder, String formatDate) {
 		
 		String imageKey = getKeyFromImageUrl(imageUrl);
-		
-		String imageDestinationKey = getImageDestinationKey(imageKey, targetFolder);
+		String DestinationFolder = targetFolder + userId + "/";
+		if(formatDate != null) {
+			DestinationFolder += formatDate + "/";
+		}
+		String imageDestinationKey = getImageDestinationKey(imageKey, DestinationFolder);
 		
 		try {
 			// 이미지 복사
@@ -190,7 +221,7 @@ public class S3ServiceImpl implements S3Service {
 	
 	// 여러개의 이미지 위치를 옮기는 메서드이다.
 	@Override
-	public List<String> moveImages(List<String> imageUrls, String targetFolder) {
+	public List<String> moveImages(List<String> imageUrls, Long userId, String targetFolder, String formatDate) {
 		
 		// 옮겨진 키들 저장
 		List<String> moveKeys = new ArrayList<>();
@@ -203,8 +234,8 @@ public class S3ServiceImpl implements S3Service {
 					moveImageUrls.add(null);
 				} else {
 					String imageKey = getKeyFromImageUrl(imageUrl);
-					
-					String imageDestinationKey = getImageDestinationKey(imageKey, targetFolder);
+					String DestinationFolder = targetFolder + userId + "/" + formatDate + "/";
+					String imageDestinationKey = getImageDestinationKey(imageKey, DestinationFolder);
 					
 				
 					// 복사

@@ -9,6 +9,7 @@ import RecipeDetailSeq from "./RecipeDetailSeq.vue";
 import RecipeDetailCommend from "./RecipeDetailCommend.vue";
 import { getComments } from "@/services/commentService";
 import { errorMessages } from "@/utils/messages/errorMessages";
+import RecipeTip from "./RecipeTip.vue";
 
 // 화면 전환
 const router = useRouter();
@@ -48,6 +49,7 @@ const loadPage = async (page = 0) => {
     const res = await getComments(recipeId, page);
     commentsData.value = res.data;
     currentPage.value = res.data.page.number;
+    console.log(recipeDetailData)
   } catch (e) {
     if (e.response && e.response?.data?.message) {
         alert(e.response.data.message)
@@ -80,6 +82,10 @@ const refreshComments = () => {
 
         <section>
             <RecipeDetailSeq :recipeSeqs = "recipeDetailData?.recipeSeqs"/>
+        </section>
+
+        <section>
+            <RecipeTip :recipeTip= "recipeDetailData?.tip" />
         </section>
 
         <section>

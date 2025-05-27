@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
@@ -15,8 +16,11 @@ import com.cooknote.backend.domain.user.entity.User;
 @Mapper
 public interface UserMapper {
 	
+	// 로그인 회원 정보 가져오기
+	User getLoginUser(@Param("id") String id);
+	
 	// 회원 정보 가져오기
-	User getUser(@Param("id") String id);
+	User getUser(@Param("userId") Long userId);
 
 	// 유저 호스트 프로필 정보 가져오기	
 	UserHostProfileResponseDTO getHostProfile(@Param("userId") Long userId
@@ -42,4 +46,22 @@ public interface UserMapper {
 	// 팔로우 취소
 	void deleteFollow(@Param("userId") Long userId
 			   		, @Param("followId") Long followId);
+
+	// 프로필 수정
+	void userProfileUpdate(@Param("userId") Long userId
+			      	  	 , @Param("updateNickname") String nickname 
+			      	  	 , @Param("moveProfileUrl") String moveProfileUrl);
+
+	// 유저 수정 정보 조회
+	UserProfileEditInfoResponseDTO getUserProfileEditInfo(@Param("userId") Long userId);
+
+	// 비밀번호 수정
+	void pwUpdate(@Param("userId") Long userId
+				, @Param("newPw") String newPw);
+
+	// 회원 탈퇴
+	void userDelete(Long userId);
+
+
+
 }

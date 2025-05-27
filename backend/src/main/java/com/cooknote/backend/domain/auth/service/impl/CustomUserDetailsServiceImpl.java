@@ -24,7 +24,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
 
 		// DB에서 유저 조회
-		User getUser = userService.getUser(id);
+		User getUser = userService.getLoginUser(id);
 
 		// 유저 조회 실패
 		if(getUser == null) {

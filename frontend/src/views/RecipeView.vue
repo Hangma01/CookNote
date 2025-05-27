@@ -1,16 +1,9 @@
 <script setup>
-import { computed } from 'vue';
-import { RouterView, useRoute } from 'vue-router';
-
-const route = useRoute()
-
-const routerKey = computed(() => {
-  return route.meta.forceRemount ? `${route.name}-${route.params.recipeId || 'new'}` : undefined
-})
+import { RouterView } from 'vue-router';
 </script>
 
 <template>
-    <div class="recipe-content" :key="routerKey">
+    <div class="recipe-content" >
         <RouterView />
     </div>
 </template>

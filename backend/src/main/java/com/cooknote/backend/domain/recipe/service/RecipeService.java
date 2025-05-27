@@ -3,6 +3,7 @@ package com.cooknote.backend.domain.recipe.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
@@ -13,7 +14,7 @@ import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeLikeResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
-import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 
 import jakarta.validation.Valid;
 
@@ -59,6 +60,13 @@ public interface RecipeService {
 	
 	// 북마크한 공개 레시피 조회
 	Page<RecipeBookmarkResponseDTO> getBookmarkRecipe(Long userId, int page, int size);
+
+	// 레시피 검색
+	Page<RecipeSearchResponseDTO> getRecipeSearch(String keyword, int categoryCuisineId, int categoryPurposeId, int page, int size);
+
+
+	// 레시피 재료 검색
+	Page<RecipeSearchResponseDTO> getIngredientSearch(String keyword, int page, int size);
 
 
 }

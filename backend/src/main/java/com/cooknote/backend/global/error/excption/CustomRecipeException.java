@@ -8,5 +8,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class CustomRecipeException extends RuntimeException {
-	private final RecipeErrorCode recipeError;
+	private final RecipeErrorCode recipeErrorCode;
 }

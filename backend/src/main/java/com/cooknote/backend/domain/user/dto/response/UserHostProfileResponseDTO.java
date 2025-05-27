@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserHostProfileResponseDTO {
+	private String hostId;
 	private String nickname;
 	private String profileImage;
 	private int recipePublicCount;

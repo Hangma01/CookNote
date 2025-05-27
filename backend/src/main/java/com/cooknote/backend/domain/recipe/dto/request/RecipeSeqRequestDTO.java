@@ -22,7 +22,7 @@ public class RecipeSeqRequestDTO {
     private Integer step;
 	
 	@NotBlank
-	@Length(min = 5, max = 250)
+	@Length(min = 5, max = 400)
     private String description;
 	
 	@NotBlank

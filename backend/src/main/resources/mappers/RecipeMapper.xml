@@ -16,14 +16,13 @@
 	    <result property="status" column="STATUS"/>									<!-- 레시피 상태 -->
 	    <result property="categoryCuisineId" column="CATEGORY_CUISINE_ID"/>
 	    <result property="categoryPurposeId" column="CATEGORY_PURPOSE_ID"/>
-	
 	    <!-- 중첩된 재료 리스트 -->
 	    <collection property="recipeIngredients" ofType="RecipeIngredientResponseDTO">
+	    	<result property="ingredientId" column="INGREDIENT_ID"/>
 	        <result property="name" column="NAME"/>
 	        <result property="quantity" column="QUANTITY"/>
 	        <result property="remark" column="REMARK"/>
 	    </collection>
-	
 	    <!-- 중첩된 시퀀스 리스트 -->
 	    <collection property="recipeSeqs" ofType="RecipeSeqResponseDTO">
 	        <result property="step" column="RECIPE_SEQ_ID"/>
@@ -33,9 +32,7 @@
 	</resultMap>
 
 	<resultMap id="RecipeDetailResultMap" type="RecipeDetailResponseDTO" extends="RecipeEditResultMap">
-
-	    <result property="createAt" column="CREATE_AT"/> 							<!-- 작성일 -->
-	
+	    <result property="createAt" column="CREATE_AT"/> 							
 	    <!-- 작성자 정보 -->
 	    <result property="writerUserId" column="WRITER_USER_ID"/>
 	    <result property="writerNickname" column="WRITER_NICKNAME"/>
@@ -44,13 +41,11 @@
 	    <!-- 좋아요 북마크 여부 -->
 	    <result property="isLiked" column="IS_LIKED"/>
 	    <result property="isBookmarked" column="IS_BOOKMARKED"/>
-	    
 	</resultMap>
 	
 	
 	<resultMap id="deleteRecipeImages" type="Recipe">
-	    <result property="thumbnail" column="THUMBNAIL"/>							<!-- 레시피 썸네일 -->
-	
+	    <result property="thumbnail" column="THUMBNAIL"/>							
 	    <!-- 중첩된 시퀀스 리스트 -->
 	    <collection property="recipeSeqs" ofType="RecipeSeq">
 	        <result property="image" column="IMAGE"/>
@@ -71,6 +66,7 @@
 			 , R.CATEGORY_CUISINE_ID 			AS CATEGORY_CUISINE_ID		<!-- 카테고리 요리 종류 아이디 -->
 			 , R.CATEGORY_PURPOSE_ID 			AS CATEGORY_PURPOSE_ID		<!-- 카테고리 요리 목적 아이디 -->
 			 , R.CREATE_AT						AS CREATE_AT				<!-- 레시피 작성일 -->
+			 , I.RECIPE_INGREDIENT_ID			AS INGREDIENT_ID			<!-- 재료 아이디 -->
 			 , I.NAME							AS NAME						<!-- 재료 이름 -->
 	         , I.QUANTITY 						AS QUANTITY					<!-- 재료 용량 -->
         	 , I.REMARK							AS REMARK					<!-- 재료 비고 -->
@@ -80,8 +76,6 @@
         	 , U.USER_ID 						AS WRITER_USER_ID			<!-- 작성자 번호 Key -->
         	 , U.NICKNAME 						AS WRITER_NICKNAME			<!-- 작성자 닉네임 -->
         	 , U.PROFILE_IMAGE 					AS WRITER_PROFILE_IMAGE		<!-- 작성자 프로필 이미지 -->
-        	 
-	         
 			<if test="userId != null">
 			 , CASE WHEN RL.USER_ID IS NOT NULL 
 			   		THEN TRUE
@@ -92,12 +86,10 @@
 		       		ELSE FALSE
 		        	 END 						AS IS_BOOKMARKED			<!-- 레시피 북마크 여부 (로그인) -->
 			</if>
-			
 			<if test="userId == null">
 			  , FALSE 							AS iS_LIKED					<!-- 레시피 좋아요 여부 (로그아웃) -->
 			  , FALSE 							AS iS_BOOKMARKED			<!-- 레시피 북마크 여부 (로그아웃) -->
 			</if>
-        	 
 		   FROM RECIPE 							AS R						<!-- 레시피 테이블 -->
       LEFT JOIN RECIPE_INGREDIENT 				AS I 						<!-- 레시피 재료 테이블 -->
       		 ON R.RECIPE_ID = I.RECIPE_ID
@@ -127,6 +119,7 @@
 			 , R.STATUS	 			 		AS STATUS					<!-- 레시피 상태 -->
 			 , R.CATEGORY_CUISINE_ID 		AS CATEGORY_CUISINE_ID		<!-- 카테고리 요리 종류 아이디 -->
 			 , R.CATEGORY_PURPOSE_ID 		AS CATEGORY_PURPOSE_ID		<!-- 카테고리 요리 목적 아이디 -->
+			 , I.RECIPE_INGREDIENT_ID		AS INGREDIENT_ID			<!-- 재료 아이디 -->
 			 , I.NAME						AS NAME						<!-- 재료 이름 -->
 	         , I.QUANTITY 					AS QUANTITY					<!-- 재료 용량 -->
         	 , I.REMARK						AS REMARK					<!-- 재료 비고 -->
@@ -157,6 +150,7 @@
 						  , STATUS
 						  , CATEGORY_CUISINE_ID
 						  , CATEGORY_PURPOSE_ID
+						  , CREATE_AT
 						  , WRITER_ID
 		)
 		VALUES (
@@ -171,6 +165,7 @@
 			  , #{status}
 			  , #{categoryCuisineId}
 			  , #{categoryPurposeId}
+			  , #{createAt}
 			  , #{writerId}
 		)
 	</insert>
@@ -178,19 +173,20 @@
 	<!-- 레시피 수정 -->
 	<update id="update">
 		UPDATE RECIPE
-		   SET TITLE = #{title}
-		   	 , DESCRIPTION = #{description}
-        	 , THUMBNAIL = #{thumbnail}
-        	 , VIDEO_ID = #{videoId}
-        	 , SERVING = #{serving}
-        	 , DURATION = #{duration}
-        	 , LEVEL = #{level}
-        	 , TIP = #{tip}
-        	 , STATUS = #{status}
+		   SET TITLE = #{reqRecipe.title}
+		   	 , DESCRIPTION = #{reqRecipe.description}
+        	 , THUMBNAIL = #{reqRecipe.thumbnail}
+        	 , VIDEO_ID = #{reqRecipe.videoId}
+        	 , SERVING = #{reqRecipe.serving}
+        	 , DURATION = #{reqRecipe.duration}
+        	 , LEVEL = #{reqRecipe.level}
+        	 , TIP = #{reqRecipe.tip}
+        	 , STATUS = #{reqRecipe.status}
         	 , CATEGORY_CUISINE_ID = #{categoryCuisineId}
         	 , CATEGORY_PURPOSE_ID = #{categoryPurposeId}
     	 WHERE RECIPE_ID = #{recipeId}
     	   AND WRITER_ID = #{writerId}
+    	   AND STATUS != #{statusPrivateAdmin}
 	</update>
 	
 	
@@ -353,7 +349,7 @@
 		  JOIN RECIPE 		 AS R
 		    ON RL.RECIPE_ID = R.RECIPE_ID
 		 WHERE RL.USER_ID = #{userId}
-		 ORDER BY R.CREATE_AT DESC
+		 ORDER BY RL.CREATE_AT DESC
 		 LIMIT #{size}
 		OFFSET #{offset}
 	</select>
@@ -370,19 +366,139 @@
 		  JOIN RECIPE 		   AS R
 		    ON RB.RECIPE_ID = R.RECIPE_ID
 		 WHERE RB.USER_ID = #{userId}
-	  ORDER BY R.CREATE_AT DESC
+	  ORDER BY RB.CREATE_AT DESC
 		 LIMIT #{size}
 		OFFSET #{offset}
 	</select>
 	
-	<select id="getRecipeDeleteImage" resultMap="deleteRecipeImages">
-		SELECT R.THUMBNAIL AS THUMBNAIL
-			 , RS.IMAGE	   AS IMAGE
-		  FROM RECIPE 	   AS R
-		  JOIN RECIPE_SEQ  AS RS
-		    ON R.RECIPE_ID = RS.RECIPE_ID
-		 WHERE R.RECIPE_ID = #{recipeId}
-		   AND R.WRITER_ID = #{userId}
+	<!-- 레시피 작성일 -->
+	<select id="getRecipeCreateAt" resultType="java.time.LocalDateTime">
+		SELECT CREATE_AT
+		  FROM RECIPE
+		 WHERE RECIPE_ID = #{recipeId}
+		   AND WRITER_ID = #{userId}
+	</select>
+	
+	<!-- 레시피 검색 -->
+	<select id="getRecipeSearch" resultType="RecipeSearchResponseDTO">
+		SELECT R.THUMBNAIL							AS RECIPE_THUMBNAIL			<!-- 레시피 썸네일 -->
+			 , R.RECIPE_ID 						 	AS RECIPE_ID 				<!-- 레시피 아이디 -->
+			 , R.TITLE 							 	AS RECIPE_TITLE				<!-- 레시피 제목 -->
+			 , R.WRITER_ID 							AS WRITER_ID				<!-- 레시피 작성자 -->
+			 , U.NICKNAME 						 	AS WRITER_NICKNAME			<!-- 레시피 작성자 닉네임 -->
+			 , U.PROFILE_IMAGE 					 	AS WRITER_PROFILE_IMAGE		<!-- 레시피 작성자 프로필 이미지 -->
+			 , COUNT(DISTINCT C.COMMENT_ID) 	 	AS RECIPE_COMMENT_COUNT		<!-- 레시피 댓글 수 -->
+	    	 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) 	AS RECIPE_LIKE_COUNT		<!-- 레시피 좋아요 수 -->
+		  FROM RECIPE 							 	AS R						<!-- 레시피 테이블 -->
+	INNER JOIN USER 							 	AS U 						<!-- 유저 테이블 -->
+			ON R.WRITER_ID = U.USER_ID
+	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
+	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
+	 		ON R.RECIPE_ID = C.RECIPE_ID
+	     WHERE R.STATUS = #{statusRecipePublic} 
+	     	   <if test="keyword != null">
+		   AND (
+			    R.TITLE LIKE CONCAT('%', #{keyword}, '%')
+			 OR R.DESCRIPTION LIKE CONCAT('%', #{keyword}, '%')
+			 OR EXISTS (
+			            SELECT 1
+			              FROM RECIPE_INGREDIENT 	AS RI						<!-- 레시피 재료 테이블 -->
+			             WHERE RI.RECIPE_ID = R.RECIPE_ID
+			               AND RI.NAME LIKE CONCAT('%', #{keyword}, '%')
+			          	)
+			    )
+		   		</if>
+		   <if test="categoryCuisineId != 0">
+		   AND R.CATEGORY_CUISINE_ID = #{categoryCuisineId}
+		   </if>
+		   <if test="categoryPurposeId != 0">
+		   AND R.CATEGORY_PURPOSE_ID = #{categoryPurposeId}
+		   </if> 
+	  GROUP BY R.RECIPE_ID
+	  		 , R.TITLE
+	 		 , R.WRITER_ID
+	 		 , U.NICKNAME
+	 		 , U.PROFILE_IMAGE
+	 	 LIMIT #{size}
+		OFFSET #{offset}	 
+	</select>
+	
+	<!-- 레시피 검색 카운트 -->
+	<select id="getRecipeSearchCount" resultType="int">
+  		SELECT COUNT(R.RECIPE_ID)
+ 		  FROM RECIPE AS R
+  	     WHERE R.STATUS = #{statusRecipePublic} 
+  	     	   <if test="keyword != null">
+		   AND (
+		        R.TITLE LIKE CONCAT('%', #{keyword}, '%')
+		        OR R.DESCRIPTION LIKE CONCAT('%', #{keyword}, '%')
+		        OR EXISTS (
+		          		   SELECT 1 
+		          			 FROM RECIPE_INGREDIENT AS RI
+		          			WHERE RI.RECIPE_ID = R.RECIPE_ID
+		          			  AND RI.NAME LIKE CONCAT('%', #{keyword}, '%')
+		        		   )
+		        )
+		       </if>
+		  <if test="categoryCuisineId != 0">
+		   AND R.CATEGORY_CUISINE_ID = #{categoryCuisineId}
+		  </if>
+		  <if test="categoryPurposeId != 0">
+		   AND R.CATEGORY_PURPOSE_ID = #{categoryPurposeId}
+		  </if>
+	</select>
+	
+	<!-- 레시피 재료 검색 -->
+	<select id="getIngredientSearch" resultType="RecipeSearchResponseDTO">
+		SELECT R.THUMBNAIL								AS RECIPE_THUMBNAIL			<!-- 레시피 썸네일 -->
+			 , R.RECIPE_ID 						 		AS RECIPE_ID 				<!-- 레시피 아이디 -->
+			 , R.TITLE 							 		AS RECIPE_TITLE				<!-- 레시피 제목 -->
+			 , R.WRITER_ID 								AS WRITER_ID				<!-- 레시피 작성자 -->
+			 , U.NICKNAME 						 		AS WRITER_NICKNAME			<!-- 레시피 작성자 닉네임 -->
+			 , U.PROFILE_IMAGE 					 		AS WRITER_PROFILE_IMAGE		<!-- 레시피 작성자 프로필 이미지 -->
+			 , COUNT(DISTINCT C.COMMENT_ID) 	 		AS RECIPE_COMMENT_COUNT		<!-- 레시피 댓글 수 -->
+	    	 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) 		AS RECIPE_LIKE_COUNT		<!-- 레시피 좋아요 수 -->
+		  FROM RECIPE 									AS R						<!-- 레시피 테이블 -->
+	INNER JOIN USER AS U 
+		 	ON R.WRITER_ID = U.USER_ID
+	 LEFT JOIN RECIPE_LIKE 								AS RL 						<!-- 레시피 좋아요 테이블 -->
+	 		ON R.RECIPE_ID = RL.RECIPE_ID
+	 LEFT JOIN COMMENT 									AS C 						<!-- 레시피 댓글 테이블 -->
+	 		ON R.RECIPE_ID = C.RECIPE_ID
+		 WHERE R.STATUS = #{statusRecipePublic}
+		   AND R.RECIPE_ID IN (
+		    				   SELECT RI.RECIPE_ID
+		    					 FROM RECIPE_INGREDIENT AS RI						<!-- 레시피 재료 테이블 -->
+		    					WHERE RI.NAME IN <foreach item="ingredient" index="index" collection="ingredients" open="(" separator="," close=")">
+		        								 #{ingredient}
+		    									 </foreach>
+		    					GROUP BY RI.RECIPE_ID
+		    				   HAVING COUNT(DISTINCT RI.NAME) = #{ingredientCount}
+		 )
+		 GROUP BY R.RECIPE_ID
+		 		, R.TITLE
+		 		, R.WRITER_ID
+		 		, U.NICKNAME
+		 		, U.PROFILE_IMAGE
+		 LIMIT #{size}
+		OFFSET #{offset}
+	</select>
+	
+	<!-- 레시피 재료 검색 카운트 -->
+	<select id="getIngredientSearchCount" resultType="int">
+		SELECT COUNT(R.RECIPE_ID)
+		  FROM RECIPE 									AS R	<!-- 레시피 테이블 -->
+		 WHERE R.STATUS = #{statusRecipePublic}
+		   AND R.RECIPE_ID IN (
+		    				   SELECT RI.RECIPE_ID
+		    					 FROM RECIPE_INGREDIENT AS RI	<!-- 레시피 재료 테이블 -->
+		    					WHERE RI.NAME IN <foreach item="ingredient" index="index" collection="ingredients" open="(" separator="," close=")">
+		        								 #{ingredient}
+		    									 </foreach>
+		    					GROUP BY RI.RECIPE_ID
+		    				   HAVING COUNT(DISTINCT RI.NAME) = #{ingredientCount}
+		  )
 	</select>
 </mapper>
 

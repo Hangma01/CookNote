@@ -1,6 +1,7 @@
 package com.cooknote.backend.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -56,6 +57,7 @@ public class AuthController {
 
 	// 회원 가입
 	@PostMapping("/join")
+	@Transactional
 	public ResponseEntity<Void> userJoin(@Valid @RequestBody UserJoinRequestDTO userJoinRequestDTO
 									   , BindingResult bindingResult) {
 
@@ -102,6 +104,7 @@ public class AuthController {
 	
 	// 비밀번호 찾기 - 변경
 	@PatchMapping("/findPw")
+	@Transactional
 	public ResponseEntity<Void> userFindPwReset(@Valid @RequestBody UserFindPwResetRequestDTO userFindPwResetRequestDTO
 											  , BindingResult bindingResult) {
 

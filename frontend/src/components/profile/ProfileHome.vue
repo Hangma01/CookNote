@@ -1,6 +1,7 @@
 <script setup>
 import { getUserProfile } from "@/services/userService";
 import { useUserStore } from "@/stores/user";
+import { loadProfile } from "@/utils/commonFunction";
 import { errorMessages } from "@/utils/messages/errorMessages";
 import { computed, onMounted } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
@@ -22,31 +23,13 @@ const menus = [
     { label: '북마크', icon: ['fas', 'bookmark'], name: 'profileBookmark' },
     { label: '댓글', icon: ['fas', 'message'], name: 'profileComment' },
     { label: '좋아요', icon: ['fas', 'heart'], name: 'profileLike' },
-    { label: '팔로우', icon: ['fas', 'heart'], name: 'profileFollow' }
+    { label: '팔로우', icon: ['far', 'user'], name: 'profileFollow' }
 ]
 
 // 현재 활성 경로인지 체크하는 함수
 const isActive = (menuName) => route.name === menuName;
-
 onMounted(async () => {
-    try {
-        const res = await getUserProfile()
-
-        userStore.setProfile({
-                              ...res.data
-                            , isHostProfile: false
-                            })
-    } catch (e) {
-        console.log(e)
-        if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
-        } else {
-            alert(errorMessages.BADREQUEST)
-        }
-
-        router.push({ name : 'mainPage'})
-    }
-    
+    loadProfile(false)
 })
 
 </script>

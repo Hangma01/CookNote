@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.cooknote.backend.domain.category.dto.response.CategoryCuisineListResponseDTO;
 import com.cooknote.backend.domain.category.dto.response.CategoryGetAllResponseDTO;
 import com.cooknote.backend.domain.category.dto.response.CategoryPurposeResponseDTO;
+import com.cooknote.backend.domain.category.dto.response.CategoryResponseDTO;
 import com.cooknote.backend.domain.category.service.CategoryService;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEnumLabelResponseDTO;
 import com.cooknote.backend.domain.recipe.enums.RecipeDuration;
@@ -67,6 +68,30 @@ public class CategoryServiceImpl implements CategoryService {
 		
 		return categoryGetAllResponse;
     }
+
+	// 카테고리 리스트 가져오기
+	@Override
+	public CategoryResponseDTO getCategory() {
+		// 카테고리 요리 종류 리스트 가져오기
+		List<CategoryCuisineListResponseDTO> rspCategoryCuisineList = categoryMapper.getCategoryCuisine();
+		
+		if(rspCategoryCuisineList == null) {
+				throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+			}
+		
+		// 카테고리 요리 목적 리스트 가져오기
+		List<CategoryPurposeResponseDTO> rspCategoryPurposeList = categoryMapper.getCategoryPurpose();
+	
+		if(rspCategoryPurposeList == null) {
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
+		
+		CategoryResponseDTO categoryResponseDTO = CategoryResponseDTO.builder()
+																.categoryCuisineList(rspCategoryCuisineList)
+																.categoryPurposeList(rspCategoryPurposeList)
+																.build();
+		return categoryResponseDTO;
+	}
 	
 
 }

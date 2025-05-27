@@ -1,6 +1,7 @@
 package com.cooknote.backend.domain.recipe.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.cooknote.backend.domain.recipe.enums.RecipeDuration;
@@ -30,8 +31,8 @@ public class Recipe {
     private RecipeLevel level;	 		// 레시피 난이도 - 0 (쉬움), 1 (보통), 3 (어려움)ㄴ
     private String tip;					// 레시피 요리 팁
     private RecipeStatus status; 		// 레시피 상태 - PRIVATE, PUBLIC, PRIVATE_ADMIN, ELETE.
-    private LocalDate createAt;			// 레시피 생성일
-    private LocalDate updateAt;			// 레시피 수정일
+    private LocalDateTime createAt;		// 레시피 생성일
+    private LocalDateTime updateAt;		// 레시피 수정일
     private int categoryCuisineId;		// 카테고리 - 요리 종류 (FK)
     private int categoryPurposeId;		// 카테고리 - 요리 목적 (FK)
     private Long writerId;				// 작성자 (FK)

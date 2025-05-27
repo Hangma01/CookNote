@@ -23,6 +23,7 @@ import com.cooknote.backend.global.error.excption.CustomJwtException;
 import com.cooknote.backend.global.infra.mail.service.MailService;
 import com.cooknote.backend.global.infra.mail.service.impl.MailServiceImpl;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
+import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 import com.cooknote.backend.mappers.AuthMapper;
@@ -169,8 +170,10 @@ public class AuthServiceImpl implements AuthService{
 	// 비밀번호 찾기 - 재설정
 	@Override
 	public void userFindPwReset(UserFindPwResetRequestDTO userFindPwResetRequestDTO) {
+		
 		// 비밀번호 일치 확인
-		if(!userFindPwResetRequestDTO.getNewPw().equals(userFindPwResetRequestDTO.getNewPwConfirm())) {
+		if(!CommonFunctionUtil.match(userFindPwResetRequestDTO.getNewPw()
+								  , userFindPwResetRequestDTO.getNewPwConfirm())) {
 			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
 		}
 		

@@ -34,7 +34,7 @@ const isEditMode = ref(!!recipeId)
 // 레시피 저장
 const handleRecipeSave = debounce (async () => {
 
-    // // 유효성 검사
+    // 유효성 검사
     const recipeInfoValidResult = recipeInfoRef.value.validation()
     const recipeIngredientsValidResult =  recipeIngredienRef.value.validation()
     const recipeSeqValidResult = recipeSeqRef.value.validation();
@@ -49,7 +49,7 @@ const handleRecipeSave = debounce (async () => {
     } else if (recipeSetValidResult !== true) {
         alert(recipeSetValidResult)
     } else {
-    // 데이터 가져오기
+        // 데이터 가져오기
         const recipeInfo = recipeInfoRef.value.getData()
         const recipeIngredients = recipeIngredienRef.value.getData()
         const recipeSeq = recipeSeqRef.value.getData()
@@ -78,8 +78,6 @@ const handleRecipeSave = debounce (async () => {
             formValues.originalRecipeSeqs = originalRecipeData.value.recipeSeqs
         }
 
-        console.log(formValues)
-
         //서버에 전송
         try {
             if (isEditMode.value) {
@@ -87,7 +85,9 @@ const handleRecipeSave = debounce (async () => {
             } else {
                 await saveRecipe(formValues)
             }
-            router.replace({ name: 'mainPage'});
+
+            router.replace({ name: 'profileRecipe', query: { tab: recipeSet.selectedStatus } });
+
         } catch (e) {
             if (e.response && e.response?.data?.message) {
                 alert(e.response.data.message)  
@@ -127,7 +127,7 @@ const handleCancle = debounce (async () => {
 
 // 레시피 작성 / 수정 시 가져올 데이터
 onMounted(async () => {
-    if (isEditMode.value) { // 레시피 수정시요청 데이터터  
+    if (isEditMode.value) { // 레시피 수정시요청 데이터
         try {
             const [originalRecipeRes, categoriesRes] = await Promise.all([
                 getOriRecipe(recipeId),
@@ -135,6 +135,7 @@ onMounted(async () => {
             ]);
 
             originalRecipeData.value = originalRecipeRes.data
+            
             categories.value = categoriesRes.data
         } catch (e) {
             if (e.response && e.response?.data?.message) {

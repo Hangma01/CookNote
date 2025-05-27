@@ -78,7 +78,7 @@ defineExpose({
 
 
 // 요리 순서 250자 제한 (한글)
-const handleItemDescriptionInput = (e, item) => commonInputHangle(e, 250, (value) => item.description = value)
+const handleItemDescriptionInput = (e, item) => commonInputHangle(e, 400, (value) => item.description = value)
 
 // 요리 팁 400자 제한 (한글)
 const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.value = value)
@@ -100,7 +100,7 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => recipeTip.val
           <v-textarea
             v-model="item.description"
             @input="handleItemDescriptionInput($event, item)"
-            placeholder="요리 순서는 최소 5자 이상 250자 이내로 작성해주세요."
+            placeholder="요리 순서는 최소 5자 이상 400자 이내로 작성해주세요."
             rows="7"
             no-resize
             variant="outlined"

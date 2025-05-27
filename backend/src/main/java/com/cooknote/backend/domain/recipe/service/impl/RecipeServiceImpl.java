@@ -1,6 +1,7 @@
 package com.cooknote.backend.domain.recipe.service.impl;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,9 +25,9 @@ import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeLikeResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.entity.Recipe;
-import com.cooknote.backend.domain.recipe.entity.RecipeSeq;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.recipe.service.RecipeService;
 import com.cooknote.backend.global.constants.Constans;
@@ -34,6 +36,7 @@ import com.cooknote.backend.global.error.exceptionCode.RecipeErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomRecipeException;
 import com.cooknote.backend.global.infra.aws.s3.service.S3Service;
+import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 import com.cooknote.backend.mappers.RecipeIngredientMapper;
 import com.cooknote.backend.mappers.RecipeMapper;
 import com.cooknote.backend.mappers.RecipeSeqMapper;
@@ -87,19 +90,17 @@ public class RecipeServiceImpl implements RecipeService {
 	@Transactional
 	public void recipeSave(Long userId, RecipeSaveRequestDTO recipeSaveRequestDTO) {
 
-		// 이동한 이미지 url들
+		// 이동한 이미지 url 저장 리스트
 		List<String> moveImageUrls = new ArrayList<>();
 		
-		// 썸네일
+		// 썸네일 url
 		String thumbnail =  recipeSaveRequestDTO.getThumbnail();        
 
-
-        
-        long start = System.currentTimeMillis();
-		// 이동한 썸네일 url
-		String moveThumbnailUrl = s3Service.moveImage(thumbnail, Constans.S3_MOVE_RECIPE_THUMBNAILS_PATH);
+		// 썸네일 Temp -> Recip 폴더로 이동
+		LocalDateTime now = LocalDateTime.now();
+		String formatNow = CommonFunctionUtil.dateFormat(now);
+		String moveThumbnailUrl = s3Service.moveImage(thumbnail, userId, Constans.S3_MOVE_RECIPE_PATH, formatNow);
 		moveImageUrls.add(moveThumbnailUrl);
-        long end = System.currentTimeMillis();
 
 		// 레시피 순서 이미지
 		List<String> moveRecipeSeqImages = new ArrayList<>();
@@ -109,13 +110,8 @@ public class RecipeServiceImpl implements RecipeService {
         	moveRecipeSeqImages.add(recipeSeq.getImage());
         }
         
-         start = System.currentTimeMillis();
-
-
         // 이동한 레시피 순서 이미지 url
-        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, Constans.S3_MOVE_RECIPE_SEQ_IMAGES_PATH);
-         end = System.currentTimeMillis();
-
+        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, userId, Constans.S3_MOVE_RECIPE_PATH, formatNow);
         
 		try {
 	        Recipe reqRecipe = Recipe.builder()
@@ -130,10 +126,11 @@ public class RecipeServiceImpl implements RecipeService {
 					.status(recipeSaveRequestDTO.getStatus())
 					.categoryCuisineId(recipeSaveRequestDTO.getCategoryCuisineId())
 					.categoryPurposeId(recipeSaveRequestDTO.getCategoryPurposeId())
+					.createAt(now)
 					.writerId(userId)
 					.build();
 	        
-
+	        
 	        // 레시피 저장
 		    recipeMapper.save(reqRecipe);
 
@@ -153,7 +150,8 @@ public class RecipeServiceImpl implements RecipeService {
 
 		} catch (Exception e) {
 	        try {
-		        s3Service.deleteImagesFromS3(moveImageUrls);				
+	        	String folderPrefix = Constans.S3_MOVE_RECIPE_PATH + userId + "/" + formatNow;
+		        s3Service.deleteFolderFromS3(folderPrefix);				
 			} catch (Exception error) {
 				log.warn("s3 이미지 삭제 실패: " + String.join(", ", moveImageUrls));
 			}
@@ -207,15 +205,17 @@ public class RecipeServiceImpl implements RecipeService {
         
         
         // 썸네일 변경 여부 체크
-        String currentThumbnailUrl = null;
+        String moveThumbnailUrl = null;
 
-
+        LocalDateTime createAt = recipeMapper.getRecipeCreateAt(userId, recipeUpdateRequestDTO.getRecipeId());		
+        String formatCreateAt = CommonFunctionUtil.dateFormat(createAt);
+        
         if(isTempImage(newThumbnail)) {
-        	currentThumbnailUrl = s3Service.moveImage(newThumbnail, Constans.S3_MOVE_RECIPE_THUMBNAILS_PATH);
-    		moveImageUrls.add(currentThumbnailUrl);
+        	moveThumbnailUrl = s3Service.moveImage(newThumbnail, userId, Constans.S3_MOVE_RECIPE_PATH, formatCreateAt);
+    		moveImageUrls.add(moveThumbnailUrl);
     		oldImageUrls.add(oldThumbnail);
         } else {
-        	currentThumbnailUrl = oldThumbnail;
+        	moveThumbnailUrl = oldThumbnail;
         }
 
 
@@ -244,7 +244,7 @@ public class RecipeServiceImpl implements RecipeService {
         
      
         // 이동한 레시피 순서 이미지 url
-        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, Constans.S3_MOVE_RECIPE_SEQ_IMAGES_PATH);
+        List<String> moveRecipeSeqImageUrls =  s3Service.moveImages(moveRecipeSeqImages, userId, Constans.S3_MOVE_RECIPE_PATH, formatCreateAt);
 
         try {
         	// 레시피 저장
@@ -252,7 +252,7 @@ public class RecipeServiceImpl implements RecipeService {
 	        		.recipeId(recipeUpdateRequestDTO.getRecipeId())
 					.title(recipeUpdateRequestDTO.getTitle())
 					.description(recipeUpdateRequestDTO.getDescription())
-					.thumbnail(currentThumbnailUrl)
+					.thumbnail(moveThumbnailUrl)
 					.videoId(recipeUpdateRequestDTO.getVideoId())
 					.serving(recipeUpdateRequestDTO.getServing())
 					.duration(recipeUpdateRequestDTO.getDuration())
@@ -265,7 +265,7 @@ public class RecipeServiceImpl implements RecipeService {
 					.build();
 
 	        // 레시피 저장
-		    recipeMapper.update(reqRecipe);
+		    recipeMapper.update(reqRecipe, RecipeStatus.PRIVATE_ADMIN);
 
 		    // 재료 삭제
 		    recipeIngredientMapper.delete(recipeUpdateRequestDTO.getRecipeId());
@@ -287,7 +287,6 @@ public class RecipeServiceImpl implements RecipeService {
 			}
 
 		    recipeSeqMapper.save(newRecipeSeqs, recipeUpdateRequestDTO.getRecipeId());
-			
 		} catch (Exception e) {
 	        try {
 		        s3Service.deleteImagesFromS3(moveImageUrls);				
@@ -317,27 +316,19 @@ public class RecipeServiceImpl implements RecipeService {
 	@Transactional
 	public void recipeDelete(Long userId, Long recipeId) {
 		
-		// 삭제할 이미지 리스트 가져오기
-		Recipe recipe = recipeMapper.getRecipeDeleteImage(userId, recipeId);
-		
-		if(recipe == null) {
+	
+		LocalDateTime createAt = recipeMapper.getRecipeCreateAt(userId, recipeId);		
+		if(createAt == null) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
-		// 이미지 삭제
-		List<String> recipeImages = new ArrayList<>();
-		List<RecipeSeq> recipeSeqs = recipe.getRecipeSeqs();
-		
-		recipeImages.add(recipe.getThumbnail());
-		
-		for(RecipeSeq recipeSeq : recipeSeqs) {
-			recipeImages.add(recipeSeq.getImage());
-		}
-		
+
 		// 삭제 처리
 		recipeMapper.recipeDelete(userId, recipeId);
 		
 		// s3 삭제
-		s3Service.deleteImagesFromS3(recipeImages);
+		String formatCreateAt = CommonFunctionUtil.dateFormat(createAt);
+		String folderPrefix = Constans.S3_MOVE_RECIPE_PATH + userId + "/" + formatCreateAt;
+		s3Service.deleteFolderFromS3(folderPrefix);
 	}
 	
 	@Override
@@ -427,16 +418,47 @@ public class RecipeServiceImpl implements RecipeService {
 	}
 	
 	
+	// 레시피 검색
+	@Override
+	public Page<RecipeSearchResponseDTO> getRecipeSearch(String keyword, int categoryCuisineId, int categoryPurposeId, int page, int size) {
+		int offset = page * size;
+		List<RecipeSearchResponseDTO> recipes = recipeMapper.getRecipeSearch(keyword, categoryCuisineId, categoryPurposeId, size, offset, RecipeStatus.PUBLIC);
+		int total = recipeMapper.getRecipeSearchCount(keyword, categoryCuisineId, categoryPurposeId, RecipeStatus.PUBLIC);
+		
+		return new PageImpl<>(recipes, PageRequest.of(page, size), total);
+	}
 	
+
+
+	// 레시피 재료 검색
+	@Override
+	public Page<RecipeSearchResponseDTO> getIngredientSearch(String keyword, int page, int size) {
+		
+		List<String> ingredients = new ArrayList<>();
+		// 재료를 띄워쓰기로 분리하여 재료로 만들기 \s는 한개 이상의 띄워쓰기
+		if(keyword != null) {
+			ingredients = Arrays.asList(keyword.trim().split("\\s+"));
+		}
+		int ingredientCount = ingredients.size();
+		
+		int offset = page * size;
+		List<RecipeSearchResponseDTO> recipes = recipeMapper.getIngredientSearch(ingredients, ingredientCount, size, offset, RecipeStatus.PUBLIC);
+		int total = recipeMapper.getIngredientSearchCount(ingredients, ingredientCount, RecipeStatus.PUBLIC);
+		
+		return new PageImpl<>(recipes, PageRequest.of(page, size), total);
+	}
+	
+		
 	// 임시 파일 체크
 	private boolean isTempImage(String url) {
 	    return url!= null && url.contains(Constans.S3_TEMP_IMAGES_FULL_PATH);
 	}
 	
+	
 	// 레시피 상태 코드 체크
 	private void checkRecipeStatus(RecipeStatus recipeStatus) {
-		if(recipeStatus == RecipeStatus.DELETE) {
-			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_DELETE);
+		if(recipeStatus == RecipeStatus.PRIVATE) {
+			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE);
 		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN) {
 			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE_ADMIN);
 		}

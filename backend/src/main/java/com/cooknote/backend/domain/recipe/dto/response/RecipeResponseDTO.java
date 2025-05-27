@@ -1,5 +1,6 @@
 package com.cooknote.backend.domain.recipe.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class RecipeResponseDTO {
     private String thumbnail;		// 레시피 썸네일
 	    
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
-	private Date createAt;			// 생성 날짜
+	private LocalDateTime createAt;			// 생성 날짜
 }
 
 

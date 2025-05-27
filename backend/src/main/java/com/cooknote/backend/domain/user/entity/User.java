@@ -1,6 +1,7 @@
 package com.cooknote.backend.domain.user.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,6 @@ public class User {
 	private String email;
 	private String nickname;
 	private String profileImage;
-	private LocalDate createAt;
-	private LocalDate updateAt;
+	private LocalDateTime createAt;
+	private LocalDateTime updateAt;
 }

@@ -26,10 +26,13 @@ import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeLikeResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.recipe.service.RecipeService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.RecipeErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
+import com.cooknote.backend.global.error.excption.CustomRecipeException;
 import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 
 import jakarta.validation.Valid;
@@ -43,19 +46,6 @@ import lombok.extern.slf4j.Slf4j;
 public class RecipeController {
 	
 	private final RecipeService recipeService;
-	
-	
-	// 레시피 검색 조회
-	@GetMapping("/search")
-	public ResponseEntity<?> getRecipeSearch(@RequestParam("recipeId") Long recipeId) {
-		
-		// Null 체크
-		if(CommonFunctionUtil.nullCheck(recipeId)) {
-			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
-		}
-		
-		return ResponseEntity.ok().build();
-	}
 	
 	// 공개 레시피 조회
 	@GetMapping("/public/host")
@@ -255,6 +245,33 @@ public class RecipeController {
 		recipeService.recipeBookmarkDelete(customUserDetails.getUserId(), recipeId);
 		
 		return ResponseEntity.ok().build();
-	}	
+	}
+	
+	
+	// 레시피 검색 조회
+	@GetMapping("/search")
+	public ResponseEntity<Page<RecipeSearchResponseDTO>> getRecipeSearch(@RequestParam(value = "keyword", required = false) String keyword
+										   , @RequestParam(value = "categoryCuisineId", defaultValue = "0") int categoryCuisineId
+										   , @RequestParam(value = "categoryPurposeId", defaultValue = "0") int categoryPurposeId
+										   , @RequestParam(value = "page", defaultValue = "0") int page
+										   , @RequestParam(value = "size", defaultValue = "20") int size) {
+		
+		return ResponseEntity.ok(recipeService.getRecipeSearch(keyword, categoryCuisineId, categoryPurposeId, page, size));
+	}
+	
+	
+	// 레시피 재료 검색 조회
+	@GetMapping("/search/ingredient")
+	public ResponseEntity<Page<RecipeSearchResponseDTO>> getIngredientSearch(@RequestParam(value = "keyword") String keyword
+										   								   , @RequestParam(value = "page", defaultValue = "0") int page
+										   								   , @RequestParam(value = "size", defaultValue = "20") int size) {
+		
+		if(keyword.trim() == null) {
+			throw new CustomRecipeException(RecipeErrorCode.RECIPE_INGREDIENT_EMPTY_EXCEPTION);
+		}
+		
+		return ResponseEntity.ok(recipeService.getIngredientSearch(keyword, page, size));
+	}
+	
 
 }

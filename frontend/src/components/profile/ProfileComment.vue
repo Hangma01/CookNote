@@ -81,7 +81,7 @@ onMounted(async () => {
             alert(errorMessages.BADREQUEST)
         }
 
-        // router.push({ name : 'mainPage'})
+        window.location.reload()
     }
     
     document.addEventListener('click', closeCommentMenu);

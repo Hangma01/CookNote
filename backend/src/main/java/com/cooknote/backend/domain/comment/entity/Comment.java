@@ -1,5 +1,6 @@
 package com.cooknote.backend.domain.comment.entity;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.cooknote.backend.domain.comment.enums.CommentStatus;
@@ -20,8 +21,8 @@ public class Comment {
 	private Long commentId;
 	private String content;
 	private CommentStatus status;
-	private Date createAt;
-	private Date updateAt;
+	private LocalDateTime createAt;
+	private LocalDateTime updateAt;
 	private Long recipeId;
 	private Long writerId;
 	private Long parentCommentId;

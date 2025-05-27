@@ -81,7 +81,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => i
 <h2 class="sub-title">
 	<span>재료정보</span>
 
-	<p class="required">ⓘ 재료 수량은 필수 입력 항목입니다.</p>
+	<p class="required">ⓘ 재료, 수량은 필수 입력 항목입니다.</p>
 </h2>
 
  	<ul class="ingredient-list">
@@ -93,7 +93,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => i
 						v-model="item.name"
 						@input="handleItemNameInput($event, item)"
 						type="text"
-						placeholder="재료는 20자 이내로 작성해주세요."
+						placeholder="20자 이내로 작성해주세요."
 						variant="outlined"
 						density="compact"
 						hide-details=true
@@ -106,7 +106,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => i
 						v-model="item.quantity"
 						@input="handleItemQuantityInput($event, item)"
 						type="text"
-						placeholder="수량은 10자 이내로 작성해주세요."
+						placeholder="10자 이내로 작성해주세요."
 						variant="outlined"
 						density="compact"
 						hide-details=true
@@ -119,7 +119,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => i
 						v-model="item.remark"
 						@input="handleItemRemarkInput($event, item)"
 						type="text"
-						placeholder="비고는 20자 이내로 작성해주세요."
+						placeholder="20자 이내로 작성해주세요."
 						variant="outlined"
 						density="compact"
 						hide-details=true

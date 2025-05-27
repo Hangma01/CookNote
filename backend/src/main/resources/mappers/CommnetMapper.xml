@@ -92,8 +92,15 @@
 		 WHERE COMMENT_ID = #{commentId}
 	</update>
 	
-	<!-- 댓글 수정, 삭제 - 기존 정보 조회 -->
-	<select id="findComment">
+	<!-- 댓글 삭제 - 기존 정보 조회 -->
+	<select id="findDeleteComment">
+		SELECT WRITER_ID AS WRITER_ID
+		  FROM COMMENT
+		 WHERE COMMENT_ID = #{commentId}
+	</select>
+	
+	<!-- 댓글 수정 - 기존 정보 조회 -->
+	<select id="findUpdateComment">
 		SELECT WRITER_ID AS WRITER_ID
 		  FROM COMMENT
 		 WHERE COMMENT_ID = #{commentId}

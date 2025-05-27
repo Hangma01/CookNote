@@ -17,10 +17,10 @@ const router = useRouter();
 const userStore = useUserStore();
 
 // 유효성 겁사
-const formRef = ref(null);      						// Form 유효성 검사
+const formRef = ref(null);      				// Form 유효성 검사
 
 // input-field
-const formValues = reactive({             	// Form input-field 
+const formValues = reactive({             	    // Form input-field 
   id: '',
   password: '',
 })
@@ -35,79 +35,81 @@ const handleLogin = debounce(async () => {
 	const isFormVal = await formRef.value.validate()
 
 	if (isFormVal.valid) {
-    try {
-		  const res = await login({...formValues})
-      const accessToken = res.headers[commonValues.AUTHORIZATION_HEADER]
+        try {
+            const res = await login({...formValues})
+            const accessToken = res.headers[commonValues.AUTHORIZATION_HEADER]
 
-      // jwt 디코딩
-      const token = accessToken.replace('Bearer ', '')
-      const decodedToken = jwtDecode(token)
-      const userId = decodedToken.userId  
+            // jwt 디코딩
+            const token = accessToken.replace('Bearer ', '')
+            const decodedToken = jwtDecode(token)
+            const userId = decodedToken.userId  
 
-      userStore.login(accessToken, userId)
-  
-      router.replace({name : "mainPage"})
-    } catch (e) {
-      alert(errorMessages.LOGIN_ERROR)
-    }
+            userStore.login(accessToken, userId)
+        
+            router.replace({name : "mainPage"})
+        } catch (e) {
+            alert(errorMessages.LOGIN_ERROR)
+        }
 	}
 }, commonValues.defaultDebounce);
 </script>
 
 <template>
   <AuthHeader />
-  <v-form ref="formRef" class="login-form" @submit.prevent="handleLogin">
-    <div class="login-content">
-      <v-text-field
-        v-model="formValues.id"
-        type="text"
-        label="아이디"
-        variant="outlined"
-        density="compact"
-        hide-details="auto"
-        :rules="[defaultIdRule]"
-      />
+    <v-form ref="formRef" class="login-form" @submit.prevent="handleLogin">
+        <div class="login-content">
+            <v-text-field
+                v-model="formValues.id"
+                type="text"
+                label="아이디"
+                variant="outlined"
+                density="compact"
+                hide-details="auto"
+                :rules="[defaultIdRule]"
+                autocomplete="off"
+            />
 
-      <v-text-field
-        v-model="formValues.password"
-        :type="pwVisible ? 'text' : 'password'"
-        label="비밀번호"
-        variant="outlined"
-        density="compact"
-        hide-details="auto"
-        :rules="[defaultPwRule]"
-        :append-inner-icon="pwVisible ? 'mdi-eye-off' : 'mdi-eye'"
-        @click:append-inner="pwVisible = !pwVisible"
-      />
+            <v-text-field
+                v-model="formValues.password"
+                :type="pwVisible ? 'text' : 'password'"
+                label="비밀번호"
+                variant="outlined"
+                density="compact"
+                hide-details="auto"
+                :rules="[defaultPwRule]"
+                :append-inner-icon="pwVisible ? 'mdi-eye-off' : 'mdi-eye'"
+                @click:append-inner="pwVisible = !pwVisible"
+                autocomplete="off"
+            />
+        </div>
 
+        <v-btn type="submit" class="login-btn">
+            로그인
+        </v-btn>
+    </v-form>
 
+    
+    <div class="find-wrap">
+        <ul class="find-box">
+            <li>
+                <router-link :to="{ name: 'userFindPw' }" class="find-text">
+                    비밀번호 찾기
+                </router-link>
+            </li>
+
+            <li>
+                <router-link :to="{ name: 'userFindId' }" class="find-text">
+                    아이디 찾기
+                </router-link>
+            </li>
+
+            <li> 
+                <router-link :to="{ name: 'userjoin' }" class="find-text">
+                    회원가입
+                </router-link>
+            </li>
+        </ul>
     </div>
-      <v-btn type="submit" class="login-btn">
-        로그인
-      </v-btn>
-  </v-form>
-
-  <div class="find-wrap">
-    <ul class="find-box">
-      <li>
-        <router-link :to="{ name: 'userFindPw' }" class="find-text">
-            비밀번호 찾기
-        </router-link>
-      </li>
-
-      <li>
-        <router-link :to="{ name: 'userFindId' }" class="find-text">
-            아이디 찾기
-        </router-link>
-      </li>
-
-      <li> 
-        <router-link :to="{ name: 'userjoin' }" class="find-text">
-            회원가입
-        </router-link>
-      </li>
-    </ul>
-  </div>
 </template>
 
 
@@ -133,38 +135,35 @@ const handleLogin = debounce(async () => {
 }
 
 .find-wrap{
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-
-
-  .find-box {
-    margin-top: 3rem;
     display: flex;
-    gap: 2rem;
-    justify-content: space-around;
+    flex-direction: column;
+    gap: 1.5rem;
 
-    li {
-      position: relative;
-      font-size: 0.85rem;
 
-      .find-text{
-          color: #888;
-      }
+    .find-box {
+        margin-top: 3rem;
+        display: flex;
+        gap: 2rem;
+        justify-content: space-around;
+
+        li {
+            position: relative;
+            font-size: 0.85rem;
+
+            .find-text{
+                color: #888;
+            }
+        }
+
+        li + li::before {
+            content: '|';
+            position: absolute;
+            left: -58%;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #dadada;
+            font-size: 0.8rem;
+        }
     }
-
-    li + li::before {
-      content: '|';
-      position: absolute;
-      left: -58%;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #dadada;
-      font-size: 0.8rem;
-    }
-  }
-
-  
 }
-
 </style>

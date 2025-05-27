@@ -96,7 +96,8 @@ const steps = [
             .seq-content {
                 margin-top: 1rem;
                 font-size: 0.9rem;
-                word-break: break-all
+                word-break: break-all;
+                white-space: pre-wrap;
             }
         }
         

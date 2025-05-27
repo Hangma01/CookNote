@@ -81,3 +81,25 @@ export const getRecipePublic = async (page = 0) => {
 export const getRecipePrivate = async (page = 0) => {
     return await privateAPI.get(`/recipe/private?page=${page}`)
 }
+
+// 레시피 검색
+export const getRecipeSearch = async (keyword, categoryCuisineId, categoryPurposeId, page) => {
+    return await publicAPI.get('/recipe/search', {
+        params: {
+            keyword: keyword || null,
+            categoryCuisineId: categoryCuisineId,
+            categoryPurposeId: categoryPurposeId,
+            page: page,
+        }
+    });
+}
+
+// 레시피 재료 검색
+export const getRecipeSearchIngredient = async (keyword, page) => {
+    return await publicAPI.get('/recipe/search/ingredient', {
+        params: {
+            keyword: keyword || null,
+            page: page,
+        }
+    });
+}

@@ -1,11 +1,68 @@
 <script setup>
+import router from '@/router';
+import { getHostProfileLoggedIn, getUserProfile } from '@/services/userService';
 import { useUserStore } from '@/stores/user';
-import { computed } from 'vue';
+import { addFollow, cancleFollow, loadProfile } from '@/utils/commonFunction';
+import { errorMessages } from '@/utils/messages/errorMessages';
+import { computed, onBeforeMount, onUnmounted } from 'vue';
 
 // 유저 스토어
 const userStore = useUserStore();
 const isLoggedIn = userStore.getIsLoggedIn;
 const userProfile = computed(() => userStore.getProfile);
+
+
+
+// 팔로우 하기
+const handleAddFollow = async (followId) => {
+    
+    try {
+        await addFollow(followId)
+        const res = await getHostProfileLoggedIn(followId)
+        userStore.setProfile({
+                        ...res.data
+                    , isHostProfile: true
+                    })
+    } catch (e) {
+        console.log(e)
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message) 
+        } else {
+            alert(errorMessages.BADREQUEST)
+        }
+        window.location.reload()
+    }
+}
+
+// 팔로잉 취소
+const handleCancleFollow = async (followId) => {
+
+    try {
+        await cancleFollow(followId)
+        const res = await getHostProfileLoggedIn(followId)
+        userStore.setProfile({
+                        ...res.data
+                    , isHostProfile: true
+                    })
+    } catch (e) {
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message) 
+        } else {
+            alert(errorMessages.BADREQUEST)
+        }
+
+        window.location.reload()
+    }
+}
+
+// 로그인 하기
+const handleLogin = () => {
+    router.push({ name : 'login'})
+}
+
+onUnmounted(()=>{
+    userStore.setProfile(null)
+})
 </script>
 
 <template>
@@ -14,7 +71,6 @@ const userProfile = computed(() => userStore.getProfile);
             <div class="profile-image-box">
                 <img :src="userProfile?.profileImage" alt="이미지" class="profile-image"/>
             </div>
-
             <div class="user-nickname">
                 <span>{{ userProfile?.nickname }}</span>
             </div>
@@ -54,17 +110,17 @@ const userProfile = computed(() => userStore.getProfile);
 
         <div class="action-follow" v-if="userProfile?.isHostProfile">
             <div v-if="isLoggedIn">
-                <v-btn class="action-btn" v-if="userProfile?.follow">
+                <v-btn class="action-btn" v-if="userProfile?.follow" @click="handleCancleFollow(userProfile?.hostId)">
                     팔로잉 취소
                 </v-btn>
 
-                <v-btn class="action-btn" v-else>
+                <v-btn class="action-btn" v-else @click="handleAddFollow(userProfile?.hostId)">
                     팔로우
                 </v-btn>
             </div>
 
 
-            <v-btn class="action-btn" v-else>
+            <v-btn class="action-btn" v-else @click="handleLogin">
                 로그인 후 팔로우하기
             </v-btn>
         </div>
@@ -76,7 +132,8 @@ const userProfile = computed(() => userStore.getProfile);
 <style lang="scss" scoped>
 .user-profile-container {
     width: 100%;
-    border: 1px solid rgb(144, 144, 144);
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 0.5rem;
 
     .user-profile-info {
         display: flex;
@@ -92,7 +149,7 @@ const userProfile = computed(() => userStore.getProfile);
                 width: 100%;
                 height: 100%;
                 border-radius: 100%;
-                border: 1px solid rgb(144, 144, 144);
+                border: 1px solid rgb(200, 200, 200);
             }
         }
 
@@ -115,6 +172,8 @@ const userProfile = computed(() => userStore.getProfile);
                 margin-top: 0.5rem;
             }
         }
+
+        margin-bottom: 2rem;
     }
 
     .action-follow {

@@ -91,9 +91,9 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public void commentDelete(Long userId, Long commentId) {
 		
-		Comment comment = commentMapper.findComment(commentId, CommentStatus.PUBLIC);
+		Comment comment = commentMapper.findDeleteComment(commentId);
 		
-		// 댓글이 있는지 확인 또는 상태가 PUBLIC 아니면 NULL
+		// 댓글이 있는지 확인 또는 nULL 인지 확인
 		if(comment == null) {			
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
@@ -114,7 +114,7 @@ public class CommentServiceImpl implements CommentService {
 		// 본인 댓글이 맞는지
 		Long commentId = commentUpdateRequestDTO.getCommentId();
 		
-		Comment comment = commentMapper.findComment(commentId, CommentStatus.PUBLIC);
+		Comment comment = commentMapper.findUpdateComment(commentId, CommentStatus.PUBLIC);
 		
 		// 댓글이 있는지 확인 또는 상태가 PUBLIC 아니면 NULL
 		if(comment == null) {					

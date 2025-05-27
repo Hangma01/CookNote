@@ -23,6 +23,7 @@ const router = useRouter();
 // 유저 스토어
 const userStore = useUserStore();
 const isLoggedIn = userStore.isLoggedIn;
+const userId = userStore.getUserId;
 
 // 좋아요 상태
 const isLike = ref(false);
@@ -102,7 +103,9 @@ watch(() => props.recipeDetailData, (newVal) => {
             <img :src="props.recipeDetailData?.thumbnail" class="thumbnail" alt="thumbnail" v-if="props.recipeDetailData"/>
             <div class="writer-profile" >
                 <div class="writer-profile-image-box" v-if="props.recipeDetailData">
-                    <router-link :to="{ name: 'profileHost', params: { hostId: props.recipeDetailData?.writerUserId }}">
+                    <router-link :to=" userId === props.recipeDetailData?.writerUserId 
+                    ? { name: 'profileRecipe', query: { tab: props.recipeDetailData?.status }} 
+                    : { name: 'profileHost', params: { hostId: props.recipeDetailData?.writerUserId }}">
                         <img :src="props.recipeDetailData?.writerProfileImage" class="writer-profile-image" alt="writer-profile" />
                     </router-link>
                 </div>
@@ -236,7 +239,6 @@ watch(() => props.recipeDetailData, (newVal) => {
                     padding-top: 0.8rem;
                     width: 1.4rem;
                     height: 1.4rem;
-                    
                 }
 
                 .icon-text {
@@ -244,7 +246,11 @@ watch(() => props.recipeDetailData, (newVal) => {
                 }
             }
 
-            .action.liked, .action.bookmarked {
+            .action.liked{
+                color: #F99090;
+            }
+
+            .action.bookmarked {
                 color: rgb(147, 112, 98);
             }
         }
@@ -256,6 +262,7 @@ watch(() => props.recipeDetailData, (newVal) => {
         margin-top: 2rem;
         color: rgb(117, 117, 117);
         font-weight: normal;
+        white-space: pre-wrap;
     }
 
     .recipe-summary-info {

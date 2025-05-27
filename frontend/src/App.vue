@@ -16,7 +16,7 @@ import { RouterView } from 'vue-router'
 }
 
 body {
-  overflow-x: auto;
+  overflow-y: auto;
 }
 a{
   color: black;

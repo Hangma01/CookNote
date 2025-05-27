@@ -10,6 +10,7 @@ import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
 import com.cooknote.backend.global.error.excption.CustomRecipeException;
 import com.cooknote.backend.global.error.excption.CustomS3Exception;
+import com.cooknote.backend.global.error.excption.CustomUserException;
 
 @ControllerAdvice // 모든 @Controller 즉, 전역에서 발생할 수 있는 예외를 잡아 처리한다.
 public class CustonExceptionHandler {
@@ -42,6 +43,12 @@ public class CustonExceptionHandler {
 	@ExceptionHandler(CustomRecipeException.class)
 	protected ResponseEntity<ErrorResponseEntity> handleRecipeException(CustomRecipeException e) {
 		
-		return ErrorResponseEntity.toResponseEntity(e.getRecipeError());
+		return ErrorResponseEntity.toResponseEntity(e.getRecipeErrorCode());
+	}	
+	
+	@ExceptionHandler(CustomUserException.class)
+	protected ResponseEntity<ErrorResponseEntity> handleUserException(CustomUserException e) {
+		
+		return ErrorResponseEntity.toResponseEntity(e.getUserErrorCode());
 	}
 }

@@ -19,7 +19,10 @@ public enum CommonErrorCode {
 	NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "존재하지 않는 데이터입니다."),
 	
 	// 저장 실패
-	UPDATE_EXCEPTION(HttpStatus.BAD_REQUEST,"저장에 실패했습니다. 다시 시도해주세요.");
+	UPDATE_EXCEPTION(HttpStatus.BAD_REQUEST,"저장에 실패했습니다. 다시 시도해주세요."),
+	
+	// 매치 실패
+	INPUT_MATCH_EXCEPTIOON(HttpStatus.BAD_REQUEST,"잘못된 입력을 하셨습니다. 다시 시도해주세요.");
 	
 	private final HttpStatus httpStatus;
 	private final String message;

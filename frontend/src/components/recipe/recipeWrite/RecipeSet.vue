@@ -1,11 +1,11 @@
 <script setup>
+import { commonValues } from '@/utils/commonValues';
 import { ref, watch } from 'vue';
 
 
-const recipePrivate = 'PRIVATE'
-const recipePublic = 'PUBLIC'
 
-const selectedStatus = ref(recipePrivate)
+
+const selectedStatus = ref(commonValues.PRIVATE_TEXT)
 
 const props = defineProps({ 
     originalRecipeData: { // 레시피 수정 시 오는 데이터
@@ -22,6 +22,7 @@ const validation = () => {
 const getData = () => {
     return {
         data: selectedStatus.value,
+        selectedStatus: selectedStatus.value,
     }
 }
 
@@ -43,12 +44,12 @@ watch(() => props.originalRecipeData, (newVal) => {
             class="me-10"
             color="primary"
             label="비공개"
-            :value="recipePrivate"
+            :value="commonValues.PRIVATE_TEXT"
         />
         <v-radio
             color="primary"
             label="공개"
-            :value="recipePublic"
+            :value="commonValues.PUBLIC_TEXT"
         />
     </v-radio-group>
 </template>

@@ -8,6 +8,7 @@ import { HttpStatusCode } from 'axios';
 import { errorMessages } from '@/utils/messages/errorMessages';
 import { useRouter } from 'vue-router';
 import { usePwResetTokenStore } from '@/stores/pwResetToken';
+import { successMessage } from '@/utils/messages/successMessage';
 
 // 화면 전환
 const router = useRouter();
@@ -40,7 +41,7 @@ const handleFindPwReset = debounce(async () => {
 				'pwResetToken' : pwResetToken.getPwResetToken
 			})
 			
-			alert('성공적으로 비밀번호가 변경되었습니다.')
+			alert(successMessage.AUTH_PW_RESET_SUCCESS_MESSAGE)
 			pwResetToken.deletePwResetToken()
 			router.replace({ name: 'login' });
 		} catch (e) {
@@ -76,9 +77,10 @@ watch(() => formValues.newPw, () => {
 				density="compact"
 				hide-details="auto"
 				maxlength="16"
+                autocomplete="off"
 				:rules="[pwRule]"
 				:append-inner-icon="newPwVisible ? 'mdi-eye-off' : 'mdi-eye'"
-        @click:append-inner="newPwVisible = !newPwVisible"
+                @click:append-inner="newPwVisible = !newPwVisible"
 			/>
 
 			<v-text-field
@@ -88,6 +90,7 @@ watch(() => formValues.newPw, () => {
 				variant="outlined"
 				density="compact"
 				hide-details="auto"
+                autocomplete="off"
 				:rules="[newPwConfirmRule(() => formValues.newPw)]"
 				:append-inner-icon="newPwConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
         		@click:append-inner="newPwConfirmVisible = !newPwConfirmVisible"

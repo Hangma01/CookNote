@@ -1,6 +1,7 @@
 package com.cooknote.backend.mappers;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -12,6 +13,7 @@ import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeLikeResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.recipe.entity.Recipe;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 
@@ -30,7 +32,8 @@ public interface RecipeMapper {
 	RecipeEditResponseDTO getRecipeForEdit(@Param("userId") Long userId
 										 , @Param("recipeId") Long recipeId);
 	// 레시피 수정 - 업데이트
-	void update(Recipe reqRecipe);
+	void update(@Param("reqRecipe") Recipe reqRecipe
+			  , @Param("statusPrivateAdmin") RecipeStatus privateAdmin);
 
 	// 레시피 삭제
 	void recipeDelete(@Param("userId") Long userId
@@ -102,6 +105,32 @@ public interface RecipeMapper {
 	int recipeBookmarkCount(@Param("userId") Long userId);
 
 	// 삭제할 이미지 가져오기
-	Recipe getRecipeDeleteImage(@Param("userId") Long userId
-							  , @Param("recipeId") Long recipeId);
+	LocalDateTime getRecipeCreateAt(@Param("userId") Long userId
+						   		  , @Param("recipeId") Long recipeId);
+
+	// 레시피 검색
+	List<RecipeSearchResponseDTO> getRecipeSearch(@Param("keyword") String keyword
+												, @Param("categoryCuisineId") int categoryCuisineId
+												, @Param("categoryPurposeId") int categoryPurposeId
+												, @Param("size") int size
+												, @Param("offset") int offset
+												, @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+
+	// 레시피 검색 토탈 갯수
+	int getRecipeSearchCount(@Param("keyword") String keyword
+						   , @Param("categoryCuisineId") int categoryCuisineId
+						   , @Param("categoryPurposeId") int categoryPurposeId
+						   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+
+	// 레시피 재료 검색	
+	List<RecipeSearchResponseDTO> getIngredientSearch(@Param("ingredients") List<String> ingredients
+													, @Param("ingredientCount") int ingredientCount
+													, @Param("size") int size
+													, @Param("offset") int offset
+													, @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+	// 레시피 재료 검색 토탈 갯수
+	int getIngredientSearchCount(@Param("ingredients") List<String> ingredients
+						   	   , @Param("ingredientCount") int ingredientCount
+						   	   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+
 }

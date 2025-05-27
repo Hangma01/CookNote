@@ -19,13 +19,13 @@ export const routes = [
                         path: 'write',
                         name: 'recipeWrite',
                         component: () => import('@/components/recipe/recipeWrite/RecipeWrite.vue'),
-                        meta: { requiresAuth: true, forceRemount: true },
+                        meta: { requiresAuth: true},
                     },
                     {
                         path: 'edit/:recipeId',
                         name: 'recipeEdit',
                         component: () => import('../components/recipe/recipeWrite/RecipeWrite.vue'),
-                        meta: { requiresAuth: true, forceRemount: true },
+                        meta: { requiresAuth: true },
                     },
                     {
                         path: ':recipeId',
@@ -34,15 +34,15 @@ export const routes = [
                     },
                 ]
             },
-            // 마이페이지 라우터
+            // 프로필 라우터
             {
                 path: '/profile',
                 component: () => import('../views/ProfileView.vue'),
-                meta: { requiresAuth: true },
                 children: [
                     {
                         path: '',
                         component: () => import('@/components/profile/ProfileHome.vue'),
+                        meta: { requiresAuth: true },
                         children: [
                             {
                                 path: 'recipe',
@@ -72,11 +72,40 @@ export const routes = [
                         ]
                     },
                     {
+                        path: 'edit',
+                        component: () => import('@/components/profile/edit/ProfileEditHome.vue'),
+                        meta: { requiresAuth: true },
+                        children: [
+                            {
+                                path: '',
+                                name: 'profileEdit',
+                                component: () => import('@/components/profile/edit/ProfileEdit.vue'),
+                            
+                            },
+                            {
+                                path: 'pw-rest',
+                                name: 'profilePwEdit',
+                                component: () => import('@/components/profile/edit/ProfilePwEdit.vue'),
+                            },
+                        ]
+                    },
+                    {
                         path: ':hostId',
                         name: 'profileHost',
                         component: () => import('@/components/profile/ProfileHost.vue'),
                     },
                 ]
+            },
+            // 검색 라우터
+            {
+                path: '/search',
+                name: 'search',
+                component: () => import('../views/SearchView.vue'),
+            },
+            {
+                path: '/search-ingredient',
+                name: 'searchIngredient',
+                component: () => import('../views/SearchIngredient.vue'),
             }
         ]
     },

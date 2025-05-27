@@ -16,27 +16,17 @@ const props = defineProps({
 <template>
     <div class="recipe-image">
         <router-link
-            v-if="props.recipeStatus === commonValues.PUBLIC_TEXT"
             :to="{ name: 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }"
         >
             <img :src="props.recipeData?.thumbnail" class="image" />
         </router-link>
-
-        <span v-else>
-            <img :src="props.recipeData?.thumbnail" class="image" />
-        </span>
     </div>
     <div class="recipe-info">
         <div class="recipe-title">
             <router-link 
-                v-if="props.recipeStatus === commonValues.PUBLIC_TEXT"
                 :to="{name : 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }">
                 <span>{{ props.recipeData?.title }}</span>
             </router-link>
-
-            <span v-else>
-                <span>{{ props.recipeData?.title }}</span>
-            </span>
         </div>
 
         <div class="recipe-summary">

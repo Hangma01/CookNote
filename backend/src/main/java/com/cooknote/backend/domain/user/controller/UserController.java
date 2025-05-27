@@ -1,5 +1,7 @@
 package com.cooknote.backend.domain.user.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -18,6 +20,7 @@ import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.service.UserService;
@@ -156,5 +159,14 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 
+	
+	// 팔로잉 게시글 작성 최신순으로 가져오기 
+	@GetMapping("/following/latest")
+	public ResponseEntity<List<UserProfileEditInfoResponseDTO>> getFollowingLatestForRecipe(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		
+		
+		return ResponseEntity.ok(userService.getFollowingLatestForRecipe(customUserDetails.getUserId()));
+	}
+	
 	
 }

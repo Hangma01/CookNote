@@ -100,8 +100,10 @@
       <if test="userId != null">
       LEFT JOIN RECIPE_LIKE 					AS RL						<!-- 레시피 좋아요 테이블 -->
       		 ON R.RECIPE_ID = RL.RECIPE_ID
+      		AND RL.USER_ID = #{userId}
       LEFT JOIN RECIPE_BOOKMARK 				AS RB						<!-- 레시피 북마크 테이블 -->
       		 ON R.RECIPE_ID = RB.RECIPE_ID
+      		AND RB.USER_ID = #{userId} 
       </if>		 
 		  WHERE R.RECIPE_ID = #{recipeId}
 	</select>
@@ -397,7 +399,7 @@
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	     WHERE R.STATUS = #{statusRecipePublic} 
-	     	   <if test="keyword != null">
+	       <if test="keyword != null">
 		   AND (
 			    R.TITLE LIKE CONCAT('%', #{keyword}, '%')
 			 OR R.DESCRIPTION LIKE CONCAT('%', #{keyword}, '%')
@@ -408,7 +410,7 @@
 			               AND RI.NAME LIKE CONCAT('%', #{keyword}, '%')
 			          	)
 			    )
-		   		</if>
+		   </if>
 		   <if test="categoryCuisineId != 0">
 		   AND R.CATEGORY_CUISINE_ID = #{categoryCuisineId}
 		   </if>
@@ -467,6 +469,7 @@
 	 LEFT JOIN COMMENT 									AS C 						<!-- 레시피 댓글 테이블 -->
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 		 WHERE R.STATUS = #{statusRecipePublic}
+		   <if test="!ingredients.isEmpty()">
 		   AND R.RECIPE_ID IN (
 		    				   SELECT RI.RECIPE_ID
 		    					 FROM RECIPE_INGREDIENT AS RI						<!-- 레시피 재료 테이블 -->
@@ -475,7 +478,8 @@
 		    									 </foreach>
 		    					GROUP BY RI.RECIPE_ID
 		    				   HAVING COUNT(DISTINCT RI.NAME) = #{ingredientCount}
-		 )
+		   )
+		   </if>
 		 GROUP BY R.RECIPE_ID
 		 		, R.TITLE
 		 		, R.WRITER_ID
@@ -490,6 +494,7 @@
 		SELECT COUNT(R.RECIPE_ID)
 		  FROM RECIPE 									AS R	<!-- 레시피 테이블 -->
 		 WHERE R.STATUS = #{statusRecipePublic}
+		   <if test="!ingredients.isEmpty()">
 		   AND R.RECIPE_ID IN (
 		    				   SELECT RI.RECIPE_ID
 		    					 FROM RECIPE_INGREDIENT AS RI	<!-- 레시피 재료 테이블 -->
@@ -498,7 +503,100 @@
 		    									 </foreach>
 		    					GROUP BY RI.RECIPE_ID
 		    				   HAVING COUNT(DISTINCT RI.NAME) = #{ingredientCount}
-		  )
+		   )
+		   </if>
+	</select>
+	
+	
+	<!-- 유저가 팔로우한 유저들의 게시글 -->
+	<select id="getRecipesOfFollowingUsers" resultType="RecipeSearchResponseDTO">
+		SELECT R.THUMBNAIL               		 AS RECIPE_THUMBNAIL		
+	   		 , R.RECIPE_ID               		 AS RECIPE_ID
+	   		 , R.TITLE                  		 AS RECIPE_TITLE
+	   		 , R.WRITER_ID              		 AS WRITER_ID
+	   		 , U.NICKNAME              			 AS WRITER_NICKNAME
+	   		 , U.PROFILE_IMAGE          		 AS WRITER_PROFILE_IMAGE
+	   		 , COUNT(DISTINCT C.COMMENT_ID)      AS RECIPE_COMMENT_COUNT
+	   		 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) AS RECIPE_LIKE_COUNT
+		  FROM FOLLOW 							 AS F
+	INNER JOIN USER 							 AS U 
+			ON F.FOLLOWING_ID = U.USER_ID      
+	INNER JOIN RECIPE 							 AS R 
+			ON R.WRITER_ID = U.USER_ID        
+	 LEFT JOIN COMMENT 							 AS C 
+	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 LEFT JOIN RECIPE_LIKE 						 AS RL 
+	 		ON R.RECIPE_ID = RL.RECIPE_ID
+		 WHERE F.FOLLOWER_ID = #{userId}                               
+	  	   AND R.STATUS = #{statusRecipePublic}                                  
+	  GROUP BY R.RECIPE_ID
+	  		 , R.THUMBNAIL
+	  		 , R.TITLE
+	  		 , R.WRITER_ID
+	  		 , U.NICKNAME
+	  		 , U.PROFILE_IMAGE
+	  ORDER BY R.CREATE_AT DESC
+	  	 LIMIT #{size}
+		OFFSET #{offset}
+	</select>
+	
+	
+	<!-- 유저가 팔로우한 유저들의 게시글 토탈 갯수 -->
+	<select id="getRecipesOfFollowingUsersCount" resultType="int">
+		SELECT COUNT(DISTINCT R.RECIPE_ID)
+		  FROM FOLLOW AS F
+	INNER JOIN USER   AS U 
+			ON F.FOLLOWING_ID = U.USER_ID      
+	INNER JOIN RECIPE AS R 
+			ON R.WRITER_ID = U.USER_ID        
+		 WHERE F.FOLLOWER_ID = #{userId}                              
+	  	   AND R.STATUS = #{statusRecipePublic}                                     
+	</select>
+	
+	<!-- 유저가 팔오우한 유저의 특정 게시글 -->
+	<select id="getRecipesByFollowingUser" resultType="RecipeSearchResponseDTO">
+		SELECT R.THUMBNAIL               		 AS RECIPE_THUMBNAIL
+			 , R.RECIPE_ID               		 AS RECIPE_ID
+			 , R.TITLE                  		 AS RECIPE_TITLE
+			 , R.WRITER_ID              		 AS WRITER_ID
+			 , U.NICKNAME               		 AS WRITER_NICKNAME
+			 , U.PROFILE_IMAGE          		 AS WRITER_PROFILE_IMAGE
+			 , COUNT(DISTINCT C.COMMENT_ID)      AS RECIPE_COMMENT_COUNT
+			 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) AS RECIPE_LIKE_COUNT
+		  FROM FOLLOW 							 AS F
+	INNER JOIN USER 							 AS U 
+			ON F.FOLLOWING_ID = U.USER_ID 
+	INNER JOIN RECIPE 							 AS R 
+			ON R.WRITER_ID = U.USER_ID
+	 LEFT JOIN COMMENT 							 AS C 
+	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 LEFT JOIN RECIPE_LIKE 						 AS RL 
+	 		ON R.RECIPE_ID = RL.RECIPE_ID
+		 WHERE F.FOLLOWER_ID = #{userId}                                    
+	  	   AND R.STATUS = #{statusRecipePublic}                                   
+	  	   AND F.FOLLOWING_ID= #{followingId}
+	  GROUP BY R.RECIPE_ID
+	  		 , R.THUMBNAIL
+	  		 , R.TITLE
+	  		 , R.WRITER_ID
+	  		 , U.NICKNAME
+	  		 , U.PROFILE_IMAGE
+	  ORDER BY R.CREATE_AT DESC
+	  	 LIMIT #{size}
+		OFFSET #{offset}
+	</select>
+	
+	<!-- 유저가 팔로우한 유저의 특정 게시글 토탈 갯수 -->
+	<select id="getRecipesByFollowingUserCount" resultType="int">
+		SELECT COUNT(DISTINCT R.RECIPE_ID)
+		  FROM FOLLOW 							 AS F
+	INNER JOIN USER 							 AS U 
+			ON F.FOLLOWING_ID = U.USER_ID 
+	INNER JOIN RECIPE 							 AS R 
+			ON R.WRITER_ID = U.USER_ID
+		 WHERE F.FOLLOWER_ID = #{userId}                                    
+	  	   AND R.STATUS = #{statusRecipePublic}                                   
+	  	   AND F.FOLLOWING_ID= #{followingId}
 	</select>
 </mapper>
 

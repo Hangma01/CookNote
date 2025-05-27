@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
-import { getRecipeBookmark } from '@/services/recipeService';
+import { getRecipeBookmark, recipeBookmarkDelete } from '@/services/recipeService';
 import { errorMessages } from '@/utils/messages/errorMessages';
 import ProfileRecipeCard from './ProfileRecipeCard.vue';
 
@@ -55,6 +55,17 @@ const loadRecipBookmark = async (page = 0) => {
     }
 };
 
+
+// 북마크 삭제하기
+const handleBookmarkDelete = async (recipeId) => {
+    try {
+        await recipeBookmarkDelete(recipeId);
+        loadRecipBookmark();
+    } catch (e) {
+        alert('북마크를 삭제하지 못했습니다.')
+    }
+}
+
 const goToPage = (page) => {
     loadRecipBookmark(page)
 };
@@ -107,7 +118,7 @@ onBeforeUnmount(() => {
                         v-if="activeRecipeMenuMap[item.recipeId]" 
                         :ref="el => setRecipeMenuRef(el, item.recipeId)">
                         <div>
-                            <button @click="handleRecipeDelete(item.recipeId)">
+                            <button @click="handleBookmarkDelete(item.recipeId)">
                                 삭제
                             </button>
                         </div>

@@ -204,4 +204,21 @@
 		  FROM USER
 		 WHERE USER_ID = #{userId}
 	</delete>
+	
+	<select id="getFollowingLatestForRecipe" resultType="UserFollowingLatestForRecipeResponseDTO">
+		SELECT U.USER_ID AS FOLLOWING_ID
+	    	 , U.NICKNAME AS NICKNAME
+	    	 , U.PROFILE_IMAGE AS PROFILE_IMAGE
+		 FROM FOLLOW AS F
+		 JOIN USER AS U 
+	       ON U.USER_ID = F.FOLLOWING_ID 
+	LEFT JOIN RECIPE AS R 
+	       ON R.WRITER_ID = U.USER_ID 
+	      AND R.STATUS = #{statusRecipePublic}
+		WHERE F.FOLLOWER_ID = #{userId} 
+	 GROUP BY U.USER_ID
+	 		, U.NICKNAME
+	 		, U.PROFILE_IMAGE
+	 ORDER BY MAX(R.CREATE_AT) DESC;
+	</select>
 </mapper>

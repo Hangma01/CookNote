@@ -103,3 +103,14 @@ export const getRecipeSearchIngredient = async (keyword, page) => {
         }
     });
 }
+
+// 팔로잉항 사용자들의 피드 검색
+export const getRecipesOfFollowingUsers = async (page) => {
+    return await privateAPI.get(`/recipe/following?page=${page}`)
+}
+
+
+// 팔로잉한 특정 사용자 피드 검색
+export const getRecipesOfFollowingUser = async (followingId, page) => {
+    return await privateAPI.get(`/recipe/following/${followingId}?page=${page}`)
+}

@@ -133,4 +133,26 @@ public interface RecipeMapper {
 						   	   , @Param("ingredientCount") int ingredientCount
 						   	   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
 
+	// 유저가 팔로우한 유저들의 게시글
+	List<RecipeSearchResponseDTO> getRecipesOfFollowingUsers(@Param("userId") Long userId
+														   , @Param("size") int size
+														   , @Param("offset") int offset
+														   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+
+	// 유저가 팔로우한 유저들의 게시글 토탈 갯수
+	int getRecipesOfFollowingUsersCount(@Param("userId") Long userId
+									  , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+
+	// 유저가 팔오우한 유저의 특정 게시글
+	List<RecipeSearchResponseDTO> getRecipesByFollowingUser(@Param("userId") Long userId
+														   , @Param("followingId") Long followingId
+														   , @Param("size") int size
+														   , @Param("offset") int offset
+														   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+
+	// 유저가 팔로우한 유저의 특정 게시글 토탈 갯수
+	int getRecipesByFollowingUserCount(@Param("userId") Long userId
+									 , @Param("followingId") Long followingId
+									 , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+
 }

@@ -1,9 +1,12 @@
 package com.cooknote.backend.domain.user.service;
 
+import java.util.List;
+
 import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.entity.User;
@@ -40,5 +43,8 @@ public interface UserService {
 
 	// 회원 탈퇴
 	void userDelete(Long userId);
+
+	// 팔로잉 게시글 작성 최신순으로 가져오기
+	List<UserProfileEditInfoResponseDTO> getFollowingLatestForRecipe(Long userId);
 
 }

@@ -54,3 +54,9 @@ export const userPwEdit = async (formValues) => {
 export const userDelete = async () => {
     return await privateAPI.delete(`/user`)
 }
+
+// 유저가 팔로잉한 유저 리스트 최신순(레시피작성)
+export const getFollowingLatestForRecipe = async () => {
+    return await privateAPI.get(`/user/following/latest`)
+}
+

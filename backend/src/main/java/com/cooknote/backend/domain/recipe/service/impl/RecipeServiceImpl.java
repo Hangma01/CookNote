@@ -66,7 +66,14 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		RecipeStatus recipeStatus = recipeDetailResponseDTO.getStatus();
 	
-		checkRecipeStatus(recipeStatus);
+		
+		// 레시피 상태 코드 체크
+		if(recipeStatus == RecipeStatus.PRIVATE && userId != recipeDetailResponseDTO.getWriterUserId()) {
+			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE);
+		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN) {
+			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE_ADMIN);
+		}
+	
 		
 		
 		recipeDetailResponseDTO.setServingLabel(recipeDetailResponseDTO.getServing().getLabel());
@@ -177,8 +184,12 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		RecipeStatus recipeStatus = recipeEditResponseDTO.getStatus();
 		
-		checkRecipeStatus(recipeStatus);
 		
+		// 레시피 상태 코드 체크
+		if(recipeStatus == RecipeStatus.PRIVATE_ADMIN) {
+			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE_ADMIN);
+		}
+	
 		return recipeEditResponseDTO;
 	}
 	
@@ -192,7 +203,7 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		// 새로운 썸네일
 		String newThumbnail = recipeUpdateRequestDTO.getThumbnail();
-		String oldThumbnail = recipeUpdateRequestDTO.getOriginalThumbnail();
+		String originalThumbnail = recipeUpdateRequestDTO.getOriginalThumbnail();
         
         // 이전 이미지들
 	    List<String> oldImageUrls = new ArrayList<>();
@@ -213,9 +224,9 @@ public class RecipeServiceImpl implements RecipeService {
         if(isTempImage(newThumbnail)) {
         	moveThumbnailUrl = s3Service.moveImage(newThumbnail, userId, Constans.S3_MOVE_RECIPE_PATH, formatCreateAt);
     		moveImageUrls.add(moveThumbnailUrl);
-    		oldImageUrls.add(oldThumbnail);
+    		oldImageUrls.add(originalThumbnail);
         } else {
-        	moveThumbnailUrl = oldThumbnail;
+        	moveThumbnailUrl = originalThumbnail;
         }
 
 
@@ -447,6 +458,27 @@ public class RecipeServiceImpl implements RecipeService {
 		
 		return new PageImpl<>(recipes, PageRequest.of(page, size), total);
 	}
+
+	// 팔로우한 유저들의 전체 게시글
+	@Override
+	public Page<RecipeSearchResponseDTO> getRecipesOfFollowingUsers(Long userId, int page, int size) {
+		int offset = page * size;
+		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesOfFollowingUsers(userId, size, offset, RecipeStatus.PUBLIC);
+		int total = recipeMapper.getRecipesOfFollowingUsersCount(userId, RecipeStatus.PUBLIC);
+		
+		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
+	}
+
+
+	// 팔로우한 특정 유저의 게시글
+	@Override
+	public Page<RecipeSearchResponseDTO> getRecipesByFollowingUser(Long userId, Long followingId, int page, int size) {
+		int offset = page * size;
+		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesByFollowingUser(userId, followingId, size, offset, RecipeStatus.PUBLIC);
+		int total = recipeMapper.getRecipesByFollowingUserCount(userId, followingId, RecipeStatus.PUBLIC);
+		
+		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
+	}
 	
 		
 	// 임시 파일 체크
@@ -454,15 +486,7 @@ public class RecipeServiceImpl implements RecipeService {
 	    return url!= null && url.contains(Constans.S3_TEMP_IMAGES_FULL_PATH);
 	}
 	
-	
-	// 레시피 상태 코드 체크
-	private void checkRecipeStatus(RecipeStatus recipeStatus) {
-		if(recipeStatus == RecipeStatus.PRIVATE) {
-			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE);
-		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN) {
-			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE_ADMIN);
-		}
-	}
+
 	
 	// 레시피 존재 여부 체크
 	private void checkRecipeExists(Long userId, Long recipeId) {
@@ -485,4 +509,5 @@ public class RecipeServiceImpl implements RecipeService {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 	}
+
 }

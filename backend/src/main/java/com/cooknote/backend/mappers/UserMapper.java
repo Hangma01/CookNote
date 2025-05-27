@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
+import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
+import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
@@ -60,7 +62,12 @@ public interface UserMapper {
 				, @Param("newPw") String newPw);
 
 	// 회원 탈퇴
-	void userDelete(Long userId);
+	void userDelete(@Param("userId") Long userId);
+
+	// 팔로잉한 유저중 레시피 작성 최신순
+	List<UserProfileEditInfoResponseDTO> getFollowingLatestForRecipe(@Param("userId") Long userId
+							   	   								   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+	
 
 
 

@@ -1,3 +1,5 @@
+import { nameRule } from '@/utils/rules';
+
 export const routes = [
     {
         path: '/',
@@ -106,6 +108,12 @@ export const routes = [
                 path: '/search-ingredient',
                 name: 'searchIngredient',
                 component: () => import('../views/SearchIngredient.vue'),
+            },
+            {
+                path: '/feed',
+                name: 'followFeed',
+                component: () => import('../views/FeedView.vue'),
+                meta: { requiresAuth: true },
             }
         ]
     },

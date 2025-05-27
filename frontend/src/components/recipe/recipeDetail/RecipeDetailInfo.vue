@@ -211,11 +211,12 @@ watch(() => props.recipeDetailData, (newVal) => {
         justify-content: space-between;
         margin-top: 8rem;
         padding-right: 1rem;
+        gap: 1rem;
 
         .recipe-title {
             font-size: 1.5rem;    
             font-weight: bold;
-
+            flex: 5.5;
             .creat-date {
                 font-size: 0.7rem;
                 color: rgb(117, 117, 117);
@@ -225,7 +226,7 @@ watch(() => props.recipeDetailData, (newVal) => {
         .recipe-user-aciton {
             display: flex;
             gap: 0.8rem;
-            
+            flex: 1;
             .action {
                 text-align: center;
                 font-size: 0.6rem;

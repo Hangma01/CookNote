@@ -128,6 +128,7 @@ const handleCancle = debounce (async () => {
 // 레시피 작성 / 수정 시 가져올 데이터
 onMounted(async () => {
     if (isEditMode.value) { // 레시피 수정시요청 데이터
+        console.log('타니')
         try {
             const [originalRecipeRes, categoriesRes] = await Promise.all([
                 getOriRecipe(recipeId),

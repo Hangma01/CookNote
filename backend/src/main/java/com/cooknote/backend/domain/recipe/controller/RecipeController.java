@@ -262,16 +262,35 @@ public class RecipeController {
 	
 	// 레시피 재료 검색 조회
 	@GetMapping("/search/ingredient")
-	public ResponseEntity<Page<RecipeSearchResponseDTO>> getIngredientSearch(@RequestParam(value = "keyword") String keyword
+	public ResponseEntity<Page<RecipeSearchResponseDTO>> getIngredientSearch(@RequestParam(value = "keyword", required = false) String keyword
 										   								   , @RequestParam(value = "page", defaultValue = "0") int page
 										   								   , @RequestParam(value = "size", defaultValue = "20") int size) {
 		
-		if(keyword.trim() == null) {
-			throw new CustomRecipeException(RecipeErrorCode.RECIPE_INGREDIENT_EMPTY_EXCEPTION);
-		}
 		
 		return ResponseEntity.ok(recipeService.getIngredientSearch(keyword, page, size));
 	}
 	
+	
+	// 유저가 팔로우한 유저들의 전체 게시글
+	@GetMapping("/following")
+	public ResponseEntity<Page<RecipeSearchResponseDTO>> getRecipesOfFollowingUsers(@AuthenticationPrincipal CustomUserDetails customUserDetails 
+																				  , @RequestParam(value = "page", defaultValue = "0") int page
+																				  , @RequestParam(value = "size", defaultValue = "20") int size) {
+	
+		
+		
+		return ResponseEntity.ok(recipeService.getRecipesOfFollowingUsers(customUserDetails.getUserId(), page, size));
+	}
+	
+	// 유저가 팔로우한 특정 유저의 게시글
+	@GetMapping("/following/{followingId}")
+	public ResponseEntity<Page<RecipeSearchResponseDTO>> getRecipesByFollowingUser(@AuthenticationPrincipal CustomUserDetails customUserDetails 
+																				 , @PathVariable("followingId") Long followingId
+																			     , @RequestParam(value = "page", defaultValue = "0") int page
+																			     , @RequestParam(value = "size", defaultValue = "20") int size) {
+	
+		
+		return ResponseEntity.ok(recipeService.getRecipesByFollowingUser(customUserDetails.getUserId(), followingId, page, size));
+	}
 
 }

@@ -1,5 +1,5 @@
 <script setup>
-import SearchRecipeCard from '@/components/search/SearchRecipeCard.vue';
+import RecipeCard from '@/components/ui/RecipeCard.vue';
 import SelectDropDown from '@/components/ui/SelectDropDown.vue';
 import { getCategory, getCategoryAll } from '@/services/categoryService';
 import { getRecipeSearch, getRecipeSearchIngredient } from '@/services/recipeService';
@@ -31,9 +31,6 @@ const handleSearchReq = () => {
 // 검색 실행
 const handleSearch = async(page = 0) => {
 
-    if (!keyword.value || keyword.value.trim() === '') {    
-        return; 
-    }
     // 쿼리스트링에 검색조건 반영
     router.replace({
         query: {
@@ -102,7 +99,7 @@ onMounted( () => {
                         v-for="(item, index) in searchData?.content"
                         :key="index"
                     >
-                        <SearchRecipeCard :recipeData = "item" />
+                        <RecipeCard :recipeData = "item" />
                     </li>
                 </ul>
             </div>

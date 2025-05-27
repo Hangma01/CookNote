@@ -30,7 +30,6 @@ const hostId = route.params.hostId;
 const loadRecipPublic = async (page = 0) => {
   try {
     const res = await getHostRecipePublic(hostId, page); // page 파라미터 넘김
-
     hostRecipePublicData.value = res.data
 
     // 현재 페이지 저장
@@ -63,7 +62,8 @@ onMounted(async () => {
 
         profile.value = hostProfileRes.data
         hostRecipePublicData.value = hostRecipePublicDataRes.data
-        
+        console.log(profile.value)
+        console.log(hostRecipePublicData.value)
         if(isLoggedIn) {
             if(userStore.getUserId == hostId) {
                 isHostProfile.value = false

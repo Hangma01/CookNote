@@ -1,5 +1,5 @@
 <script setup>
-import SearchRecipeCard from '@/components/search/SearchRecipeCard.vue';
+import RecipeCard from '@/components/ui/RecipeCard.vue';
 import SelectDropDown from '@/components/ui/SelectDropDown.vue';
 import { getCategory, getCategoryAll } from '@/services/categoryService';
 import { getRecipeSearch } from '@/services/recipeService';
@@ -129,7 +129,6 @@ onMounted(async () => {
         // 카테고리 로딩 후 쿼리 반영
         initCategoryFromQuery();
     } catch (e) {
-        console.log(e)
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message)  
         } else {
@@ -187,7 +186,7 @@ onMounted(async () => {
                         v-for="(item, index) in searchData?.content"
                         :key="index"
                     >
-                        <SearchRecipeCard :recipeData = "item" />
+                        <RecipeCard :recipeData = "item" />
                     </li>
                 </ul>
             </div>

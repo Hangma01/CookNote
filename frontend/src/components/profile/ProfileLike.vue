@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
-import { getRecipeLike } from '@/services/recipeService';
+import { getRecipeLike, recipeLikeDelete } from '@/services/recipeService';
 import { errorMessages } from '@/utils/messages/errorMessages';
 import ProfileRecipeCard from './ProfileRecipeCard.vue';
 
@@ -55,6 +55,17 @@ const loadRecipLike = async (page = 0) => {
     }
 };
 
+
+// 좋아요 삭제하기
+const handleLikeDelete = async (recipeId) => {
+    try {
+        await recipeLikeDelete(recipeId);
+        loadRecipLike();
+    } catch (e) {
+        alert('좋아요를 삭제하지 못했습니다.')
+    }
+}
+
 const goToPage = (page) => {
     loadRecipLike(page)
 };
@@ -90,7 +101,7 @@ onBeforeUnmount(() => {
     <div>
         <ul>
             <li 
-                class="recipe=like-content"
+                class="recipe-like-content"
                 v-for="(item) in recipeData?.content"
                 :key="item.recipeId"
             >
@@ -106,7 +117,7 @@ onBeforeUnmount(() => {
                         v-if="activeRecipeMenuMap[item.recipeId]" 
                         :ref="el => setRecipeMenuRef(el, item.recipeId)">
                         <div>
-                            <button @click="handleRecipeDelete(item.recipeId)">
+                            <button @click="handleLikeDelete(item.recipeId)">
                                 삭제
                             </button>
                         </div>

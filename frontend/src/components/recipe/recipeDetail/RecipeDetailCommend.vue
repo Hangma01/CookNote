@@ -607,12 +607,13 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                     gap: 5px;
 
                     .writer-profile-image {
-                        width: 2rem;
-                        
+                        width: 1.5rem;
+                        height: 1.5rem;
+                        border-radius: 100%;
                     }
 
                     .writer-nickname {
-                        padding-top: 0.3rem;
+                        padding-top: 0.1rem;
                         font-size: 0.85rem;
                         font-weight: 600;
                     }
@@ -723,7 +724,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                     width: 100%;
 
                     .writer-nickname {
-                        padding-top: 0.3rem;
+                        padding-top: 0.1rem;
                         font-size: 0.85rem;
                         font-weight: 600;
                     }
@@ -738,8 +739,9 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                             gap: 5px;
 
                             .writer-profile-image {
-                                width: 2rem;
-                                
+                                width: 1.5rem;
+                                height: 1.5rem;
+                                border-radius: 100%;
                             }
                         }
                     }

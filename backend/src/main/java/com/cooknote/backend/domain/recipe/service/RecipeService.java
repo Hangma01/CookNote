@@ -69,4 +69,10 @@ public interface RecipeService {
 	Page<RecipeSearchResponseDTO> getIngredientSearch(String keyword, int page, int size);
 
 
+	Page<RecipeSearchResponseDTO> getRecipesOfFollowingUsers(Long userId, int page, int size);
+
+
+	Page<RecipeSearchResponseDTO> getRecipesByFollowingUser(Long userId, Long followingId, int page, int size);
+
+
 }

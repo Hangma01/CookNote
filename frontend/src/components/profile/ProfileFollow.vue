@@ -174,21 +174,24 @@ onMounted(async () => {
                 justify-content: space-between;
                 align-items: center;
                 border-bottom: 1px solid rgb(200, 200, 200);
+                padding-top: 0.4rem;
                 padding-bottom: 0.3rem;
         
                 .user-info{
                     display: flex;
                     align-items: center;
                     .user-image {
-                        width: 3rem;
-                        height: 3rem;
+                        width: 2.5rem;
+                        height: 2.5rem;
 
                         .image{
                             width: 100%;
                             height: 100%;
+                            border-radius: 100%;
                         }
                     }
                     .user-nickname {
+                        margin-left: 1rem;
                     }
                 }
                 

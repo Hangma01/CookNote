@@ -7,10 +7,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
@@ -46,6 +48,12 @@ public class UserServiceImpl implements UserService {
 	// 유저 프로필 정보 조회
 	@Override
 	public UserHostProfileResponseDTO getHostProfile(Long userId, Long hostId) {
+		
+		User host = userMapper.getUser(hostId);
+		
+		if(host == null) {
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
 		
 		return userMapper.getHostProfile(userId, hostId);
 		
@@ -171,5 +179,15 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void userDelete(Long userId) {
 		userMapper.userDelete(userId);
+	}
+
+	// 팔로잉 게시글 작성 최신순으로 가져오기 
+	@Override
+	public List<UserProfileEditInfoResponseDTO> getFollowingLatestForRecipe(Long userId) {
+		
+		
+		return userMapper.getFollowingLatestForRecipe(userId, RecipeStatus.PUBLIC);
+		
+		
 	}
 }

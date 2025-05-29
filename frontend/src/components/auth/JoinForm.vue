@@ -194,7 +194,7 @@ const handleSubmitJoin = debounce(async () => {
             }
         }
     }
-}, commonValues.defaultDebounce)
+}, commonValues.DEFALUT_DEBOUNCE)
 
 // 입력 변경 여부 확인
 watch (() => ({ ...formValues }),

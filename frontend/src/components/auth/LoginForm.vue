@@ -51,7 +51,7 @@ const handleLogin = debounce(async () => {
             alert(errorMessages.LOGIN_ERROR)
         }
 	}
-}, commonValues.defaultDebounce);
+}, commonValues.DEFALUT_DEBOUNCE);
 </script>
 
 <template>

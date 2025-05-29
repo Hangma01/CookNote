@@ -13,6 +13,7 @@ import com.cooknote.backend.domain.auth.dto.response.UserFindIdResponseDTO;
 import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
 import com.cooknote.backend.domain.user.entity.User;
+import com.cooknote.backend.domain.user.enums.UserStatus;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
@@ -49,7 +50,7 @@ public class AuthServiceImpl implements AuthService{
 	// 아이디 중복 체크
 	@Override
 	public void getExistsId(String id) {
-		boolean isExists = authMapper.getExistsId(id);
+		boolean isExists = authMapper.getExistsId(id, UserStatus.DELETE);
 		
 		if(isExists) {
 			throw new CustomAuthException(AuthErrorCode.DUPLICATE_USERID_EXCEPTION);
@@ -59,7 +60,7 @@ public class AuthServiceImpl implements AuthService{
 	// 닉네임 중복 체크
 	@Override
 	public void getExistsNickname(String nickname) {
-		boolean isExists = authMapper.getExistsNickname(nickname);
+		boolean isExists = authMapper.getExistsNickname(nickname, UserStatus.DELETE);
 		
 		if(isExists) {
 			throw new CustomAuthException(AuthErrorCode.DUPLICATE_NICKNAME_EXCEPTION);
@@ -69,7 +70,7 @@ public class AuthServiceImpl implements AuthService{
 	// 이메일 중복 체크
 	@Override
 	public void getExistsEmail(String email) {
-		boolean isExists = authMapper.getExistsEmail(email);
+		boolean isExists = authMapper.getExistsEmail(email, UserStatus.DELETE);
 		
 		if(isExists) {
 			throw new CustomAuthException(AuthErrorCode.DUPLICATE_EMAIL_EXCEPTION);
@@ -108,8 +109,9 @@ public class AuthServiceImpl implements AuthService{
 	@Override
 	public void userFindIdAuthRequest(UserFindIdAuthRequestDTO userFindIdAuthRequestDTO) {
 		
-		Boolean isExistsUser = authMapper.userFindIdAuthRequest(userFindIdAuthRequestDTO.getName(), 
-																userFindIdAuthRequestDTO.getEmail());
+		Boolean isExistsUser = authMapper.userFindIdAuthRequest(userFindIdAuthRequestDTO.getName() 
+															  , userFindIdAuthRequestDTO.getEmail()
+															  , UserStatus.DELETE);
 	
 		if(!isExistsUser) {
 			throw new CustomAuthException(AuthErrorCode.NOT_FOUND_USER_EXCEPTION);
@@ -123,7 +125,7 @@ public class AuthServiceImpl implements AuthService{
 	@Override
 	public UserFindIdResponseDTO userFindId(String name, String email) {
 
-		User rspUser = authMapper.userFindId(name, email);
+		User rspUser = authMapper.userFindId(name, email, UserStatus.DELETE);
 		
 		if(rspUser == null) {
 			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
@@ -141,7 +143,9 @@ public class AuthServiceImpl implements AuthService{
 	public UserFindPwResponseDTO userFindPwAuthRequest(UserFindPwAuthRequestDTO userFindPwAuthRequestDTO) {
 		
 
-		User rspUser = authMapper.userFindPw(userFindPwAuthRequestDTO.getId(), userFindPwAuthRequestDTO.getEmail());
+		User rspUser = authMapper.userFindPw(userFindPwAuthRequestDTO.getId()
+				   						  , userFindPwAuthRequestDTO.getEmail()
+				   						  , UserStatus.DELETE);
 		
 		System.out.println(rspUser);
 		
@@ -189,7 +193,7 @@ public class AuthServiceImpl implements AuthService{
 		String password = bCryptPasswordEncoder.encode(userFindPwResetRequestDTO.getNewPw());
 		long userId = Long.valueOf(getUserId);
 		
-		authMapper.updatePwReset(userId, password);
+		authMapper.updatePwReset(userId, password, UserStatus.DELETE);
 		
 		// 레디스에 저장된 비밀전호 재설정 key 삭제
 		redisUtil.deleteData(pwResetRedisKey);

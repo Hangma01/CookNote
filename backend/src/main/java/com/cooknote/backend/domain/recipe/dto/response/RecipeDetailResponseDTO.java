@@ -42,11 +42,10 @@ public class RecipeDetailResponseDTO {
     private RecipeStatus status; 									// 레시피 상태 - PRIVATE, PUBLIC, PRIVATE_ADMIN, ELETE.
     private int categoryCuisineId;									// 카테고리 - 요리 종류 (FK)
     private int categoryPurposeId;									// 카테고리 - 요리 목적 (FK)
-    
+    private Long writerId;											// 작성자 아이디
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime createAt;									// 생성 날짜
     
-    private Long writerUserId;										// 레피시 작성자 번호
     private String writerNickname;									// 레시피 작성자 닉네임
     private String writerProfileImage;								// 레시피 작성자 프로필 이미지
     

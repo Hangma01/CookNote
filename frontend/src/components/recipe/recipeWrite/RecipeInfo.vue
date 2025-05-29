@@ -10,15 +10,9 @@ import { debounce } from 'lodash';
 
 // RecipeWrite.vue로부터 받는 데이터
 const props = defineProps({ 
-    categories: {   // 레시피 작성 시 오는 데이터
-        type: Object
-    },
-    originalRecipeData: { // 레시피 수정 시 오는 데이터
-        type: Object
-    },
-    isEditMode: {
-        type: Boolean
-    }
+    categories: Object,  // 레시피 작성 시 오는 데이터
+    originalRecipeData: Object, // 레시피 수정 시 오는 데이터
+    isEditMode: Boolean,
 })
 
 // 입력 값 선언
@@ -112,7 +106,7 @@ const handleGetVideoId = debounce( async () => {
   } catch (error) {
     formValues.videoId = null;
   }
-}, commonValues.defaultDebounce)
+}, commonValues.DEFALUT_DEBOUNCE)
 
 const getYoutubeVideoId = () => {
     const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;

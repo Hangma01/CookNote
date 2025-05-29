@@ -10,6 +10,8 @@ import { getOriRecipe, editRecipe, saveRecipe, deleteRecipe } from '@/services/r
 import { errorMessages } from "@/utils/messages/errorMessages";
 import { useRoute, useRouter } from "vue-router";
 import { getCategoryAll } from "@/services/categoryService";
+import { isEqual } from "lodash";
+import { HttpStatusCode } from "axios";
 
 // 화면 전환
 const router = useRouter();
@@ -30,6 +32,7 @@ const originalRecipeData = ref(null)
 const route = useRoute()
 const recipeId = route.params.recipeId || null
 const isEditMode = ref(!!recipeId) 
+
 
 // 레시피 저장
 const handleRecipeSave = debounce (async () => {
@@ -94,10 +97,11 @@ const handleRecipeSave = debounce (async () => {
             } else {
                 alert(errorMessages.BADREQUEST)
             }
-            window.location.reload();
+            
+            router.push({ name: 'mainPage' })
         } 
   }
-}, commonValues.defaultDebounce)
+}, commonValues.DEFALUT_DEBOUNCE)
 
 // 레시피 삭제
 const handleRecipeDelete = debounce (async () => {
@@ -117,18 +121,18 @@ const handleRecipeDelete = debounce (async () => {
             window.location.reload();
         }
     }
-}, commonValues.defaultDebounce)
+}, commonValues.DEFALUT_DEBOUNCE)
 
 // 취소
 const handleCancle = debounce (async () => {
     router.back();
-}, commonValues.defaultDebounce)
+}, commonValues.DEFALUT_DEBOUNCE)
 
 
 // 레시피 작성 / 수정 시 가져올 데이터
 onMounted(async () => {
     if (isEditMode.value) { // 레시피 수정시요청 데이터
-        console.log('타니')
+
         try {
             const [originalRecipeRes, categoriesRes] = await Promise.all([
                 getOriRecipe(recipeId),
@@ -136,15 +140,21 @@ onMounted(async () => {
             ]);
 
             originalRecipeData.value = originalRecipeRes.data
-            
             categories.value = categoriesRes.data
+
+
         } catch (e) {
             if (e.response && e.response?.data?.message) {
-                alert(e.response.data.message)  
+                if(e.status === HttpStatusCode.NotFound) {
+                    router.push({ name: 'notFound' })
+                } else {
+                    alert(e.response.data.message)
+                    router.back()
+                }  
             } else {
                 alert(errorMessages.BADREQUEST)
+                router.back()
             }
-            router.push({ name: "mainPage" }) // 나중에 마이페이지로 이동해야함
         }
     } else {  // 레시피 작성시 요청 데이터
         try {

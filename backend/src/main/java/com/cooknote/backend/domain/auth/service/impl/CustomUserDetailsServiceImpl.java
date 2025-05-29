@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.cooknote.backend.domain.user.entity.User;
+import com.cooknote.backend.domain.user.enums.UserStatus;
 import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.message.ErrorMessage;
@@ -24,7 +25,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
 
 		// DB에서 유저 조회
-		User getUser = userService.getLoginUser(id);
+		User getUser = userService.getLoginUser(id, UserStatus.DELETE);
 
 		// 유저 조회 실패
 		if(getUser == null) {

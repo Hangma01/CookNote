@@ -23,31 +23,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecipeUpdateRequestDTO {
-	@NotBlank()
+	@NotBlank
 	@Length(max = 50)
     private String title;											// 레시피 제목
     
-	@NotBlank()
+	@NotBlank
 	@Length(min = 10, max = 250)
 	private String description;										// 레시피 요리소개
     
-	@NotBlank()
+	@NotBlank
 	@Length(max = 400)
 	private String thumbnail;										// 레시피 썸네일
     
 	@Pattern(regexp = "^[a-zA-Z0-9_-]{11}$")
 	private String videoId;											// 동영상 아이디
     
-	@NotNull()
+	@NotNull
     private RecipeServing serving;									// 레시피 인원수
     
-    @NotNull()
+    @NotNull
     private RecipeDuration duration;								// 레시피 요리시간
     
-    @NotNull()
+    @NotNull
     private RecipeLevel level;			 							// 레시피 난이도
     
-    @Length(max = 250)
+    @Length(max = 400)
     private String tip;												// 레시피 요리 팁
     
     @NotNull
@@ -59,12 +59,12 @@ public class RecipeUpdateRequestDTO {
     @NotNull
     private Integer categoryPurposeId;								// 카테고리 - 요리 목적 (FK)
     
-    @NotEmpty()
+    @NotEmpty
     @Size(min = 3)
     @Valid
     private List<RecipeIngredientRequestDTO> recipeIngredients;		// 재료 목록 
     
-    @NotEmpty()
+    @NotEmpty
     @Size(min = 3)
     @Valid
     private List<RecipeSeqRequestDTO> recipeSeqs;					// 레시피 순서 목록
@@ -76,7 +76,7 @@ public class RecipeUpdateRequestDTO {
     @Length(max = 400)
     private String originalThumbnail;								// 오리지널 썸네일
     
-    @NotEmpty()
+    @NotEmpty
     @Size(min = 3)
     @Valid
     private List<RecipeSeqRequestDTO> originalRecipeSeqs;			// 오리지널 레시피 순서

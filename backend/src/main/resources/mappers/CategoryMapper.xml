@@ -18,5 +18,12 @@
 			 , TYPE				   AS TYPE		<!-- 카테고리 목적 종류 -->
 		  FROM CATEGORY_PURPOSE					<!-- 카테고리 목적 테이블 -->
 	</select>
+	
+	<!-- 카테고리 신고 사유 가져오기 -->
+	<select id="getCategoryReportReason" resultType="CategoryReportReasonResponseDTO">
+		SELECT CATEGORY_REPORT_REASON_ID AS ID			<!-- 카테고리 신고사유 아이디 -->
+			 , TYPE				   	  	 AS TYPE		<!-- 카테고리 신고사유 종류 -->
+		  FROM CATEGORY_REPORT_REASON					<!-- 카테고리 신고사유 테이블 -->
+	</select>
 </mapper>
 

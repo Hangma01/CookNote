@@ -41,19 +41,26 @@ const setCommentMenuRef = (el, commentId) => {
 
 // 댓글 삭제하기
 const handleCommentDelete =  async (commentId) => {
-    try {
-        await commentDelete(commentId);
-        loadCommentUser();
-    } catch (e) {
-        alert('댓글을 삭제하지 못했습니다.')
-    }
+    
+    const proceed = confirm("댓글을 정말 삭제하시겠습니까?");
 
+    if(proceed) {
+        try {
+            await commentDelete(commentId);
+            loadCommentUser();
+        } catch (e) {
+            alert('댓글을 삭제하지 못했습니다.')
+        }
+    } else {
+        activeCommentMenuMap[commentId] = !activeCommentMenuMap[commentId];
+    }
 }
 
 // 데이터 가져오기
 const loadCommentUser = async (page = 0) => {
     try {
         const res = await getCommentUser(page); // page 파라미터 넘김
+        console.log(res)
         commentData.value = res.data
 
     } catch (e) {        
@@ -81,7 +88,7 @@ onMounted(async () => {
             alert(errorMessages.BADREQUEST)
         }
 
-        window.location.reload()
+        router.push({ name : 'mainPage'})
     }
     
     document.addEventListener('click', closeCommentMenu);
@@ -98,7 +105,7 @@ onBeforeUnmount(() => {
     </div>
     <div class="line"></div>
 
-    <div>
+    <div v-if="commentData?.content.length > 0">
         <ul>
             <li 
                 v-for="(item) in commentData?.content"
@@ -116,11 +123,9 @@ onBeforeUnmount(() => {
                         <div class="menu"
                             v-if="activeCommentMenuMap[item.commentId]" 
                             :ref="el => setCommentMenuRef(el, item.commentId)">
-                            <div>
-                                <button @click="handleCommentDelete(item.commentId)">
-                                    삭제
-                                </button>
-                            </div>
+                            <button @click="handleCommentDelete(item.commentId)" class="btn">
+                                삭제
+                            </button>
                         </div>
                     </div>
 
@@ -150,6 +155,10 @@ onBeforeUnmount(() => {
                 {{ n }}
             </button>
         </div>
+    </div>
+
+    <div v-else class="non-comment">
+        <p>조회된 댓글이 없습니다.</p>
     </div>
 </template>
 
@@ -199,6 +208,10 @@ onBeforeUnmount(() => {
             padding-top: 0.2rem;
             padding-bottom: 0.2rem;
             color: black;
+
+            .btn {
+                width: 100%;
+            }
         }
     }
 }
@@ -236,5 +249,15 @@ onBeforeUnmount(() => {
         font-weight: bold;
         }
     }
+}
+
+.non-comment {
+    height: 30rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #333333;
 }
 </style>

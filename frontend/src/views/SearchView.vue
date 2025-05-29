@@ -1,6 +1,7 @@
 <script setup>
 import RecipeCard from '@/components/ui/RecipeCard.vue';
 import SelectDropDown from '@/components/ui/SelectDropDown.vue';
+import { ConditonalType } from '@/constans/conditionalType';
 import { getCategory, getCategoryAll } from '@/services/categoryService';
 import { getRecipeSearch } from '@/services/recipeService';
 import { useUserStore } from '@/stores/user';
@@ -23,6 +24,14 @@ const keyword = ref(null)
 // 카테고리 데이터
 const categories = ref(null)
 
+// 조건 데이터
+const conditionalType = ref(ConditonalType.POPULAR)
+
+// 조건 토글
+const selectConditionalType = (type) => {
+  conditionalType.value = type;
+  handleSearch(); // 정렬 변경 후 재검색
+};
 
 const formValues = reactive({
     categories: {
@@ -49,7 +58,8 @@ const handleSearch = async(page = 0) => {
         query: {
             keyword: keyword.value || '',
             categorycuisine: formValues.categories.cuisine.id,
-            categorypurpose: formValues.categories.purpose.id,
+            categorypurpose: formValues.categories.purpose.id,            
+            conditionalType: conditionalType.value,
             page,
         }
     });
@@ -60,6 +70,7 @@ const handleSearch = async(page = 0) => {
               keyword.value
             , formValues.categories.cuisine.id
             , formValues.categories.purpose.id
+            , conditionalType.value
             , page
         )
         searchData.value = res.data
@@ -77,6 +88,7 @@ const initCategoryFromQuery = () => {
     const cuisineId = parseInt(route.query.categorycuisine);
     const purposeId = parseInt(route.query.categorypurpose);
     keyword.value = route.query.keyword || '';
+    conditionalType.value = route.query.conditionalType || ConditonalType.POPULAR
 
     if (!isNaN(cuisineId) && categories.value?.categoryCuisineList) {
         const cuisine = categories.value.categoryCuisineList.find(c => c.id === cuisineId);
@@ -177,10 +189,27 @@ onMounted(async () => {
                     class="category"
                 />
             </div>
+            
+            <div class="conditional-box">
+                <button 
+                class="conditional-btn"
+                :class="{ active: conditionalType === ConditonalType.POPULAR }"
+                @click="selectConditionalType(ConditonalType.POPULAR)"
+                >
+                    인기순
+                </button>
+                <button
+                class="conditional-btn"
+                :class="{ active: conditionalType === ConditonalType.LATEST }"
+                @click="selectConditionalType(ConditonalType.LATEST)"
+                >
+                    최신순
+                </button>
+            </div>
         </section> 
 
         <section class="search-recipe-list">
-            <div >
+            <div>
                 <ul class="recipe-card-wrap">
                     <li
                         v-for="(item, index) in searchData?.content"
@@ -216,7 +245,6 @@ onMounted(async () => {
 
     .search-bar-wrap {
         text-align: center;
-        padding-bottom: 3rem;
         border-bottom: 1px solid rgb(224,224,224);
         
         .search-bar {
@@ -233,6 +261,25 @@ onMounted(async () => {
 
             .category {
                 width: 3rem;
+            }
+
+        }
+        
+        .conditional-box {
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: end;
+            margin-right: 1rem;
+            gap: 2rem;
+
+            .conditional-btn {
+                color: #a89d94;
+                
+                &.active {
+                    color: rgb(147, 112, 98);
+                    font-weight: bold;
+                }
             }
         }
     }

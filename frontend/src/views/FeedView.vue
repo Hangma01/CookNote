@@ -168,7 +168,7 @@ onMounted( async () => {
                             border-radius: 100%;
 
                             &.active {
-                                border: 3px solid rgb(170, 81, 45);
+                                border: 5px solid rgba(23, 170, 255, 0.836);
                             }
                         }
                     }

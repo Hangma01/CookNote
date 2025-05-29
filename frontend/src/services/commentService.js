@@ -29,10 +29,18 @@ export const commentDelete = async (commentId) => {
 }
 
 // 리플 목록 가져오기
-export const getCommentReplys = async (parentCommentId, page, size) => {
+export const getCommentReplies = async (parentCommentId, page, size) => {
     return await publicAPI.get(`/comment/replies?parentCommentId=${parentCommentId}&page=${page}&size=${size}`
 )}
 
-export const getCommentUser = async(page) => {
+// 유저가 작성한 댓글 가져오기
+export const getCommentUser = async() => {
     return await privateAPI.get(`/comment/user`)
+}
+
+// 리플 총 갯수 가져요기
+export const getRepliesCount = async(recipeId) => {
+    return await publicAPI.get(`comment/replies/count?recipeId=${recipeId
+        
+    }`)
 }

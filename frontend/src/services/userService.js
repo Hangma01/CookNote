@@ -22,7 +22,7 @@ export const getUserFollow = async () => {
 }
 
 // 유저 팔로우 하기
-export const userFollow = async (followId) => {
+export const userAddFollow = async (followId) => {
     return await privateAPI.post(`/user/follow`, followId, {
     headers: {
         'Content-Type': 'application/json',
@@ -60,3 +60,51 @@ export const getFollowingLatestForRecipe = async () => {
     return await privateAPI.get(`/user/following/latest`)
 }
 
+// 신고하기
+export const userReport = async (reportType, recipeId, commentId, selectedReasonId) => {
+    return await privateAPI.post(`/user/report`,
+        {   'reportType': reportType,
+            'recipeId': recipeId,
+            'commentId': commentId,
+            'categoryReportReasonId' : selectedReasonId
+        },
+        {
+            headers: {
+                'Accept': 'application/json'  // 응답 형식으로 JSON을 명시적으로 요청
+            }
+        });
+}
+
+// 신고 중복 체크
+export const userReportDuplicationCheck = async (reportType, recipeId, commentId) => {
+    return await privateAPI.post(`/user/report/duplication`,
+        {   'reportType': reportType,
+            'recipeId': recipeId,
+            'commentId': commentId,
+        },
+        {
+            headers: {
+                'Accept': 'application/json'  // 응답 형식으로 JSON을 명시적으로 요청
+            }
+        });
+}
+
+// 쉐프 검색
+export const getChefSearch = async (keyword, page) => {
+    return await publicAPI.get('/user/search/chef', {
+        params: {
+            keyword: keyword || null,
+            page: page,
+        }
+    })
+}
+
+// 쉐프 검색 - 로그인 시
+export const getChefSearchLoggined = async (keyword, page) => {
+    return await privateAPI.get('/user/search/chef', {
+        params: {
+            keyword: keyword || null,
+            page: page,
+        }
+    })
+}

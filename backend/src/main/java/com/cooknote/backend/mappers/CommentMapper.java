@@ -19,21 +19,21 @@ public interface CommentMapper {
 	// 댓글 조회
 	List<CommentsResponseDTO> getComments(@Param("recipeId") Long recipeId
 							, @Param("size") int size
-							, @Param("offset") int offset 
+							, @Param("offset") int offset
 							, @Param("statusPublic") CommentStatus statusPublic);
-
+	
 	// 댓글 토탈 갯수
-	int commentsCount(@Param("recipeId") Long recipeId 
+	int commentsCount(@Param("recipeId") Long recipeId
 					, @Param("statusPublic") CommentStatus statusPublic);
 	
 	// 리플 조회
 	List<CommentRepliesResponseDTO> getCommentReplies(@Param("parentCommentId") Long parentCommentId 
 													, @Param("size") int size
-													, @Param("offset") int offset 
+													, @Param("offset") int offset
 													, @Param("statusPublic") CommentStatus statusPublic);
 	
-	// 리플 토탈 갯수
-	int commentRepliesCount(@Param("parentCommentId")  Long parentCommentId
+	// 댓글별 리플 토탈 갯수
+	int commentRepliesCount(@Param("parentCommentId") Long parentCommentId
 						  , @Param("statusPublic") CommentStatus statusPublic);
 	
 	
@@ -48,7 +48,8 @@ public interface CommentMapper {
 
 	
 	// 댓글 삭제
-	void commentDelete(@Param("commentId") Long commentId);
+	void commentDelete(@Param("commentId") Long commentId
+					 , @Param("statusDelete") CommentStatus statusDelete);
 	
 
 	// 댓글 삭제 - 기존 정보 조회
@@ -66,10 +67,15 @@ public interface CommentMapper {
 	List<CommentUserWriteResponseDTO> getCommentUserWrite(@Param("userId") Long userId
 												, @Param("size") int size
 												, @Param("offset") int offset 
-												, @Param("statusPrivateAdmin") CommentStatus statusPrivateAdmin);
+												, @Param("statusPublic") CommentStatus statusPublic);
 	
 	// 유저가 작성한 토탈 댓글 갯수 조회
-	int getCommentUserWriteCount(@Param("userId") Long userId);
+	int getCommentUserWriteCount(@Param("userId") Long userId
+							   , @Param("statusPublic") CommentStatus statusPublic);
+
+	// 리플 총 갯수 조회
+	Integer getRepliesCount(@Param("recipeId") Long recipeId
+						  , @Param("statusPublic") CommentStatus statusPublic);
 
 
 }

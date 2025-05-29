@@ -3,6 +3,7 @@ package com.cooknote.backend.domain.comment.dto.response;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+import com.cooknote.backend.domain.comment.enums.CommentStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
@@ -26,7 +27,6 @@ public class CommentUserWriteResponseDTO {
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
     private LocalDateTime commentCreateAt;		// 댓글 작성 날짜
-	private String commentContent;				// 댓글 내용
-    private boolean isPrivateAdmin;				// 댓글 상태
+	private String commentContent;				// 댓글 내용		
 	
 }

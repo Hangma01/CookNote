@@ -103,7 +103,7 @@ public class CommentServiceImpl implements CommentService {
 			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
 		} 
 		
-		commentMapper.commentDelete(commentId);
+		commentMapper.commentDelete(commentId, CommentStatus.DELETE);
 	}
 
 	// 댓글 수정
@@ -137,9 +137,16 @@ public class CommentServiceImpl implements CommentService {
 		
 		
 		int offset = page * size;
-		List<CommentUserWriteResponseDTO> comments = commentMapper.getCommentUserWrite(userId, size, offset, CommentStatus.PRIVATE_ADMIN);
-		int total = commentMapper.getCommentUserWriteCount(userId);
+		List<CommentUserWriteResponseDTO> comments = commentMapper.getCommentUserWrite(userId, size, offset, CommentStatus.PUBLIC);
+		int total = commentMapper.getCommentUserWriteCount(userId, CommentStatus.PUBLIC);
 		
 		return new PageImpl<>(comments, PageRequest.of(page, size), total);
+	}
+
+	// 리플 총 갯수 조회
+	@Override
+	public Integer getRepliesCount(Long recipeId) {
+		
+		return commentMapper.getRepliesCount(recipeId, CommentStatus.PUBLIC);
 	}
 }

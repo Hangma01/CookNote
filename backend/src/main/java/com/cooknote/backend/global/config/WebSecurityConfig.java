@@ -97,12 +97,14 @@ public class WebSecurityConfig {
 		http
 			.authorizeHttpRequests((auth) -> auth
 						.requestMatchers("/login", "/logout", "/auth/**", "/mail/**").permitAll()
-						.requestMatchers(HttpMethod.GET, "/recipe/public", "/recipe/private", "/recipe/edit", "/recipe/like", "/recipe/bookmark").authenticated()
-						.requestMatchers(HttpMethod.GET, "/recipe/*", "/recipe/public/host", "/recipe/search/*"
-													   , "/comment", "/comment/replies"
-													   , "/user/profile/host"
+						.requestMatchers(HttpMethod.GET, "/recipe/public", "/recipe/private", "/recipe/edit", "/recipe/like", "/recipe/bookmark"
+													   , "/cateogry/all"
+													   , "/comment/user").authenticated()
+						.requestMatchers(HttpMethod.GET, "/recipe/*", "/recipe/public/host", "/recipe/search/*", "/recipe/like/count"
 													   , "/recipe/public/host"
-													   , "/category").permitAll()
+													   , "/comment", "/comment/**"
+													   , "/user/profile/host", "/user/search/chef"
+													   , "/category", "/category/*").permitAll()
 						.anyRequest().authenticated());
 
 		

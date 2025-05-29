@@ -1,6 +1,6 @@
 import { HttpStatusCode } from "axios";
 import { verifyMailAuthCode } from '@/services/mailService';
-import { getUserProfile, userCancleFollow, userFollow } from "@/services/userService";
+import { getUserProfile } from "@/services/userService";
 import { useUserStore } from "@/stores/user";
 
 
@@ -72,18 +72,10 @@ export const loginCheck = (router) => {
     }
 }
 
+
 // 랜덤 UUID 추출출
 export const generateId = () => crypto.randomUUID();
 
-// 팔로우 하기
-export const addFollow = async (followId) => {
-    return await userFollow(followId)
-}
-
-// 팔로잉 취소
-export const cancleFollow = async (followId) => {
-    return await userCancleFollow(followId)
-}
 
 // 프로필 로드
 export const loadProfile = async (isHostProfileStatus) => {

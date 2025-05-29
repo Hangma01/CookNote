@@ -56,7 +56,7 @@ const handleFindPwReset = debounce(async () => {
 			router.replace({ name: 'userFindPw' });
 		}
 	}
-}, commonValues.defaultDebounce);
+}, commonValues.DEFALUT_DEBOUNCE);
 
 
 watch(() => formValues.newPw, () => {

@@ -74,7 +74,7 @@ const loadRecipPrivate = async (page = 0) => {
     const res = await getRecipePrivate(page); // page 파라미터 넘김
     recipeData.value = res.data
 
-    
+        console.log(recipeData.value)
   } catch (e) {        
     if (e.response && e.response?.data?.message) {
         alert(e.response.data.message) 
@@ -85,6 +85,7 @@ const loadRecipPrivate = async (page = 0) => {
     router.push({ name : 'mainPage'})
   }
 };
+
 
 
 // 레시피 삭제
@@ -111,6 +112,8 @@ const handleRecipeDelete = async(recipeId) => {
             }
             router.push({ name : 'mainPage'})
         }
+    } else {
+        activeRecipeMenuMap[recipeId] = !activeRecipeMenuMap[recipeId];
     }
 }
 
@@ -126,7 +129,7 @@ onMounted(async () => {
 
     const tabFromQuery = route.query.tab;
 
-    if (tabFromQuery === commonValues.PRIVATE_TEXT || tabFromQuery === commonValues.PUBLIC_TEXT) {
+    if (tabFromQuery === commonValues.PRIVATE_TEXT || tabFromQuery === commonValues.PUBLIC_TEXT ) {
         activeTab.value = tabFromQuery;
     }
 
@@ -135,7 +138,7 @@ onMounted(async () => {
             loadRecipPublic();
         } else if (activeTab.value === commonValues.PRIVATE_TEXT) {
             loadRecipPrivate();
-        } 
+        }
     } catch (e) {
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message) 
@@ -182,9 +185,9 @@ watch(activeTab, (newTab) => {
         >
             비공개({{ userProfile?.recipePrivateCount || 0 }})
         </li>
-    </ul>
 
-    <div>
+    </ul>
+    <div v-if="!(userProfile?.recipePublicCount  === 0 && userProfile?.recipePrivateCount === 0)">
         <ul>
             <li 
                 class="recipe-content"
@@ -202,17 +205,16 @@ watch(activeTab, (newTab) => {
                 <div class="menu"
                         v-if="activeRecipeMenuMap[item.recipeId]" 
                         :ref="el => setRecipeMenuRef(el, item.recipeId)">
-                        <div v-if="item.privateAdmin !== true" class="btn">
-                            <router-link :to="{name : 'recipeEdit', params: { recipeId: item.recipeId } }">
-                                수정
-                            </router-link>
-                        </div>
+                        
+                        <router-link :to="{name : 'recipeEdit', params: { recipeId: item.recipeId } }">
+                            <div v-if="item.privateAdmin !== true" class="btn">
+                                    수정
+                            </div>
+                        </router-link>
 
-                        <div :class="[item.privateAdmin !== true ? 'btn' : 'btn-solo']">
-                            <button @click="handleRecipeDelete(item.recipeId)">
-                                삭제
-                            </button>
-                        </div>
+                        <button @click="handleRecipeDelete(item.recipeId)" :class="[item.privateAdmin !== true ? 'btn' : 'btn-solo']">
+                            삭제
+                        </button>
                     </div>
                 </div>
             </li>
@@ -228,6 +230,18 @@ watch(activeTab, (newTab) => {
                 {{ n }}
             </button>
         </div>
+    </div>
+
+    <div v-else class="non-recipe">
+        <p>작성한 레시피가 없습니다.</p>
+        <p>새로운 레시피를 작성해보세요.</p>
+    
+        <router-link :to="{name : 'recipeWrite'}">
+            <div class="router-write">
+                <font-awesome-icon :icon="['fas', 'pen-to-square']" style="color: #FFFFFF;" class="write-icon" />
+                <span>작성하기</span>    
+            </div>    
+        </router-link>
     </div>
 </template>
 
@@ -284,6 +298,10 @@ watch(activeTab, (newTab) => {
             padding-bottom: 0.2rem;
             color: black;
 
+            .btn {
+                width: 100%;
+            }
+
             .btn:hover{
                 background-color: #c09370;
             }
@@ -312,6 +330,29 @@ watch(activeTab, (newTab) => {
         background-color: #a89d94;
         color: white;
         font-weight: bold;
+        }
+    }
+}
+
+.non-recipe {
+    height: 30rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #333333;
+    .router-write {
+        margin-top: 2rem;
+        border: 1px solid black;
+        padding: 1rem 2rem ;
+        border-radius: 0.5rem;
+        background-color: #c09370;
+        border: 1px solid #a57954;
+        color: white;
+        .write-icon {
+            margin-right: 1rem;
+    
         }
     }
 }

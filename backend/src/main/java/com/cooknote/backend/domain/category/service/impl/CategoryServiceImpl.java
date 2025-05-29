@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.cooknote.backend.domain.category.dto.response.CategoryCuisineListResponseDTO;
 import com.cooknote.backend.domain.category.dto.response.CategoryGetAllResponseDTO;
 import com.cooknote.backend.domain.category.dto.response.CategoryPurposeResponseDTO;
+import com.cooknote.backend.domain.category.dto.response.CategoryReportReasonResponseDTO;
 import com.cooknote.backend.domain.category.dto.response.CategoryResponseDTO;
 import com.cooknote.backend.domain.category.service.CategoryService;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEnumLabelResponseDTO;
@@ -76,8 +77,8 @@ public class CategoryServiceImpl implements CategoryService {
 		List<CategoryCuisineListResponseDTO> rspCategoryCuisineList = categoryMapper.getCategoryCuisine();
 		
 		if(rspCategoryCuisineList == null) {
-				throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
-			}
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
 		
 		// 카테고리 요리 목적 리스트 가져오기
 		List<CategoryPurposeResponseDTO> rspCategoryPurposeList = categoryMapper.getCategoryPurpose();
@@ -91,6 +92,19 @@ public class CategoryServiceImpl implements CategoryService {
 																.categoryPurposeList(rspCategoryPurposeList)
 																.build();
 		return categoryResponseDTO;
+	}
+
+	// 카테고리 - 신고 사유 가져오기
+	@Override
+	public List<CategoryReportReasonResponseDTO> getCategoryReportReason() {
+		
+		List<CategoryReportReasonResponseDTO> categoryReportReasonResponseDTO = categoryMapper.getCategoryReportReason();
+		
+		if(categoryReportReasonResponseDTO == null) {
+			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
+		}
+		
+		return categoryReportReasonResponseDTO;
 	}
 	
 

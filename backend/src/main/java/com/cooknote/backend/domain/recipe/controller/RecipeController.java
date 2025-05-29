@@ -21,18 +21,22 @@ import com.cooknote.backend.domain.recipe.dto.request.RecipeLikeRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeUpdateRequestDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeBookmarkResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeCardResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeDetailResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeEditResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeLikeResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateAdminResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePrivateResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeRecommnetResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
+import com.cooknote.backend.domain.recipe.enums.ConditionalType;
+import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.recipe.service.RecipeService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
+import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
-import com.cooknote.backend.global.error.exceptionCode.RecipeErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.error.excption.CustomRecipeException;
 import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 
 import jakarta.validation.Valid;
@@ -80,6 +84,7 @@ public class RecipeController {
 		
 		return ResponseEntity.ok(recipeService.getRecipePrivate(customUserDetails.getUserId(), page, size));
 	}
+
 		
 	// 레시피 상세 조회
 	@GetMapping("/{recipeId}")
@@ -122,12 +127,13 @@ public class RecipeController {
 	@GetMapping("/edit/{recipeId}")
 	public ResponseEntity<RecipeEditResponseDTO> getRecipeForEdit(@AuthenticationPrincipal CustomUserDetails customUserDetails 
 												  				, @PathVariable("recipeId") Long recipeId) {
-		
+
 		// Null 체크
 		if(CommonFunctionUtil.nullCheck(recipeId)) {
 			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+			
 		}
-		
+
 		RecipeEditResponseDTO recipeEditResponseDTO = recipeService.getRecipeForEdit(customUserDetails.getUserId(), recipeId);
 		
 		return ResponseEntity.ok(recipeEditResponseDTO);
@@ -139,11 +145,12 @@ public class RecipeController {
 										   , @Valid @RequestBody RecipeUpdateRequestDTO recipeUpdateRequestDTO
 										   , BindingResult bindingResult) {
 
+
 		// 유효성 검사 확인
 		if (CommonFunctionUtil.validationCheck(bindingResult)) {;
 			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
-		
+
 		recipeService.recipeUpdate(customUserDetails.getUserId(), recipeUpdateRequestDTO);
 		
 		
@@ -207,6 +214,17 @@ public class RecipeController {
 	}
 	
 	
+	@GetMapping("/like/count")
+	public ResponseEntity<Integer> getRecipeLikeCount(@RequestParam("recipeId") Long recipeId) {
+
+		// Null 체크
+		if(CommonFunctionUtil.nullCheck(recipeId)) {
+			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+		}
+		
+		return ResponseEntity.ok(recipeService.getRecipeLikeCount(recipeId));
+	}
+	
 	// 북마크한 공개 레시피 데이터 가져오기
 	@GetMapping("/bookmark")
 	public ResponseEntity<Page<RecipeBookmarkResponseDTO>> getBookmarkRecipePublic(@AuthenticationPrincipal CustomUserDetails customUserDetails
@@ -254,9 +272,10 @@ public class RecipeController {
 										   , @RequestParam(value = "categoryCuisineId", defaultValue = "0") int categoryCuisineId
 										   , @RequestParam(value = "categoryPurposeId", defaultValue = "0") int categoryPurposeId
 										   , @RequestParam(value = "page", defaultValue = "0") int page
-										   , @RequestParam(value = "size", defaultValue = "20") int size) {
+										   , @RequestParam(value = "size", defaultValue = "20") int size
+										   , @RequestParam("conditionalType") ConditionalType conditionalType ) {
 		
-		return ResponseEntity.ok(recipeService.getRecipeSearch(keyword, categoryCuisineId, categoryPurposeId, page, size));
+		return ResponseEntity.ok(recipeService.getRecipeSearch(keyword, categoryCuisineId, categoryPurposeId, page, size, conditionalType));
 	}
 	
 	
@@ -264,10 +283,11 @@ public class RecipeController {
 	@GetMapping("/search/ingredient")
 	public ResponseEntity<Page<RecipeSearchResponseDTO>> getIngredientSearch(@RequestParam(value = "keyword", required = false) String keyword
 										   								   , @RequestParam(value = "page", defaultValue = "0") int page
-										   								   , @RequestParam(value = "size", defaultValue = "20") int size) {
+										   								   , @RequestParam(value = "size", defaultValue = "20") int size
+										   								   , @RequestParam("conditionalType") ConditionalType conditionalType) {
 		
 		
-		return ResponseEntity.ok(recipeService.getIngredientSearch(keyword, page, size));
+		return ResponseEntity.ok(recipeService.getIngredientSearch(keyword, page, size, conditionalType));
 	}
 	
 	
@@ -293,4 +313,25 @@ public class RecipeController {
 		return ResponseEntity.ok(recipeService.getRecipesByFollowingUser(customUserDetails.getUserId(), followingId, page, size));
 	}
 
+	// 추천 레시피 가져오기
+	@GetMapping("/recomment")
+	public ResponseEntity<List<RecipeRecommnetResponseDTO>> getRecommentRecipe( ) {
+		
+		return ResponseEntity.ok(recipeService.getRecommentRecipe());
+	}
+	
+	// 혼밥 레시피 가져오기
+	@GetMapping("/soloMeal")
+	public ResponseEntity<List<RecipeCardResponseDTO>> getSoloMealRecipe( ) {
+		
+		return ResponseEntity.ok(recipeService.getSoloMealRecipe());
+	}
+	
+	// 베스트 레시피 가져오기
+	@GetMapping("/best")
+	public ResponseEntity<List<RecipeCardResponseDTO>> getBestRecipe( ) {
+		
+
+		return ResponseEntity.ok(recipeService.getBestRecipe());
+	}
 }

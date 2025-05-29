@@ -136,7 +136,7 @@ const handleFindId = debounce(async () => {
         }
     }
 }
-}, commonValues.defaultDebounce);
+}, commonValues.DEFALUT_DEBOUNCE);
 
 
 

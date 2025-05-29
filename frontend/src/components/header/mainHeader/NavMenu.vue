@@ -29,9 +29,11 @@
         </li>
 
         <li class="nav-menu-item">
-            <div class="menu-item">
-                <span>쉐프 검색</span>
-            </div>
+            <router-link :to="{ name: 'searchChef' }">
+                <div class="menu-item">
+                    <span>쉐프 검색</span>
+                </div>
+            </router-link>
         </li>
 
         <li class="nav-menu-item">

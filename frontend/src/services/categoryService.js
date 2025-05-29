@@ -10,3 +10,8 @@ export const getCategoryAll = async () => {
 export const getCategory = async () => {
   return await publicAPI.get(`/category`)
 }
+
+// 신고 사유 카테고리 가져오기
+export const getCategoryReportReason = async () => {
+  return await publicAPI.get(`/category/reportReason`)
+}

@@ -59,10 +59,12 @@ public class CommentController {
 		return ResponseEntity.ok(commentService.getCommentUserWrite(customUserDetails.getUserId(), page, size));
 	}
 	
+	
+	// 특정 댓글의 리플 가져오기
 	@GetMapping("/replies")
 	public ResponseEntity<Page<CommentRepliesResponseDTO>> getReplies(@RequestParam("parentCommentId") Long parentCommentId
-				   , @RequestParam(value = "page", defaultValue = "0") int page
-				   , @RequestParam(value = "size", defaultValue = "5") int size) {
+																    , @RequestParam(value = "page", defaultValue = "0") int page
+																    , @RequestParam(value = "size", defaultValue = "5") int size) {
 
 		// Null 체크
 		if(CommonFunctionUtil.nullCheck(parentCommentId)) {
@@ -97,7 +99,7 @@ public class CommentController {
 		if (CommonFunctionUtil.nullCheck(commentId)) {
 			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
-		
+		log.info(commentId.toString());
 		commentService.commentDelete(customUserDetails.getUserId(), commentId);
 		
 		return ResponseEntity.ok().build();
@@ -118,4 +120,16 @@ public class CommentController {
 		
 		return ResponseEntity.ok().build();
 	}
+	
+	// 리플 전체 수 가져오기
+	@GetMapping("/replies/count")
+	public ResponseEntity<Integer> getRepliesCount(@RequestParam("recipeId") Long recipeId) {
+
+	// Null 체크
+	if(CommonFunctionUtil.nullCheck(recipeId)) {
+		throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+	}
+	
+	return ResponseEntity.ok(commentService.getRepliesCount(recipeId));
+}
 }

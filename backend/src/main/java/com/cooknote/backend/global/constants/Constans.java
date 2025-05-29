@@ -36,8 +36,11 @@ public class Constans {
     public static final String S3_CONTENT_TYPE = "image/";
     public static final String S3_DEFAULT_START_WITH = "Default";
     
-    
-    
+    // GET RECIPE
+    public static final int GET_RECIPE_LIMIT = 100;
+    public static final int RECOMMENT_RECIPE_MIN_VALUE = 4;
+    public static final int SOLO_RECIPE_MIN_VALUE = 12;
+
     // ETC...
     public static final int SECOND_MS = 1000;
     public static final int PW_RESET_TOKEN_EXPIRE = 3600; 

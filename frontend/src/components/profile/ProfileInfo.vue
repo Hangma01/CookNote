@@ -1,10 +1,9 @@
 <script setup>
 import router from '@/router';
-import { getHostProfileLoggedIn, getUserProfile } from '@/services/userService';
+import { userAddFollow, userCancleFollow, getHostProfileLoggedIn } from '@/services/userService';
 import { useUserStore } from '@/stores/user';
-import { addFollow, cancleFollow, loadProfile } from '@/utils/commonFunction';
 import { errorMessages } from '@/utils/messages/errorMessages';
-import { computed, onBeforeMount, onUnmounted } from 'vue';
+import { computed, onUnmounted } from 'vue';
 
 // 유저 스토어
 const userStore = useUserStore();
@@ -17,7 +16,7 @@ const userProfile = computed(() => userStore.getProfile);
 const handleAddFollow = async (followId) => {
     
     try {
-        await addFollow(followId)
+        await userAddFollow(followId)
         const res = await getHostProfileLoggedIn(followId)
         userStore.setProfile({
                         ...res.data
@@ -38,7 +37,7 @@ const handleAddFollow = async (followId) => {
 const handleCancleFollow = async (followId) => {
 
     try {
-        await cancleFollow(followId)
+        await userCancleFollow(followId)
         const res = await getHostProfileLoggedIn(followId)
         userStore.setProfile({
                         ...res.data
@@ -111,7 +110,7 @@ onUnmounted(()=>{
         <div class="action-follow" v-if="userProfile?.isHostProfile">
             <div v-if="isLoggedIn">
                 <v-btn class="action-btn" v-if="userProfile?.follow" @click="handleCancleFollow(userProfile?.hostId)">
-                    팔로잉 취소
+                    팔로우 취소
                 </v-btn>
 
                 <v-btn class="action-btn" v-else @click="handleAddFollow(userProfile?.hostId)">
@@ -185,8 +184,7 @@ onUnmounted(()=>{
             width: 100%;
             font-weight: bold;
             font-size: 1.1rem;
-            background-color: #c09370;
-            border: 1px solid #a57954;
+            background-color: #007bff;
             color: white;
         }
     }

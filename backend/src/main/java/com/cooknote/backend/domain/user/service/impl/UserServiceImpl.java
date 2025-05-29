@@ -1,22 +1,34 @@
 package com.cooknote.backend.domain.user.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cooknote.backend.domain.comment.enums.CommentStatus;
+import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserReportDupliationCheckRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
 import com.cooknote.backend.domain.user.entity.User;
+import com.cooknote.backend.domain.user.enums.ReportStatus;
+import com.cooknote.backend.domain.user.enums.ReportType;
+import com.cooknote.backend.domain.user.enums.UserStatus;
 import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
@@ -25,24 +37,28 @@ import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomUserException;
 import com.cooknote.backend.global.infra.aws.s3.service.S3Service;
 import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.mappers.RecipeMapper;
 import com.cooknote.backend.mappers.UserMapper;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 	
 	private final UserMapper userMapper;
+	private final RecipeMapper recipeMapper;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final S3Service s3Service;	
 	
 	// 유저 조회
 	@Override
-	public User getLoginUser(String id) {
+	public User getLoginUser(String id, UserStatus userStatus) {
 
-		return userMapper.getLoginUser(id);
+		return userMapper.getLoginUser(id, userStatus);
 	}
 
 	// 유저 프로필 정보 조회
@@ -55,7 +71,7 @@ public class UserServiceImpl implements UserService {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 		
-		return userMapper.getHostProfile(userId, hostId);
+		return userMapper.getHostProfile(userId, hostId, RecipeStatus.PUBLIC, RecipeStatus.PRIVATE);
 		
 	}
 
@@ -63,7 +79,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserProfileResponseDTO getProfile(Long userId) {
 
-		return userMapper.getProfile(userId);
+		return userMapper.getProfile(userId, RecipeStatus.PUBLIC, RecipeStatus.PRIVATE);
 	}
 
 	// 유저 팔로우 조회
@@ -148,6 +164,7 @@ public class UserServiceImpl implements UserService {
 		return userMapper.getUserProfileEditInfo(userId);
 	}
 
+	// 유저 비밀번호 수정
 	@Override
 	@Transactional
 	public void userPwUpdate(Long userId, @Valid UserPwEditRequestDTO userPwEditRequestDTO) {
@@ -178,16 +195,58 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public void userDelete(Long userId) {
-		userMapper.userDelete(userId);
+		
+		
+		recipeMapper.recipeDeleteByUserId(userId, RecipeStatus.DELETE);
+		recipeMapper.recipeSeqDeleteByUserId(userId);
+		userMapper.userDelete(userId, UserStatus.DELETE);
+		userMapper.userFollowAllDelete(userId);
+		userMapper.userBookmarkAllDelete(userId);
+		userMapper.userLikeAllDelete(userId);
+		userMapper.userCommnetAllDelete(userId, CommentStatus.DELETE);
+		
+		// s3 삭제
+		String recipeFolderPrefix = Constans.S3_MOVE_RECIPE_PATH + userId;
+		String userFolderPrefix = Constans.S3_MOVE_USER_PROFILE_PATH + userId;
+		s3Service.deleteFolderFromS3(recipeFolderPrefix);
+		s3Service.deleteFolderFromS3(userFolderPrefix);
 	}
 
 	// 팔로잉 게시글 작성 최신순으로 가져오기 
 	@Override
 	public List<UserProfileEditInfoResponseDTO> getFollowingLatestForRecipe(Long userId) {
 		
-		
 		return userMapper.getFollowingLatestForRecipe(userId, RecipeStatus.PUBLIC);
+	}
+
+	// 신고 생성
+	@Override
+	public void reportInsert(Long userId, UserReportInsertRequestDTO userReportInsertRequestDTO) {
 		
 		
+		
+		userMapper.reportInsert(userId, userReportInsertRequestDTO, ReportType.RECIPE, ReportType.COMMENT);
+	}
+
+	// 신고 중복 확인
+	@Override
+	public void reportDuplicationCheck(long userId, UserReportDupliationCheckRequestDTO userReportDupliationCheckRequestDTO) {
+		
+		boolean reportDuplication = userMapper.reportDuplicationCheck(userId, userReportDupliationCheckRequestDTO, ReportType.RECIPE, ReportType.COMMENT);
+		
+		if(reportDuplication) {
+			throw new CustomUserException(UserErrorCode.REPORT_DUPLICATION_EXCEPTION);
+		}
+	}
+
+	// 쉐프 검색 - 게시글 0.2, 북마크 0.3, 팔로워 0.5 (인기순)
+	@Override
+	public Page<UserSearchChefResponseDTO> getSearchChefList(Long userId, String keyword, int page, int size) {
+		
+		int offset = page * size;
+		List<UserSearchChefResponseDTO> chefList = userMapper.getSearchChefList(userId, keyword, size, offset, RecipeStatus.PUBLIC, UserStatus.ACTIVE);
+		int total = userMapper.getSearchChefListCount(userId, keyword, RecipeStatus.PUBLIC, UserStatus.ACTIVE);
+		
+		return new PageImpl<>(chefList, PageRequest.of(page, size), total);
 	}
 }

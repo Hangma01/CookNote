@@ -3,22 +3,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.cooknote.backend.mappers.CommentMapper">
-
-
-	<!-- 댓글 페이징 -->
+	<!-- 댓글 조회 -->
 	<select id="getComments" resultType="CommentsResponseDTO">
-		SELECT C.COMMENT_ID    AS COMMENT_ID		<!-- 댓글 아이디 -->
-			 , C.WRITER_ID     AS WRITER_ID			<!-- 작성자 아이디 -->
-			 , C.CONTENT 	   AS CONTENT 			<!-- 댓글 컨텐츠 -->
-			 , C.CREATE_AT     AS CREATE_AT			<!-- 댁슬 작성일 -->
-			 , U.NICKNAME 	   AS NICKNAME			<!-- 작성자 닉네임 -->
-			 , U.PROFILE_IMAGE AS PROFILE_IMAGE		<!-- 작성자 프로필 이미지 -->
-		 FROM COMMENT 		   AS C
+		SELECT C.COMMENT_ID    		AS COMMENT_ID			<!-- 댓글 아이디 -->
+			 , C.WRITER_ID     		AS WRITER_ID			<!-- 작성자 아이디 -->
+			 , C.CONTENT 	   		AS CONTENT 				<!-- 댓글 컨텐츠 -->
+			 , C.CREATE_AT     		AS CREATE_AT			<!-- 댓글 작성일 -->
+			 , U.NICKNAME 	   		AS NICKNAME				<!-- 작성자 닉네임 -->
+			 , U.PROFILE_IMAGE 	    AS PROFILE_IMAGE		<!-- 작성자 프로필 이미지 -->
+			 , COUNT(CC.COMMENT_ID) AS REPLY_COUNT		  	<!-- 리플 카운트 -->
+		 FROM COMMENT 		  	 	AS C
 		 JOIN USER U
 		   ON C.WRITER_ID = U.USER_ID
-	 	WHERE RECIPE_ID = #{recipeId}
-		  AND PARENT_COMMENT_ID IS NULL
-	   	  AND STATUS = #{statusPublic}
+	LEFT JOIN COMMENT 				AS CC
+		   ON C.COMMENT_ID = CC.PARENT_COMMENT_ID
+	 	WHERE C.RECIPE_ID = #{recipeId}
+		  AND C.PARENT_COMMENT_ID IS NULL
+		  AND C.STATUS = #{statusPublic}
+	 GROUP BY C.COMMENT_ID
+	 		, C.WRITER_ID
+	 		, C.CONTENT
+	 		, C.CREATE_AT
+	 		, U.NICKNAME
+	 		, U.PROFILE_IMAGE
 	 ORDER BY C.CREATE_AT DESC
 	    LIMIT #{size} 
 	   OFFSET #{offset}
@@ -29,8 +36,8 @@
 		SELECT COUNT(COMMENT_ID)
 		  FROM COMMENT
 		 WHERE RECIPE_ID = #{recipeId}
-		   AND STATUS = #{statusPublic}
 		   AND PARENT_COMMENT_ID IS NULL
+		   AND STATUS = #{statusPublic}
 	</select>
 	
 	<!-- 리플 페이징 -->
@@ -45,7 +52,7 @@
 		 JOIN USER 			   AS U
 		   ON C.WRITER_ID = U.USER_ID
 	 	WHERE PARENT_COMMENT_ID = #{parentCommentId}
-	   	  AND STATUS = #{statusPublic}
+	 	  AND C.STATUS = #{statusPublic}
 	 ORDER BY C.CREATE_AT DESC
 	    LIMIT #{size} 
 	   OFFSET #{offset}
@@ -87,9 +94,10 @@
 	
 	<!-- 댓글 삭제 -->
 	<update id="commentDelete">
-		DELETE
-		  FROM COMMENT
+		UPDATE COMMENT
+		   SET STATUS = #{statusDelete}
 		 WHERE COMMENT_ID = #{commentId}
+		    OR PARENT_COMMENT_ID = #{commentId}
 	</update>
 	
 	<!-- 댓글 삭제 - 기존 정보 조회 -->
@@ -124,24 +132,30 @@
 			 , C.COMMENT_ID  AS COMMENT_ID				<!-- 댓글 아이디 -->
 			 , C.CONTENT 	 AS COMMENT_CONTENT 		<!-- 댓글 컨텐츠 -->
 			 , C.CREATE_AT   AS COMMENT_CREATE_AT		<!-- 댓글 작성일 -->
-			 , CASE
-			   WHEN C.STATUS = #{statusPrivateAdmin}
-			   THEN 1
-			   ELSE 0
-			    END			 AS IS_PRIVATE_ADMIN		<!-- 관리자 삭제 여부 -->
 		 FROM COMMENT 		 AS C
 		 JOIN RECIPE 		 AS R
 		   ON C.RECIPE_ID = R.RECIPE_ID
 	 	WHERE C.WRITER_ID = #{userId}
+	 	  AND C.STATUS = #{statusPublic}
 	 ORDER BY C.CREATE_AT DESC
 	    LIMIT #{size} 
 	   OFFSET #{offset}
 	</select>
 	
-	<!--  -->
+	<!-- 유저가 작성한 댓글 조회 -->
 	<select id="getCommentUserWriteCount" resultType="int">
 		SELECT COUNT(COMMENT_ID)
 		  FROM COMMENT
 		 WHERE WRITER_ID = #{userId}
+	 	   AND STATUS = #{statusPublic}
+	</select>
+	
+	<!-- 리플총 갯수 조회 -->
+	<select id="getRepliesCount" resultType="int">
+		SELECT COUNT(COMMENT_ID)
+		  FROM COMMENT
+		 WHERE RECIPE_ID = #{recipeId}
+		   AND PARENT_COMMENT_ID IS NOT NULL
+		   AND STATUS = #{statusPublic}
 	</select>
 </mapper>

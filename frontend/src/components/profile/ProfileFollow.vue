@@ -1,19 +1,11 @@
 <script setup>
-import { getUserFollow, getUserProfile, userCancleFollow, userFollow } from '@/services/userService';
-import { useUserStore } from '@/stores/user';
-import { addFollow, cancleFollow, loadProfile } from '@/utils/commonFunction';
+import { getUserFollow, userAddFollow, userCancleFollow } from '@/services/userService';
+import { loadProfile } from '@/utils/commonFunction';
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { errorMessages } from 'vue/compiler-sfc';
 
 const userFollowData = ref(null)
 
-// 화면 전환
-const router = useRouter()
-
-
-// 유저 스토어
-const userStore = useUserStore();
 
 const loadUserFollow = async () => {
     try {
@@ -36,7 +28,7 @@ const loadUserFollow = async () => {
 // 팔로우 하기
 const handleAddFollow = async (followId) => {
     try {
-        await addFollow(followId)
+        await userAddFollow(followId)
         loadUserFollow()
     } catch (e) {
         if (e.response && e.response?.data?.message) {
@@ -52,7 +44,7 @@ const handleAddFollow = async (followId) => {
 // 팔로잉 취소
 const handleCancleFollow = async (followId) => {
     try {
-        await cancleFollow(followId)
+        await userCancleFollow(followId)
         loadUserFollow()
     } catch (e) {
         if (e.response && e.response?.data?.message) {
@@ -77,18 +69,23 @@ onMounted(async () => {
             <div class="follower-box">
                 <div class="title">팔로워</div>
                 <div class="follower-wrap">
-                    <ul>
+                    <ul v-if="userFollowData?.follower.length > 0">
                         <li class="user-list"
                             v-for="(item, index) in userFollowData?.follower" :key="index">
                             <div class="user-info">
-                                <div class="user-image">
-                                    <img :src="item.followerProfileImage" class="image"/>
-                                </div>
-                                <div class="user-nickname">
-                                    <span>
-                                        {{ item.followerNickname }}
-                                    </span>
-                                </div>
+                                <router-link :to="{ name : 'profileHost',  params: { hostId: item.followerId } }">
+                                    <div class="user-image">
+                                        <img :src="item.followerProfileImage" class="image"/>
+                                    </div>
+                                </router-link>
+
+                                <router-link :to="{ name : 'profileHost',  params: { hostId: item.followerId } }">
+                                    <div class="user-nickname">
+                                        <span>
+                                            {{ item.followerNickname }}
+                                        </span>
+                                    </div>
+                                </router-link>
                             </div>
                             
                             <div v-if="item.followingBack" class="isFollowBack">
@@ -99,24 +96,33 @@ onMounted(async () => {
                             </button>
                         </li>
                     </ul>
+                                        
+                    <div v-else class="non-follower">
+                        <p>팔로워한 한 쉐프가 없습니다.</p>
+                    </div>
                 </div>
             </div>
 
             <div class="following-box">
                 <div class="title">팔로잉</div>
-                <div class="following-wrap">
-                    <ul>
+                <div class="following-wrap" >
+                    <ul v-if="userFollowData?.following.length > 0">
                         <li class="user-list"
                             v-for="(item, index) in userFollowData?.following" :key="index">
                             <div class="user-info">
-                                <div class="user-image">
-                                    <img :src="item.followingProfileImage" class="image"/>
-                                </div>
-                                <div class="user-nickname">
-                                    <span>
-                                        {{ item.followingNickname }}
-                                    </span>
-                                </div>
+                                <router-link :to="{ name : 'profileHost',  params: { hostId: item.followingId } }">
+                                    <div class="user-image">
+                                        <img :src="item.followingProfileImage" class="image"/>
+                                    </div>
+                                </router-link>
+                                
+                                <router-link :to="{ name : 'profileHost',  params: { hostId: item.followingId } }">
+                                    <div class="user-nickname">
+                                        <span>
+                                            {{ item.followingNickname }}
+                                        </span>
+                                    </div>
+                                </router-link>
                             </div>
                             
                             <button @click="handleCancleFollow(item.followingId)" class="action-btn">
@@ -124,7 +130,12 @@ onMounted(async () => {
                             </button>
                         </li>
                     </ul>
+                    
+                    <div v-else class="non-following">
+                        <p>팔로잉을 한 쉐프가 없습니다.</p>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -210,6 +221,16 @@ onMounted(async () => {
                     padding: 0.2rem 0.5rem;
                     border-radius: 0.5rem;
                 }
+            }
+
+            .non-follower, .non-following {
+                height: 27rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                font-size: 1.3rem;
+                color: #333333;
             }
         }
 

@@ -45,7 +45,7 @@ const handleEditPw = debounce(async () => {
 			window.location.reload();
 		}
 	}
-}, commonValues.defaultDebounce);
+}, commonValues.DEFALUT_DEBOUNCE);
 
 
 

@@ -2,6 +2,7 @@ package com.cooknote.backend.domain.user.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -18,11 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cooknote.backend.domain.auth.dto.request.UserFindPwResetRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserReportDupliationCheckRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
@@ -46,7 +50,7 @@ public class UserController {
 	// 호스트 프로필 정보
 	@GetMapping("/profile/host")
 	public ResponseEntity<UserHostProfileResponseDTO> getHostPorfile(@AuthenticationPrincipal CustomUserDetails customUserDetails
-			   							   , @RequestParam(value = "hostId") Long hostId) {
+			   							   						   , @RequestParam("hostId") Long hostId) {
 		
 		Long userId = null;
 		
@@ -114,6 +118,7 @@ public class UserController {
 	// 프로필 수정 정보
 	@GetMapping("/edit")
 	public ResponseEntity<UserProfileEditInfoResponseDTO> getUserProfileEditInfo(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+		
 		return ResponseEntity.ok(userService.getUserProfileEditInfo(customUserDetails.getUserId()));
 	}
 	
@@ -168,5 +173,58 @@ public class UserController {
 		return ResponseEntity.ok(userService.getFollowingLatestForRecipe(customUserDetails.getUserId()));
 	}
 	
+	// 신고 생성
+	@PostMapping("/report")
+	public ResponseEntity<List<UserProfileEditInfoResponseDTO>> reportInsert(@AuthenticationPrincipal CustomUserDetails customUserDetails
+																		   , @Valid @RequestBody UserReportInsertRequestDTO userReportInsertRequestDTO
+																		   , BindingResult bindingResult) {
+		// 유효성 검사 확인
+		if (CommonFunctionUtil.validationCheck(bindingResult)) {
+			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
+		}
+		
+		if (CommonFunctionUtil.nullCheck(userReportInsertRequestDTO.getRecipeId()) && CommonFunctionUtil.nullCheck(userReportInsertRequestDTO.getCommentId())) {
+			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+		}
+		
+		userService.reportInsert(customUserDetails.getUserId(), userReportInsertRequestDTO);
+
+		return ResponseEntity.ok().build();
+	}
+	
+	// 신고 중복 체크
+	@PostMapping("/report/duplication")
+	public ResponseEntity<List<UserProfileEditInfoResponseDTO>> reportDuplicationCheck(@AuthenticationPrincipal CustomUserDetails customUserDetails
+																				     , @Valid @RequestBody UserReportDupliationCheckRequestDTO userReportDupliationCheckRequestDTO
+																				     , BindingResult bindingResult) {
+		// 유효성 검사 확인
+		if (CommonFunctionUtil.validationCheck(bindingResult)) {
+		throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
+		}
+		
+		if (CommonFunctionUtil.nullCheck(userReportDupliationCheckRequestDTO.getRecipeId()) && CommonFunctionUtil.nullCheck(userReportDupliationCheckRequestDTO.getCommentId())) {
+		throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
+		}
+		
+		userService.reportDuplicationCheck(customUserDetails.getUserId(), userReportDupliationCheckRequestDTO);
+		
+		return ResponseEntity.ok().build();
+	}
+	
+	// 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.5 (인기순)
+	@GetMapping("/search/chef")
+	public ResponseEntity<Page<UserSearchChefResponseDTO>> getSearchChefList(@AuthenticationPrincipal CustomUserDetails customUserDetails
+																		   , @RequestParam(value = "keyword", required = false) String keyword
+																		   , @RequestParam(value = "page", defaultValue = "0") int page
+																		   , @RequestParam(value = "size", defaultValue = "30") int size){
+
+		Long userId = null;
+		
+		if (CommonFunctionUtil.authCheck(customUserDetails)) {
+			userId = customUserDetails.getUserId();
+		}
+		
+		return ResponseEntity.ok(userService.getSearchChefList(userId, keyword, page, size));
+	}
 	
 }

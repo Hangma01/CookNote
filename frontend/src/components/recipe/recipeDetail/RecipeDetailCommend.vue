@@ -1,24 +1,20 @@
 <script setup>
-import { commentDelete, commentInsert, commentUpdate, getCommentReplys } from '@/services/commentService';
+import ReportModal from '@/components/ui/ReportModal.vue';
+import { ReportType } from '@/constans/reportType';
+import { commentDelete, commentInsert, commentUpdate, getCommentReplies } from '@/services/commentService';
 import { useUserStore } from '@/stores/user';
 import { commonInputHangle } from '@/utils/commonFunction';
 import { errorMessages } from '@/utils/messages/errorMessages';
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { CommentStatus } from '../../../constans/commentStatus';
 
 // 부모로 받은 데이터
 const props = defineProps({ 
-    commentsData: { 
-        type: Object    
-    },
-    recipeId: {
-        type: String
-    },
-    requesterId: {
-        type: Number
-    },
-    recipeWriterId: {
-        type: Number
-    }
+    commentsData: Object ,   
+    recipeId:  String,
+    requesterId: Number,
+    recipeWriterId: Number,
+    repliesCountData: Number,
 })
 
 
@@ -28,7 +24,7 @@ const isLoggedIn = userStore.getIsLoggedIn;
 const userId = userStore.getUserId;
 
 // 부모 이벤트
-const emit = defineEmits(['refreshComments', 'changePage']);
+const emit = defineEmits(['refreshComments', 'changePage', 'openReportModal', 'refreshReply']);
 
 // inputFiled
 const formValues = reactive({
@@ -106,6 +102,7 @@ const handleCommentInsert = async () => {
         await commentInsert(content, props?.recipeId);
         formValues.content = ''; // 입력 필드 초기화
         emit('refreshComments');
+        emit('refreshReply');
     } catch(e) {
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message)
@@ -150,6 +147,7 @@ const handleCommentEditDelete = async (commentId) => {
     try {
         await commentDelete(commentId);
         emit('refreshComments');
+        emit('refreshReply');
         activeEditCommentMap[commentId] = false;
     } catch(e) {
         if (e.response && e.response?.data?.message) {
@@ -200,7 +198,7 @@ const handleReplyBtn = async (commentId) => {
 // 답글 가져오기
 const loadReplies = async (commentId, page = 0, size = 5) => {
   try {
-    const res = await getCommentReplys(commentId, page, size); // page 파라미터 넘김
+    const res = await getCommentReplies(commentId, page, size); // page 파라미터 넘김
 
     if (!replyListMap[commentId]) {
       replyListMap[commentId] = [];
@@ -234,7 +232,10 @@ const handleReplyInsert = async (parentCommentId) => {
   try {
     await commentInsert(content, props.recipeId, parentCommentId);
     replyContentMap[parentCommentId] = '';
+    emit('refreshReply');
+
     loadReplies(parentCommentId, replyPageMap[parentCommentId])
+
   } catch (e) {
     if (e.response && e.response?.data?.message) {
         alert(e.response.data.message)
@@ -280,6 +281,7 @@ const handleReplyEditDelete = async (commentId, parentCommentId) => {
         await commentDelete(commentId);
         loadReplies(parentCommentId, replyPageMap[parentCommentId])
         activeEditReplyMap[commentId] = false;
+        emit('refreshReply');
     } catch(e) {
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message)
@@ -312,7 +314,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
 <template>
     <div class="recipe-detail-comment-section">
         <div class="section-title">
-            <p>댓글</p>
+            <p>댓글 {{ commentsData.page?.totalElements + (props?.repliesCountData || 0)}}</p>
         </div>
 
         <div class="comment-wrap">
@@ -354,10 +356,20 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                                     <img :src="item.profileImage" class="writer-profile-image"/>
                                 </router-link>
                             </div>
+                            
                             <span class="writer-nickname">{{ item.nickname }}</span>
-                            <div>
-                                <span class="isAuthor" v-if="recipeWriterId === item.writerId">주인장</span>
+                            
+                            <div class="is-author-box">
+                                <div class="is-author">
+                                    <span  v-if="recipeWriterId === item.writerId">주인장</span>
+                                </div>
                             </div>
+                            
+                            <!-- <div class="is-self-box">
+                                <div class="is-self">
+                                    <span v-if="userId === item.writerId">본인</span>
+                                </div>
+                            </div> -->
                         </div>
 
                         
@@ -370,7 +382,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                                     v-if="activeCommentMenuMap[item.commentId]" 
                                     :ref="el => setCommentMenuRef(el, item.commentId)">
                                 <div v-if="item.writerId !== userId">
-                                    <button>
+                                    <button @click="$emit('openReportModal', ReportType.COMMENT ,item.commentId)">
                                         신고
                                     </button>
                                 </div>
@@ -427,7 +439,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                     
                     <!-- 답글 버튼 -->
                     <div class="reply-wrap">
-                        <button class="reply-show-btn" @click="handleReplyBtn(item.commentId)">답글</button>
+                        <button class="reply-show-btn" @click="handleReplyBtn(item.commentId)">답글 <span v-if="item.replyCount > 0">{{ item.replyCount }}</span></button>
                     </div>
 
                     <!-- 답글 입력창 -->
@@ -466,9 +478,17 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                                                     <img :src="reply.profileImage" class="writer-profile-image" />
                                                 </router-link>
                                                 <span class="writer-nickname">{{ reply.nickname }}</span>
-                                                <div>
-                                                    <span class="isAuthor" v-if="recipeWriterId === reply.writerId">주인장</span>
+                                                <div class="is-author-box">
+                                                    <div class="is-author">
+                                                        <span  v-if="recipeWriterId === reply.writerId">주인장</span>
+                                                    </div>
                                                 </div>
+                                                
+                                                <!-- <div class="is-self-box">
+                                                    <div class="is-self">
+                                                        <span v-if="userId === reply.writerId">본인</span>
+                                                    </div>
+                                                </div> -->
                                             </div>
 
                                             <div class="comment-menu-btn" v-if="isLoggedIn === true">
@@ -481,7 +501,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                                                     v-if="activeReplyMenuMap[reply.commentId]" 
                                                     :ref="el => setReplyMenuRef(el, reply.commentId)">
                                                     <div v-if="reply.writerId !== userId">
-                                                        <button>
+                                                        <button @click="$emit('openReportModal', ReportType.COMMENT ,reply.commentId)">
                                                             신고
                                                         </button>
                                                     </div>
@@ -791,15 +811,36 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
 
             }
 
-            .isAuthor {
-                font-size: 0.6rem;
-                font-weight: 600;
-                border: 1px solid #03C75A;
-                height: 1.2rem;
-                border-radius: 10rem;
-                padding: 0.1rem 0.2rem;
-                color: #03C75A;
+            .is-author-box {
+                padding-top: 0.2rem;
+
+                .is-author {
+                    font-size: 0.6rem;
+                    font-weight: 600;
+                    border: 1px solid #03C75A;
+                    height: 1.2rem;
+                    border-radius: 10rem;
+                    padding: 0.1rem 0.2rem;
+                    color: #03C75A;
+                    
+                }
             }
+
+            // .is-self-box {
+            //     padding-top: 0.2rem;
+
+            //     .is-self {
+            //         font-size: 0.6rem;
+            //         font-weight: 600;
+            //         border: 1px solid orange;
+            //         height: 1.2rem;
+            //         border-radius: 10rem;
+            //         padding: 0.1rem 0.5rem;
+            //         color: orange;
+                    
+            //     }
+            // }
+
         }
         .pagination {
             margin-top: 1rem;

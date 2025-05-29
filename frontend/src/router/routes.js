@@ -110,6 +110,11 @@ export const routes = [
                 component: () => import('../views/SearchIngredient.vue'),
             },
             {
+                path: '/search-chef',
+                name: 'searchChef',
+                component: () => import('../views/SearchChef.vue'),
+            },
+            {
                 path: '/feed',
                 name: 'followFeed',
                 component: () => import('../views/FeedView.vue'),

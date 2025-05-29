@@ -29,6 +29,7 @@ public class RecipeEditResponseDTO {
     private RecipeStatus status; 		// 레시피 상태 - PRIVATE, PUBLIC, PRIVATE_ADMIN, ELETE.
     private int categoryCuisineId;		// 카테고리 - 요리 종류 (FK)
     private int categoryPurposeId;		// 카테고리 - 요리 목적 (FK)
+    private Long writerId;				// 작성자 아이디
     
     private List<RecipeIngredientResponseDTO> recipeIngredients;
     private List<RecipeSeqResponseDTO> recipeSeqs;

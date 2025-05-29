@@ -11,6 +11,7 @@
 			 , PASSWORD
 		  FROM USER
 	 	 WHERE ID = #{id}
+	 	   AND STATUS != #{statusUserDelete}
 	</select>   
 	
 	<!-- 회원 정보 가져오기 -->
@@ -35,15 +36,14 @@
 			 , U.PROFILE_IMAGE AS PROFILE_IMAGE
 			 , SUM(
 			 	   CASE 
-			 	   WHEN R.STATUS = 'PUBLIC' 
+			 	   WHEN R.STATUS = #{statusRecipePublic} 
 			 	   THEN 1 
 			 	   ELSE 0 
 			 	    END
 		     ) 				   AS RECIPE_PUBLIC_COUNT
 		     , SUM(
 		     	   CASE 
-		    	   WHEN R.STATUS 
-		     		 IN ('PRIVATE', 'PRIVATE_ADMIN') 
+		    	   WHEN R.STATUS = #{statusRecipePrivate} 
 		     	   THEN 1 
 		     	   ELSE 0 
 		     		END
@@ -78,15 +78,14 @@
 			 , U.PROFILE_IMAGE AS PROFILE_IMAGE
 			 , SUM(
 			 	   CASE 
-			 	   WHEN R.STATUS = 'PUBLIC' 
+			 	   WHEN R.STATUS = #{statusRecipePublic} 
 			 	   THEN 1 
 			 	   ELSE 0 
 			 	    END
 		     ) 				   AS RECIPE_PUBLIC_COUNT
 		     , SUM(
 		     	   CASE 
-		    	   WHEN R.STATUS 
-		     		 IN ('PRIVATE', 'PRIVATE_ADMIN') 
+		    	   WHEN R.STATUS = #{statusRecipePrivate}
 		     	   THEN 1 
 		     	   ELSE 0 
 		     		END
@@ -114,7 +113,7 @@
 		     , U.NICKNAME AS FOLLOWER_NICKNAME
 		     , U.PROFILE_IMAGE FOLLOWER_PROFILE_IMAGE
  			 , CASE
- 			   WHEN F2.FOLLOWING_ID IS NOT NULL
+ 			   WHEN F2.FOLLOWER_ID = #{userId}
  			   THEN TRUE
  			   ELSE FALSE
  			    END AS IS_FOLLOWING_BACK
@@ -123,6 +122,7 @@
     	    ON F1.FOLLOWER_ID = U.USER_ID
      LEFT JOIN FOLLOW AS F2
             ON F1.FOLLOWER_ID = F2.FOLLOWING_ID
+           AND F1.FOLLOWING_ID = F2.FOLLOWER_ID
     	 WHERE F1.FOLLOWING_ID = #{userId}
 	</select>
 	
@@ -199,12 +199,16 @@
 		 WHERE USER_ID = #{userId}
 	</update>
 	
-	<delete id="userDelete">
-		DELETE
-		  FROM USER
+	<!-- 회원 탈퇴 -->
+	<update id="userDelete">
+		UPDATE USER
+		   SET PROFILE_IMAGE = NULL,
+		   	   STATUS = #{statusUserDelete},
+		       DELETE_AT = NOW()
 		 WHERE USER_ID = #{userId}
-	</delete>
+	</update>
 	
+	<!-- 팔로잉한 유저 중 레시피 작성 최신순으로 정보 가져오기 -->
 	<select id="getFollowingLatestForRecipe" resultType="UserFollowingLatestForRecipeResponseDTO">
 		SELECT U.USER_ID AS FOLLOWING_ID
 	    	 , U.NICKNAME AS NICKNAME
@@ -220,5 +224,176 @@
 	 		, U.NICKNAME
 	 		, U.PROFILE_IMAGE
 	 ORDER BY MAX(R.CREATE_AT) DESC;
+	</select>
+	
+	<!-- 신고 생성 -->
+	<insert id="reportInsert">
+		INSERT 
+		  INTO REPORT (
+		  			   REPORT_TYPE					<!-- 신고 종류 (RECIPE, COMMENT) -->
+		  			 , <if test="reportInsertReq.reportType == recipe">
+					   RECIPE_ID
+					  </if>
+					  <if test="reportInsertReq.reportType == comment">
+					   COMMENT_ID
+					  </if>							<!-- 타겟 아이디 (RECIPE_ID, COMMENT_ID) -->
+		  			 , REPORTER_ID					<!-- 신고자 -->
+		  			 , CATEGORY_REPORT_REASON_ID	<!-- 신고 카테고리 아이디 -->
+		  			  )
+		VALUES (
+			    #{reportInsertReq.reportType}
+			  , <if test="reportInsertReq.reportType == recipe">
+			    #{reportInsertReq.recipeId}
+			    </if>
+			    <if test="reportInsertReq.reportType == comment">
+			    #{reportInsertReq.commentId}
+			    </if>
+			  , #{userId}
+			  , #{reportInsertReq.categoryReportReasonId}
+				)
+	</insert>
+	
+	<!-- 중복 신고 확인 -->
+	<select id="reportDuplicationCheck" resultType="boolean">
+		SELECT EXISTS (
+					   SELECT 1 
+						 FROM REPORT 				
+						WHERE REPORTER_ID = #{userId}
+						  AND 
+						  <if test="reportDuplicationCheckReq.reportType == recipe">
+						  	  REPORT_TYPE = #{reportDuplicationCheckReq.reportType}
+						  AND RECIPE_ID = #{reportDuplicationCheckReq.recipeId}
+						  </if>
+						  <if test="reportDuplicationCheckReq.reportType == comment">
+						  	  REPORT_TYPE = #{reportDuplicationCheckReq.reportType}
+						  AND COMMENT_ID = #{reportDuplicationCheckReq.commentId}
+						  </if>				  
+					   )	
+	</select>
+
+	<!-- 회원 탈퇴 - 모든 팔로우 삭제 -->
+	<delete id="userFollowAllDelete">
+		DELETE
+		  FROM FOLLOW
+		 WHERE FOLLOWER_ID = #{userId}
+		    OR FOLLOWING_ID = #{userId}
+	</delete>
+
+	<!-- 회원 탈퇴 - 모든 북마크 삭제 -->
+	<delete id="userBookmarkAllDelete">
+		DELETE
+		  FROM RECIPE_BOOKMARK
+		 WHERE USER_ID = #{userId} 
+	</delete>
+	
+	<!-- 회원 탈퇴 - 모든 좋아요 삭제 -->
+	<delete id="userLikeAllDelete">
+		DELETE
+		  FROM RECIPE_LIKE
+		  WHERE USER_ID = #{userId}
+	</delete>
+
+	<!-- 회원 탈퇴 - 모든 댓글 삭제 -->
+	<update id="userCommnetAllDelete">
+		UPDATE COMMENT
+		   SET STATUS = #{statusCommentDelete}
+		 WHERE WRITER_ID = #{userId}
+		    OR PARENT_COMMENT_ID = #{userId}
+	</update>
+	
+	<!-- 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.5 (인기순) -->
+	<select id="getSearchChefList" resultType="UserSearchChefResponseDTO">
+		SELECT U.USER_ID										AS USER_ID
+			 , U.NICKNAME										AS NICKNAME
+			 , U.PROFILE_IMAGE									AS PROFILE_IMAGE
+			 , IFNULL(FOLLOW_CNT.FOLLOWER_COUNT, 0) 			AS FOLLOWER_COUNT
+			 , IFNULL(RECIPE_CNT.RECIPE_COUNT, 0) 				AS RECIPE_COUNT
+ 			 , IFNULL(LIKE_CNT.LIKE_COUNT, 0) 					AS LIKE_COUNT
+			 , IFNULL(BOOKMARK_CNT.BOOKMARK_COUNT, 0) 			AS BOOKMARK_COUNT
+			 , IFNULL(FOLLOW_CNT.FOLLOWER_COUNT, 0) * 0.4 
+			 	   + (IFNULL(RECIPE_CNT.RECIPE_COUNT, 0) * 0.2)
+			 	   + (IFNULL(LIKE_CNT.LIKE_COUNT, 0) * 0.2) 
+			 	   + (IFNULL(BOOKMARK_CNT.BOOKMARK_COUNT, 0) * 0.2) AS POPULARITY_SCORE
+			 , <if test="userId != null">
+        	   CASE 
+        	   WHEN LOGIN_USER_FOLLOW.FOLLOWING_ID IS NOT NULL
+        	   THEN TRUE
+        	   ELSE FALSE
+        	    END  												AS IS_FOLLOWING
+      		   </if>
+      		   <if test="userId == null">
+        	   FALSE 												AS IS_FOLLOWING
+      		   </if>
+		  FROM USER U
+	 LEFT JOIN (
+		    	SELECT FOLLOWER_ID
+		    	     , COUNT(FOLLOWER_ID) 						AS FOLLOWER_COUNT
+		    	  FROM FOLLOW
+		       GROUP BY FOLLOWER_ID
+		  	   ) 												AS FOLLOW_CNT 
+			ON FOLLOW_CNT.FOLLOWER_ID = U.USER_ID
+     LEFT JOIN (
+		    	SELECT WRITER_ID
+		    	   	 , COUNT(WRITER_ID) 						AS RECIPE_COUNT
+		    	  FROM RECIPE
+		         WHERE STATUS = #{statusRecipePublic}
+		      GROUP BY WRITER_ID
+		  	   ) 												AS RECIPE_CNT 
+			ON RECIPE_CNT.WRITER_ID = U.USER_ID
+     LEFT JOIN (
+		    	SELECT R.WRITER_ID
+		    	     , COUNT(R.WRITER_ID) 						AS LIKE_COUNT
+		    	  FROM RECIPE_LIKE 								AS RL
+		    INNER JOIN RECIPE 									AS R 
+		       		ON RL.RECIPE_ID = R.RECIPE_ID
+		      GROUP BY R.WRITER_ID
+		  	   )												AS LIKE_CNT	
+		  	ON LIKE_CNT.WRITER_ID = U.USER_ID  					
+     LEFT JOIN (
+		    	SELECT R.WRITER_ID
+		    	     , COUNT(R.WRITER_ID) 						AS BOOKMARK_COUNT
+		    	  FROM RECIPE_BOOKMARK 							AS RB
+		    INNER JOIN RECIPE 									AS R 
+		       		ON RB.RECIPE_ID = R.RECIPE_ID
+		      GROUP BY R.WRITER_ID
+		  	   )  												AS BOOKMARK_CNT 
+		    ON BOOKMARK_CNT.WRITER_ID = U.USER_ID
+	 <if test="userId != null">
+ 	 LEFT JOIN (
+	    		SELECT FOLLOWING_ID
+	    		  FROM FOLLOW
+	    		 WHERE FOLLOWER_ID = #{userId}
+				) 												AS LOGIN_USER_FOLLOW 
+			ON LOGIN_USER_FOLLOW.FOLLOWING_ID = U.USER_ID
+	 </if>
+		    
+		 WHERE U.STATUS = #{statusUserActive}
+		   <if test="userId != null">
+ 		   AND U.USER_ID != #{userId}
+ 		   </if>
+		   <if test="keyword != null">
+		   AND U.NICKNAME LIKE CONCAT('%', #{keyword}, '%')
+		   </if>
+	  ORDER BY POPULARITY_SCORE DESC
+	  		 , FOLLOWER_COUNT DESC
+	  		 , RECIPE_COUNT DESC
+			 , LIKE_COUNT DESC
+			 , BOOKMARK_COUNT DESC
+
+		 LIMIT #{size}
+		OFFSET #{offset}
+	</select>
+	
+	<!-- 쉐프 검색 토탈 갯수 -->
+	<select id="getSearchChefListCount" resultType="int">
+		SELECT COUNT(U.USER_ID)
+		  FROM USER U
+		WHERE U.STATUS = #{statusUserActive}
+		  <if test="userId != null">
+ 		  AND U.USER_ID != #{userId}
+ 		  </if>
+		  <if test="keyword != null">
+		  AND U.NICKNAME LIKE CONCAT('%', #{keyword}, '%')
+		  </if>
 	</select>
 </mapper>

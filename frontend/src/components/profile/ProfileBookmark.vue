@@ -58,11 +58,18 @@ const loadRecipBookmark = async (page = 0) => {
 
 // 북마크 삭제하기
 const handleBookmarkDelete = async (recipeId) => {
-    try {
-        await recipeBookmarkDelete(recipeId);
-        loadRecipBookmark();
-    } catch (e) {
-        alert('북마크를 삭제하지 못했습니다.')
+    
+    const proceed = confirm("북마크를 정말 삭제하시겠습니까?");
+
+    if(proceed) {
+        try {
+            await recipeBookmarkDelete(recipeId);
+            loadRecipBookmark();
+        } catch (e) {
+            alert('북마크를 삭제하지 못했습니다.')
+        }
+    } else{
+        activeRecipeMenuMap[recipeId] = !activeRecipeMenuMap[recipeId];
     }
 }
 
@@ -99,7 +106,7 @@ onBeforeUnmount(() => {
     <div class="line"></div>
 
     
-    <div>
+    <div v-if="recipeData?.content.length > 0">
         <ul>
             <li 
                 class="recipe-bookmark-content"
@@ -117,11 +124,9 @@ onBeforeUnmount(() => {
                 <div class="menu"
                         v-if="activeRecipeMenuMap[item.recipeId]" 
                         :ref="el => setRecipeMenuRef(el, item.recipeId)">
-                        <div>
-                            <button @click="handleBookmarkDelete(item.recipeId)">
-                                삭제
-                            </button>
-                        </div>
+                        <button @click="handleBookmarkDelete(item.recipeId)" class="btn">
+                            삭제
+                        </button>
                     </div>
                 </div>
             </li>
@@ -137,6 +142,10 @@ onBeforeUnmount(() => {
                 {{ n }}
             </button>
         </div>
+    </div>
+
+    <div v-else class="non-bookmark">
+        <p>조회된 북마크가 없습니다.</p>
     </div>
 </template>
 
@@ -187,6 +196,10 @@ onBeforeUnmount(() => {
             padding-top: 0.2rem;
             padding-bottom: 0.2rem;
             color: black;
+
+            .btn {
+                width: 100%;
+            }
         }
     }
 }
@@ -209,5 +222,15 @@ onBeforeUnmount(() => {
         font-weight: bold;
         }
     }
+}
+
+.non-bookmark {
+    height: 30rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #333333;
 }
 </style>

@@ -19,7 +19,5 @@ public class RecipePrivateResponseDTO {
     private String thumbnail;			// 레시피 썸네일
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
-    private LocalDateTime createAt;				// 생성 날짜
-
-    private boolean isPrivateAdmin;
+    private LocalDateTime createAt;		// 생성 날짜
 }

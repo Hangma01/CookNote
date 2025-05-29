@@ -13,24 +13,24 @@ const userStore = useUserStore();
 const isLoggedIn = userStore.isLoggedIn;
 
 // 마이 페이지 아이템 이벤트
-const showMypageItem = ref(false);
-const myPageItemRef = ref(null);  
+const showProfileItem = ref(false);
+const profileItemRef = ref(null);  
 
 // 외부 클릭 시 마이 페이지 아이템 창 닫기
-const closeMypageItem = (event) => {
-    if (showMypageItem && !myPageItemRef.value.contains(event.target)) {
-        showMypageItem.value = false;
+const closeProfileItem = (event) => {
+    if (showProfileItem && !profileItemRef.value.contains(event.target)) {
+        showProfileItem.value = false;
     }
 }
 
 // 마이 페이지 아이템 창 토글
-const toggleMypageItem = (event) => {
-    showMypageItem.value = !showMypageItem.value
+const toggleProfileItem = (event) => {
+    showProfileItem.value = !showProfileItem.value
     event.stopPropagation();
 }
 
-const toggleShowMypageItem = () => {
-    showMypageItem.value = false
+const toggleShowProfileItem = () => {
+    showProfileItem.value = false
 }
 
 // 로그아웃
@@ -46,12 +46,12 @@ const handleLogout = async () => {
 
 // 전체 페이지 클릭 이벤트를 추가
 onMounted(() => {
-    document.addEventListener('click', closeMypageItem);
+    document.addEventListener('click', closeProfileItem);
 });
 
 // 컴포넌트가 언마운트 될 때 이벤트 리스너 제거
 onBeforeUnmount(() => {
-    document.removeEventListener('click', closeMypageItem);
+    document.removeEventListener('click', closeProfileItem);
 });
 </script>
 
@@ -68,25 +68,29 @@ onBeforeUnmount(() => {
                 <font-awesome-icon :icon="['far', 'user']" style="color: #454F5B;" />
             </router-link>
 
-            <div v-if="isLoggedIn" @click="toggleMypageItem" class="mypage-icon">
+            <div v-if="isLoggedIn" @click="toggleProfileItem" class="profile-icon">
                 <font-awesome-icon :icon="['far', 'user']" style="color: #454F5B;" />
             </div>
 
-            <div class="user-menu-mypage-item" v-show="showMypageItem" @click="toggleShowMypageItem" ref="myPageItemRef">
+            <div class="user-menu-profile-item" v-show="showProfileItem" @click="toggleShowProfileItem" ref="profileItemRef">
                 <ul>
                     <router-link :to="{ name: 'profileRecipe' }">
-                        <li class="mypage-item">
+                        <li class="profile-item">
                             홈
                         </li>
                     </router-link>
 
                     <router-link :to="{ name: 'profileEdit' }">
-                        <li class="mypage-item">
+                        <li class="profile-item">
                             개인정보 수정
                         </li>
                     </router-link>
                     
-                    <li class="mypage-item" @click="handleLogout">
+                    <li class="profile-item" @click="handleLogout">
+                        신고
+                    </li>
+
+                    <li class="profile-item" @click="handleLogout">
                         로그아웃
                     </li>
                 </ul>
@@ -116,7 +120,7 @@ onBeforeUnmount(() => {
         position: relative;
         
 
-        .user-menu-mypage-item {
+        .user-menu-profile-item {
             position: absolute;
             font-size: 1rem;
             width: 8rem;
@@ -128,7 +132,7 @@ onBeforeUnmount(() => {
             left: -3.1rem;
             margin-top: 1rem;
 
-            .mypage-item {
+            .profile-item {
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -136,11 +140,11 @@ onBeforeUnmount(() => {
                 cursor: pointer;
             }
 
-            .mypage-item:hover{
+            .profile-item:hover{
                 background-color:#c09370;
             }
         }
-        .mypage-icon {
+        .profile-icon {
             cursor: pointer;
         }
     }

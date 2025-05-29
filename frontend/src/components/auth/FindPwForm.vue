@@ -120,7 +120,7 @@ const handleFindPw = debounce(async () => {
 		}
 	}
 
-}, commonValues.defaultDebounce);
+}, commonValues.DEFALUT_DEBOUNCE);
 
 
 

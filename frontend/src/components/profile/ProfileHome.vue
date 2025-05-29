@@ -23,7 +23,7 @@ const menus = [
     { label: '북마크', icon: ['fas', 'bookmark'], name: 'profileBookmark' },
     { label: '댓글', icon: ['fas', 'message'], name: 'profileComment' },
     { label: '좋아요', icon: ['fas', 'heart'], name: 'profileLike' },
-    { label: '팔로우', icon: ['far', 'user'], name: 'profileFollow' }
+    { label: '팔로우', icon: ['fas', 'user'], name: 'profileFollow' }
 ]
 
 // 현재 활성 경로인지 체크하는 함수

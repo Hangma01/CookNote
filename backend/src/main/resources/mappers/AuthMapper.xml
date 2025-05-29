@@ -23,7 +23,9 @@
 		SELECT EXISTS (
 					   SELECT 1 
 						 FROM USER 						<!-- 유저 테이블 -->
-						WHERE ID = #{id}		)
+						WHERE ID = #{id}
+						  AND STATUS != #{statusUserDelete}		
+		)
 	</select>
 	
 	<!-- 닉네임 중복 체크 -->
@@ -32,6 +34,7 @@
 					   SELECT 1 
 						 FROM USER						<!-- 유저 테이블 -->
 						WHERE NICKNAME = #{nickname}
+						  AND STATUS != #{statusUserDelete}	
 		)
 	</select>
 	
@@ -41,12 +44,13 @@
 					   SELECT 1 
 						 FROM USER 						<!-- 유저 테이블 -->
 						WHERE EMAIL = #{email}
+						  AND STATUS != #{statusUserDelete}	
 		)
 	</select>
 
 	<!-- 회원 가입 -->
 	<insert id="userJoin" parameterType="User">
-		INSERT INTO USER (								<!-- 유저 테이브 -->
+		INSERT INTO USER (								<!-- 유저 테이블 -->
 	       				  ID, 
 	       				  PASSWORD, 
 	       				  NAME, 
@@ -71,6 +75,7 @@
 						 FROM USER						<!-- 유저 테이블 -->
 						WHERE NAME = #{name} 
 						  AND EMAIL = #{email}
+						  AND STATUS != #{statusUserDelete}
 		)
 	</select>
 	
@@ -80,6 +85,7 @@
 		  FROM USER										<!-- 유저 테이블 -->
 		 WHERE NAME = #{name} 
 		   AND EMAIL = #{email}
+		   AND STATUS != #{statusUserDelete}
 	</select>
 	
 	<!-- 비밀번호 찾기 - 요청 -->
@@ -88,6 +94,7 @@
 		  FROM USER										<!-- 유저 테이블 -->
 		 WHERE ID = #{id} 
 		   AND EMAIL = #{email}
+		   AND STATUS != #{statusUserDelete}
 	</select>
 	
 	<!-- 비밀번호 변경 -->
@@ -95,5 +102,6 @@
 		UPDATE USER										<!-- 유저 테이블 -->
 		   SET PASSWORD = #{password}
 		 WHERE USER_ID = #{userId}
+		   AND STATUS != #{statusUserDelete}
 	</update>
 </mapper>

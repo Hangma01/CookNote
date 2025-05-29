@@ -1,6 +1,7 @@
 <script setup>
 import RecipeCard from '@/components/ui/RecipeCard.vue';
 import SelectDropDown from '@/components/ui/SelectDropDown.vue';
+import { ConditonalType } from '@/constans/conditionalType';
 import { getCategory, getCategoryAll } from '@/services/categoryService';
 import { getRecipeSearch, getRecipeSearchIngredient } from '@/services/recipeService';
 import { useUserStore } from '@/stores/user';
@@ -18,6 +19,16 @@ const searchData = ref()
 // 검색어
 const keyword = ref(null)
 
+// 조건 데이터
+const conditionalType = ref(ConditonalType.POPULAR)
+
+// 조건 토글
+const selectConditionalType = (type) => {
+  conditionalType.value = type;
+  handleSearch(); // 정렬 변경 후 재검색
+};
+
+// 검색 요청 시
 const handleSearchReq = () => {
     if (!keyword.value || keyword.value.trim() === '') {
         keyword.value=''
@@ -35,6 +46,7 @@ const handleSearch = async(page = 0) => {
     router.replace({
         query: {
             keyword: keyword.value || '',
+            conditionalType: conditionalType.value,
             page,
         }
     });
@@ -42,6 +54,7 @@ const handleSearch = async(page = 0) => {
     try {
         const res = await getRecipeSearchIngredient(
               keyword.value
+            , conditionalType.value
             , page
         )
     
@@ -65,6 +78,7 @@ const goToPage = (page) => {
 onMounted( () => {
     const page = parseInt(route.query.page) || 0;
     keyword.value = route.query.keyword || '';
+    conditionalType.value = route.query.conditionalType || ConditonalType.POPULAR
 
     handleSearch(page)
 })
@@ -89,6 +103,23 @@ onMounted( () => {
             </div>
             <div class="search-rule">
                 <p>ⓘ 여러개의 재료 입력 시에 각 재료는 <strong class="search-rule-strong">띄어쓰기</strong>로 구분해주세요.</p>
+            </div>
+
+            <div class="conditional-box">
+                <button 
+                class="conditional-btn"
+                :class="{ active: conditionalType === ConditonalType.POPULAR }"
+                @click="selectConditionalType(ConditonalType.POPULAR)"
+                >
+                    인기순
+                </button>
+                <button
+                class="conditional-btn"
+                :class="{ active: conditionalType === ConditonalType.LATEST }"
+                @click="selectConditionalType(ConditonalType.LATEST)"
+                >
+                    최신순
+                </button>
             </div>
         </section> 
 
@@ -129,7 +160,6 @@ onMounted( () => {
 
     .search-bar-wrap {
         text-align: center;
-        padding-bottom: 3rem;
         border-bottom: 1px solid rgb(224,224,224);
         
         .search-bar {
@@ -155,6 +185,24 @@ onMounted( () => {
 
             .search-rule-strong {
                 color: red;
+            }
+        }
+
+        .conditional-box {
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: end;
+            margin-right: 1rem;
+            gap: 2rem;
+
+            .conditional-btn {
+                color: #a89d94;
+                
+                &.active {
+                    color: rgb(147, 112, 98);
+                    font-weight: bold;
+                }
             }
         }
     }

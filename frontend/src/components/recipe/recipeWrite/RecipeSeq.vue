@@ -77,7 +77,7 @@ defineExpose({
 })
 
 
-// 요리 순서 250자 제한 (한글)
+// 요리 순서 400자 제한 (한글)
 const handleItemDescriptionInput = (e, item) => commonInputHangle(e, 400, (value) => item.description = value)
 
 // 요리 팁 400자 제한 (한글)

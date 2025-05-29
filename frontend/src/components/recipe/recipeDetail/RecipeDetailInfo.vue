@@ -1,4 +1,5 @@
 <script setup>
+import { ReportType } from "@/constans/reportType";
 import { recipeBookmarkDelete, recipeBookmarkInsert, recipeLikeDelete, recipeLikeInsert } from "@/services/recipeService";
 import { useUserStore } from "@/stores/user";
 import { loginCheck } from "@/utils/commonFunction";
@@ -6,19 +7,17 @@ import { commonValues } from "@/utils/commonValues";
 import { errorMessages } from "@/utils/messages/errorMessages";
 import { debounce } from "lodash";
 import { ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps({ 
-    recipeDetailData: { 
-        type: Object    
-    },
-    recipeId: {
-        type: String
-    }
+    recipeDetailData: Object,
+    recipeId: String,
+    recipeLikeCount: Number,
 })
 
 // 화면 전환
 const router = useRouter();
+
 
 // 유저 스토어
 const userStore = useUserStore();
@@ -31,6 +30,9 @@ const isLike = ref(false);
 // 북마크 상태
 const isBookmark = ref();
 
+// 부모 이벤트
+const emit = defineEmits(['openReportModal', 'refreshLike']);
+
 // 좋아요 클릭
 const handleRecipeLike = async () => {
     if(isLoggedIn) {
@@ -40,7 +42,7 @@ const handleRecipeLike = async () => {
             } else {
                 const res = await recipeLikeInsert(props.recipeId)
             }
-
+            emit('refreshLike')
             isLike.value = !isLike.value
         } catch (e) {
             if (e.response && e.response?.data?.message) {
@@ -61,9 +63,9 @@ const handleRecipeBookmark = async () => {
     if(isLoggedIn) {
         try {
             if(isBookmark.value) {
-                const res = await recipeBookmarkDelete(props.recipeId)
+                await recipeBookmarkDelete(props.recipeId)
             } else {
-                const res = await recipeBookmarkInsert(props.recipeId)
+                await recipeBookmarkInsert(props.recipeId)
             }
 
             isBookmark.value = !isBookmark.value
@@ -81,10 +83,10 @@ const handleRecipeBookmark = async () => {
 }
 
 // 신고 클릭 
-const handleRecipeReport = async () => {
+const handleRecipeReport = async (recipeId) => {
 
     if(isLoggedIn) {
-
+        emit('openReportModal', ReportType.RECIPE , recipeId)
     } else {
         loginCheck(router)
     }
@@ -103,9 +105,9 @@ watch(() => props.recipeDetailData, (newVal) => {
             <img :src="props.recipeDetailData?.thumbnail" class="thumbnail" alt="thumbnail" v-if="props.recipeDetailData"/>
             <div class="writer-profile" >
                 <div class="writer-profile-image-box" v-if="props.recipeDetailData">
-                    <router-link :to=" userId === props.recipeDetailData?.writerUserId 
+                    <router-link :to=" userId === props.recipeDetailData?.writerId 
                     ? { name: 'profileRecipe', query: { tab: props.recipeDetailData?.status }} 
-                    : { name: 'profileHost', params: { hostId: props.recipeDetailData?.writerUserId }}">
+                    : { name: 'profileHost', params: { hostId: props.recipeDetailData?.writerId }}">
                         <img :src="props.recipeDetailData?.writerProfileImage" class="writer-profile-image" alt="writer-profile" />
                     </router-link>
                 </div>
@@ -123,20 +125,22 @@ watch(() => props.recipeDetailData, (newVal) => {
             </div>
             
             <div class="recipe-user-aciton" v-if="!props.recipeDetailData?.author">
-                <div :class="{'action' : true, 'liked' : isLike}" @click="handleRecipeLike">
-                    <font-awesome-icon :icon="['fas', 'heart']" v-if="isLike" class="action-icon" />
-                    <font-awesome-icon :icon="['far', 'heart']" v-else class="action-icon" />
-                    <p class="icon-text">좋아요</p>
-                </div>
-                <div :class="{'action' : true, 'bookmarked' : isBookmark }" @click="handleRecipeBookmark">
-                    <font-awesome-icon :icon="['fas', 'bookmark']" v-if="isBookmark" class="action-icon" />
-                    <font-awesome-icon :icon="['far', 'bookmark']" v-else class="action-icon" />
-                    <p class="icon-text">북마크</p>
+                <div :class="{'action like-box' : true, 'liked' : isLike}" @click="handleRecipeLike">
+                    <font-awesome-icon :icon="['fas', 'heart']" v-if="isLike" class="action-icon like-icon" />
+                    <font-awesome-icon :icon="['far', 'heart']" v-else class="action-icon like-icon" />
+                    <span class="like-count">{{ props?.recipeLikeCount }}</span>
                 </div>
 
-                <div class="action" @click="handleRecipeReport">
-                    <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="action-icon"/>
-                    <p class="icon-text">신고</p>
+                <div>
+                    <div :class="{'action bookmark-box' : true, 'bookmarked' : isBookmark }" @click="handleRecipeBookmark">
+                        <font-awesome-icon :icon="['fas', 'bookmark']" v-if="isBookmark" class="action-icon bookmark-icon" />
+                        <font-awesome-icon :icon="['far', 'bookmark']" v-else class="action-icon bookmark-icon" />
+                        <p class="icon-text">북마크</p>
+                    </div>
+                    <div class="action" @click="handleRecipeReport(props?.recipeId)">
+                        <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="action-icon"/>
+                        <p class="icon-text">신고</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -207,11 +211,7 @@ watch(() => props.recipeDetailData, (newVal) => {
     }
 
     .recipe-header {
-        display: flex;
-        justify-content: space-between;
         margin-top: 8rem;
-        padding-right: 1rem;
-        gap: 1rem;
 
         .recipe-title {
             font-size: 1.5rem;    
@@ -225,6 +225,7 @@ watch(() => props.recipeDetailData, (newVal) => {
 
         .recipe-user-aciton {
             display: flex;
+            justify-content: space-between;
             gap: 0.8rem;
             flex: 1;
             .action {
@@ -235,16 +236,48 @@ watch(() => props.recipeDetailData, (newVal) => {
                 font-weight: 500;
                 color: rgb(189, 189, 189);
                 cursor: pointer;
+                float: left;
         
                 .action-icon {
                     padding-top: 0.8rem;
                     width: 1.4rem;
                     height: 1.4rem;
-                }
-
+                }            
+    
                 .icon-text {
                     margin-top: 0.3rem;
                 }
+            }
+
+
+            .bookmark-box {
+                margin-right: 1rem;
+            }
+
+            .like-box{
+
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                border: 1px solid #F99090;
+                height: 2.2rem;
+                margin-top: 1rem;
+                padding-bottom: 0.6rem;
+                padding-left: 0.7rem;
+                padding-right: 1rem;
+                border-radius: 2rem;
+                
+                .like-icon {
+                    width: 1.6rem;
+                    height: 1.6rem;
+                }
+
+                .like-count {
+                    padding-top: 0.7rem;
+                    text-align: center;
+                    font-size: 1.2rem;
+                    color: #F99090;
+                }   
             }
 
             .action.liked{

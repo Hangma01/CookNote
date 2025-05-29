@@ -33,7 +33,13 @@ public interface CommentService {
 	// 댓글 수정
 	void commentUpdate(Long userId, CommentUpdateRequestDTO commentUpdateRequestDTO);
 
+	
+	// 유저가 작성한 댓글 조회
 	Page<CommentUserWriteResponseDTO> getCommentUserWrite(Long userId, int page, int size);
+
+	
+	// 리플 총 갯수 조회
+	Integer getRepliesCount(Long recipeId);
 
 
 

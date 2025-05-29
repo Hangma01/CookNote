@@ -2,20 +2,24 @@ package com.cooknote.backend.domain.user.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserReportDupliationCheckRequestDTO;
+import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
-import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
-import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.User;
+import com.cooknote.backend.domain.user.enums.UserStatus;
 
 import jakarta.validation.Valid;
 
 public interface UserService {
 
-	User getLoginUser(String id);
+	User getLoginUser(String id, UserStatus delete);
 
 	// 호스트 프로필 조회
 	UserHostProfileResponseDTO getHostProfile(Long userId, Long hostId);
@@ -46,5 +50,14 @@ public interface UserService {
 
 	// 팔로잉 게시글 작성 최신순으로 가져오기
 	List<UserProfileEditInfoResponseDTO> getFollowingLatestForRecipe(Long userId);
+
+	// 신고 생성
+	void reportInsert(Long userId, UserReportInsertRequestDTO userReportInsertRequestDTO);
+
+	// 신고 중복 확인
+	void reportDuplicationCheck(long userId, UserReportDupliationCheckRequestDTO userReportDupliationCheckRequestDTO);
+
+	// 쉐프 검색 - 게시글 0.2, 북마크 0.3, 팔로워 0.5 (인기순)
+	Page<UserSearchChefResponseDTO> getSearchChefList(Long userId, String keyword, int page, int size);
 
 }

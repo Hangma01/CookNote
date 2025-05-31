@@ -1,6 +1,5 @@
 <script setup>
 import Logo from '@/components/logo/Logo.vue';
-
 </script>
 
 <template>
@@ -21,6 +20,4 @@ import Logo from '@/components/logo/Logo.vue';
         text-align: center;
     }
 }
-
-
 </style>

@@ -18,8 +18,8 @@ public class UserReportInsertRequestDTO {
 	private ReportType reportType;
 	
 	private Long recipeId;
-	
 	private Long commentId;
+	private Long reportedId;
 	
 	@NotNull
 	private Integer categoryReportReasonId;

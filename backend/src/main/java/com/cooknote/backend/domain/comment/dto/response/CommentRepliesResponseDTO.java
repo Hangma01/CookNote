@@ -17,8 +17,6 @@ public class CommentRepliesResponseDTO {
 	private Long commentId;
 	private Long writerId;
 	private String content;
-	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime createAt;
 	private String nickname;
 	private String profileImage;

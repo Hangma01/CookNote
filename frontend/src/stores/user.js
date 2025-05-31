@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
-export const useUserStore = defineStore("user", {
+export const useUserStore = defineStore('user', {
     state: () => ({
         isLoggedIn: false,
         userId: null,
@@ -15,14 +15,14 @@ export const useUserStore = defineStore("user", {
         getUserId: (state) => {
             return state.userId;
         },
-        
+
         getAccessToken: (state) => {
-            return state.accessToken
+            return state.accessToken;
         },
 
         getProfile: (state) => {
-            return state.profile
-        }
+            return state.profile;
+        },
     },
     actions: {
         login(accessToken, userId) {
@@ -32,7 +32,7 @@ export const useUserStore = defineStore("user", {
             this.profile = null;
         },
 
-        logout(){
+        logout() {
             this.isLoggedIn = false;
             this.userId = null;
             this.accessToken = null;
@@ -45,9 +45,9 @@ export const useUserStore = defineStore("user", {
 
         setProfile(profile) {
             this.profile = profile;
-        }
+        },
     },
-        persist: {
+    persist: {
         storage: window.sessionStorage,
-    }
+    },
 });

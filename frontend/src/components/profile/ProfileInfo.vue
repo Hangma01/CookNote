@@ -10,65 +10,61 @@ const userStore = useUserStore();
 const isLoggedIn = userStore.getIsLoggedIn;
 const userProfile = computed(() => userStore.getProfile);
 
-
-
 // 팔로우 하기
 const handleAddFollow = async (followId) => {
-    
     try {
-        await userAddFollow(followId)
-        const res = await getHostProfileLoggedIn(followId)
+        await userAddFollow(followId);
+        const res = await getHostProfileLoggedIn(followId);
         userStore.setProfile({
-                        ...res.data
-                    , isHostProfile: true
-                    })
+            ...res.data,
+            isHostProfile: true,
+        });
     } catch (e) {
-        console.log(e)
+        console.log(e);
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
-        window.location.reload()
+        window.location.reload();
     }
-}
+};
 
 // 팔로잉 취소
 const handleCancleFollow = async (followId) => {
-
     try {
-        await userCancleFollow(followId)
-        const res = await getHostProfileLoggedIn(followId)
+        await userCancleFollow(followId);
+        const res = await getHostProfileLoggedIn(followId);
         userStore.setProfile({
-                        ...res.data
-                    , isHostProfile: true
-                    })
+            ...res.data,
+            isHostProfile: true,
+        });
     } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
 
-        window.location.reload()
+        window.location.reload();
     }
-}
+};
 
 // 로그인 하기
 const handleLogin = () => {
-    router.push({ name : 'login'})
-}
+    router.push({ name: 'login' });
+};
 
-onUnmounted(()=>{
-    userStore.setProfile(null)
-})
+onUnmounted(() => {
+    userStore.setProfile(null);
+});
 </script>
 
 <template>
     <div class="user-profile-container">
         <div class="user-profile-info">
             <div class="profile-image-box">
-                <img :src="userProfile?.profileImage" alt="이미지" class="profile-image"/>
+                <img :src="userProfile?.profileImage" alt="이미지" class="profile-image" />
             </div>
             <div class="user-nickname">
                 <span>{{ userProfile?.nickname }}</span>
@@ -82,7 +78,7 @@ onUnmounted(()=>{
                 </div>
 
                 <div class="user-sub-info-count">
-                    <span>{{ userProfile?.recipePublicCount + userProfile?.recipePrivateCount || 0}}</span>
+                    <span>{{ userProfile?.recipePublicCount + userProfile?.recipePrivateCount || 0 }}</span>
                 </div>
             </div>
 
@@ -92,8 +88,8 @@ onUnmounted(()=>{
                 </div>
 
                 <div class="user-sub-info-count">
-                    <span>{{ userProfile?.followerCount || 0}}</span>
-                </div> 
+                    <span>{{ userProfile?.followerCount || 0 }}</span>
+                </div>
             </div>
 
             <div class="user-sub-info-box">
@@ -102,28 +98,20 @@ onUnmounted(()=>{
                 </div>
 
                 <div class="user-sub-info-count">
-                    <span>{{ userProfile?.followingCount ||0 }}</span>
+                    <span>{{ userProfile?.followingCount || 0 }}</span>
                 </div>
             </div>
         </div>
 
         <div class="action-follow" v-if="userProfile?.isHostProfile">
             <div v-if="isLoggedIn">
-                <v-btn class="action-btn" v-if="userProfile?.follow" @click="handleCancleFollow(userProfile?.hostId)">
-                    팔로우 취소
-                </v-btn>
+                <v-btn class="action-btn" v-if="userProfile?.follow" @click="handleCancleFollow(userProfile?.hostId)"> 팔로우 취소 </v-btn>
 
-                <v-btn class="action-btn" v-else @click="handleAddFollow(userProfile?.hostId)">
-                    팔로우
-                </v-btn>
+                <v-btn class="action-btn" v-else @click="handleAddFollow(userProfile?.hostId)"> 팔로우 </v-btn>
             </div>
 
-
-            <v-btn class="action-btn" v-else @click="handleLogin">
-                로그인 후 팔로우하기
-            </v-btn>
+            <v-btn class="action-btn" v-else @click="handleLogin"> 로그인 후 팔로우하기 </v-btn>
         </div>
-        
     </div>
 </template>
 
@@ -155,9 +143,8 @@ onUnmounted(()=>{
         .user-nickname {
             margin-top: 1rem;
             font-size: 1.3rem;
-        }   
+        }
     }
-
 
     .user-sub-info {
         display: flex;

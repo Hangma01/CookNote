@@ -3,10 +3,15 @@ package com.cooknote.backend.global.error.exceptionHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import com.cooknote.backend.global.error.entity.ErrorResponseEntity;
+import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
+import com.cooknote.backend.global.error.excption.CustomGoogleException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
 import com.cooknote.backend.global.error.excption.CustomRecipeException;
 import com.cooknote.backend.global.error.excption.CustomS3Exception;
@@ -51,4 +56,11 @@ public class CustonExceptionHandler {
 		
 		return ErrorResponseEntity.toResponseEntity(e.getUserErrorCode());
 	}
+	
+	@ExceptionHandler(CustomGoogleException.class)
+	protected ResponseEntity<ErrorResponseEntity> handleUserException(CustomGoogleException e) {
+		
+		return ErrorResponseEntity.toResponseEntity(e.getGoogleErrorCode());
+	}
+
 }

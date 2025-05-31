@@ -9,4 +9,8 @@ export const errorMessages = {
     USER_EDIT_REQUIRED_ERROR_MESSAGE: '회원정보를 수정해주세요.',
     SEARCH_INGREDIENT_EMPTY_VALUE_ERROR_MESSAGE: '재료를 입력해주세요.',
     SEARCH_EMPTY_VALUE_ERROR_MESSAGE: '검색어어를 입력해주세요.',
+    IMAGE_FILE_EXTENSION_ERROR_MESSAGE: 'jpg, jpeg, png, webp 형식의 이미지 파일만 업로드 가능합니다.',
+    MAX_IMAGE_SIZE_ERROR_MESSAGE: '이미지 크기는 2MB 이하로 업로드 해주세요.',
+    MAX_IMAGE_SIZE_OR_NETWORK_ERROR_MESSAGE: '요청에 문제를 발견했습니다. 미지 크기가 2MB 이하인지 확인해주세요.',
+    NOT_IMAGE_FILE_ERROR_MESSAGE: '이미지 파일만 업로드 가능합니다.',
 };

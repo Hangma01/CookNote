@@ -2,55 +2,47 @@
 import { commonValues } from '@/utils/commonValues';
 import { ref, watch } from 'vue';
 
+const selectedStatus = ref(commonValues.PRIVATE_TEXT);
 
-
-
-const selectedStatus = ref(commonValues.PRIVATE_TEXT)
-
-const props = defineProps({ 
-    originalRecipeData: { // 레시피 수정 시 오는 데이터
-        type: Object    
+const props = defineProps({
+    originalRecipeData: {
+        // 레시피 수정 시 오는 데이터
+        type: Object,
     },
-})
+});
 
 const validation = () => {
-    if (!selectedStatus.value) return '설정을 선택해주세요.'
+    if (!selectedStatus.value) return '설정을 선택해주세요.';
 
     return true;
-}
+};
 
 const getData = () => {
     return {
         data: selectedStatus.value,
         selectedStatus: selectedStatus.value,
-    }
-}
+    };
+};
 
 // 부모가 사용할 수 있게 expose
 defineExpose({
     validation,
-    getData
-})
+    getData,
+});
 
-watch(() => props.originalRecipeData, (newVal) => {
-    selectedStatus.value = newVal.status
-})
+watch(
+    () => props.originalRecipeData,
+    (newVal) => {
+        selectedStatus.value = newVal.status;
+    }
+);
 </script>
 
 <template>
-<h2 class="sub-title">설정</h2>
-    <v-radio-group v-model="selectedStatus" inline >
-        <v-radio
-            class="me-10"
-            color="primary"
-            label="비공개"
-            :value="commonValues.PRIVATE_TEXT"
-        />
-        <v-radio
-            color="primary"
-            label="공개"
-            :value="commonValues.PUBLIC_TEXT"
-        />
+    <h2 class="sub-title">설정</h2>
+    <v-radio-group v-model="selectedStatus" inline>
+        <v-radio class="me-10" color="primary" label="비공개" :value="commonValues.PRIVATE_TEXT" />
+        <v-radio color="primary" label="공개" :value="commonValues.PUBLIC_TEXT" />
     </v-radio-group>
 </template>
 
@@ -63,7 +55,7 @@ watch(() => props.originalRecipeData, (newVal) => {
 
 .recipe-set-wrap {
     display: flex;
-  
+
     .seq-item-wrap {
         display: flex;
         gap: 2rem;
@@ -89,11 +81,10 @@ watch(() => props.originalRecipeData, (newVal) => {
                     padding: 0.5rem;
                     resize: none;
                 }
-
             }
         }
 
-        .image-preview-wrap{
+        .image-preview-wrap {
             width: 13rem;
             margin-left: 2rem;
         }

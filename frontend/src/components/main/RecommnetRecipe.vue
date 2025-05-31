@@ -1,31 +1,22 @@
 <script setup>
-
-const props = defineProps({ 
-    recommentRecipeData: Object ,  
-})
-
-
-
+const props = defineProps({
+    recommentRecipeData: Object,
+});
 </script>
 
 <template>
     <section class="section-tag recommend-recipe-container">
         <div class="section-title">
-            <h1>Recipe FOR YOU</h1>
+            <h1>RECIPE FOR YOU</h1>
             <h2>추천 레시피를 둘러보세요.</h2>
-            
         </div>
-        
+
         <div>
             <ul class="cardlist">
-                <li 
-                v-for="(item) in props?.recommentRecipeData"
-                :key="item.recipeId"
-                class="card"
-                >
-                    <router-link :to="{ name : 'recipeDetail',  params: { recipeId: item.recipeId } }">                        
-                        <img :src="item.recipeThumbnail" class="image"/>
-                    </router-link>     
+                <li v-for="item in props?.recommentRecipeData" :key="item.recipeId" class="card">
+                    <router-link :to="{ name: 'recipeDetail', params: { recipeId: item.recipeId } }">
+                        <img :src="item.recipeThumbnail" class="image" />
+                    </router-link>
 
                     <div class="title">
                         <span>{{ item.recipeTitle }}</span>
@@ -33,38 +24,34 @@ const props = defineProps({
                 </li>
             </ul>
         </div>
-    </section> 
+    </section>
 </template>
 
 <style lang="scss" scoped>
-
-
-.section-title{
-
-    h1 {
-        font-size: 1.8rem;
-        line-height: 2.8rem;
-        letter-spacing: 0.32rem;
-        text-align: center;
-    }
-    h2 {
-        font-weight: normal;
-        font-family: "Noto Serif KR", serif, Helvetica, "Helvetica Neue", Arial;
-        font-size: 1.3rem;
-        text-align: center;
-        margin-top: 2rem;
-    }
-}
-
-.section-tag { 
+.recommend-recipe-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 5.5rem 10rem;
-}
 
-.recommend-recipe-container {
+    .section-title {
+        margin-bottom: 5.5rem;
+
+        h1 {
+            font-size: 1.8rem;
+            line-height: 2.8rem;
+            letter-spacing: 0.32rem;
+            text-align: center;
+        }
+        h2 {
+            font-weight: normal;
+            font-family: 'Noto Serif KR', serif, Helvetica, 'Helvetica Neue', Arial;
+            font-size: 1.3rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+    }
 
     .cardlist {
         display: grid;
@@ -74,13 +61,13 @@ const props = defineProps({
         margin: auto;
         gap: 20px;
         height: 27rem;
-        margin-top: 6rem;
     }
 
-    .card{
+    .card {
         height: 100%;
         overflow: hidden; // 넘치는 이미지 잘라냄
         position: relative;
+        transition: transform 0.3s ease;
 
         .title {
             position: absolute;
@@ -99,6 +86,11 @@ const props = defineProps({
             pointer-events: none;
         }
     }
+
+    .card:hover {
+        transform: scale(1.03);
+    }
+
     .cardlist > .card:nth-of-type(1) {
         grid-area: 1 / 1 / 3 / 2;
         background-color: rgb(249, 255, 232);
@@ -116,7 +108,7 @@ const props = defineProps({
 
     .cardlist > .card:nth-of-type(4) {
         grid-area: 2 / 2 / 3 / 4;
-        background-color:  rgb(249, 255, 232);;
+        background-color: rgb(249, 255, 232);
     }
 
     .image {

@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
+import com.cooknote.backend.global.error.exceptionCode.GoogleErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.JwtErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.RecipeErrorCode;
 import com.cooknote.backend.global.error.exceptionCode.S3ErrorCode;
@@ -72,6 +73,16 @@ public class ErrorResponseEntity {
 	}
 	
 	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(UserErrorCode e) {
+		return ResponseEntity
+				.status(e.getHttpStatus())
+				.body(ErrorResponseEntity.builder()
+						.status(e.getHttpStatus().value())
+						.name(e.name())
+						.message(e.getMessage())
+						.build());
+	}
+	
+	public static ResponseEntity<ErrorResponseEntity> toResponseEntity(GoogleErrorCode e) {
 		return ResponseEntity
 				.status(e.getHttpStatus())
 				.body(ErrorResponseEntity.builder()

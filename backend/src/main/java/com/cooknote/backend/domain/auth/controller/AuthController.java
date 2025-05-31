@@ -54,6 +54,14 @@ public class AuthController {
 		return ResponseEntity.ok().build();
 	}
 
+	// 이메일 중복 체크
+	@GetMapping("/existsEmail")
+	public ResponseEntity<Void> getExistsEmail(@RequestParam("email") String email) {
+
+		authService.getExistsEmail(email);
+
+		return ResponseEntity.ok().build();
+	}
 
 	// 회원 가입
 	@PostMapping("/join")

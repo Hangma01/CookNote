@@ -22,7 +22,10 @@ public enum CommonErrorCode {
 	UPDATE_EXCEPTION(HttpStatus.BAD_REQUEST,"저장에 실패했습니다. 다시 시도해주세요."),
 	
 	// 매치 실패
-	INPUT_MATCH_EXCEPTIOON(HttpStatus.BAD_REQUEST,"잘못된 입력을 하셨습니다. 다시 시도해주세요.");
+	INPUT_MATCH_EXCEPTION(HttpStatus.BAD_REQUEST,"잘못된 입력을 하셨습니다. 다시 시도해주세요."),
+	
+	// 요청 실패
+	API_REQUEST_FAILED_EXCEPTION(HttpStatus.BAD_REQUEST, "API 요청에 실패했습니다.");
 	
 	private final HttpStatus httpStatus;
 	private final String message;

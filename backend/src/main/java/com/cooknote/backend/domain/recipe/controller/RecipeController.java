@@ -320,18 +320,25 @@ public class RecipeController {
 		return ResponseEntity.ok(recipeService.getRecommentRecipe());
 	}
 	
-	// 혼밥 레시피 가져오기
-	@GetMapping("/soloMeal")
-	public ResponseEntity<List<RecipeCardResponseDTO>> getSoloMealRecipe( ) {
-		
-		return ResponseEntity.ok(recipeService.getSoloMealRecipe());
-	}
-	
 	// 베스트 레시피 가져오기
 	@GetMapping("/best")
 	public ResponseEntity<List<RecipeCardResponseDTO>> getBestRecipe( ) {
 		
 
 		return ResponseEntity.ok(recipeService.getBestRecipe());
+	}
+	
+	// 혼밥 레시피 가져오기
+	@GetMapping("/solo")
+	public ResponseEntity<List<RecipeRecommnetResponseDTO>> getSoloRecipe( ) {
+		
+		return ResponseEntity.ok(recipeService.getSoloRecipe());
+	}
+	
+	// 최신 레시피 가져오기
+	@GetMapping("/recent")
+	public ResponseEntity<List<RecipeCardResponseDTO>> getRecentRecipe( ) {
+		
+		return ResponseEntity.ok(recipeService.getRecentRecipe());
 	}
 }

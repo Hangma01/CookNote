@@ -1,5 +1,5 @@
-import axios from "axios"
+import privateAPI from '@/api/privateAPI';
 
-export const youtubeApi = async (url) => {
-    return await axios.get(url)
-}
+export const getYoutubeThumbnail = async (videoId) => {
+    return await privateAPI.get(`/youtube?videoId=${videoId}`);
+};

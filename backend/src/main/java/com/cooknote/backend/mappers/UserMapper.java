@@ -15,6 +15,7 @@ import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
 import com.cooknote.backend.domain.user.entity.User;
@@ -113,10 +114,20 @@ public interface UserMapper {
 													, @Param("offset") int offset
 													, @Param("statusRecipePublic") RecipeStatus statusRecipePublic
 													, @Param("statusUserActive") UserStatus statusUserActive);
+
+	// 신고 내역 가져오기
+	List<UserReportResponseDTO> getReports(@Param("userId") Long userId
+										 , @Param("size") int size
+										 , @Param("offset") int offset);
+	
+	// 신고 내역 카운트 가져오기
+	int getReportsCount(@Param("userId") Long userId);
+	
 	
 	// 쉐프 검색된 토탈 갯수
 	int getSearchChefListCount(@Param("userId") Long userId
 							 , @Param("keyword") String keyword
 							 , @Param("statusRecipePublic") RecipeStatus statusRecipePublic
 							 , @Param("statusUserActive") UserStatus statusUserActive);
+
 }

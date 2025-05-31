@@ -394,6 +394,7 @@
 			 , R.RECIPE_ID 						 	AS RECIPE_ID 				<!-- 레시피 아이디 -->
 			 , R.TITLE 							 	AS RECIPE_TITLE				<!-- 레시피 제목 -->
 			 , R.WRITER_ID 							AS WRITER_ID				<!-- 레시피 작성자 -->
+			 , R.CREATE_AT							AS CREATE_AT				<!-- 레시피 작성 일자 -->
 			 , U.NICKNAME 						 	AS WRITER_NICKNAME			<!-- 레시피 작성자 닉네임 -->
 			 , U.PROFILE_IMAGE 					 	AS WRITER_PROFILE_IMAGE		<!-- 레시피 작성자 프로필 이미지 -->
 			 , COUNT(DISTINCT C.COMMENT_ID) 	 	AS RECIPE_COMMENT_COUNT		<!-- 레시피 댓글 수 -->
@@ -405,18 +406,21 @@
 	 		ON R.RECIPE_ID = RL.RECIPE_ID		
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
 	     WHERE R.STATUS = #{statusRecipePublic} 
-	       <if test="keyword != null">
-		   AND (
-			    R.TITLE LIKE CONCAT('%', #{keyword}, '%')
-			 OR R.DESCRIPTION LIKE CONCAT('%', #{keyword}, '%')
-			 OR EXISTS (
-			            SELECT 1
-			              FROM RECIPE_INGREDIENT 	AS RI						<!-- 레시피 재료 테이블 -->
-			             WHERE RI.RECIPE_ID = R.RECIPE_ID
-			               AND RI.NAME LIKE CONCAT('%', #{keyword}, '%')
-			          	)
-			    )
+	       <if test="keywords != null and keywords.size() > 0">
+	       AND (
+		    	<foreach item="keyword" collection="keywords" separator=" OR ">
+		    	 R.TITLE LIKE CONCAT('%', #{keyword}, '%')
+		 		 OR R.DESCRIPTION LIKE CONCAT('%', #{keyword}, '%')
+		 		 OR EXISTS (
+		            		SELECT 1
+		              		  FROM RECIPE_INGREDIENT AS RI						<!-- 레시피 재료 테이블 -->
+		             		 WHERE RI.RECIPE_ID = R.RECIPE_ID
+		               		   AND RI.NAME LIKE CONCAT('%', #{keyword}, '%')
+		         			)
+	    		</foreach>
+				) 										
 		   </if>
 		   <if test="categoryCuisineId != 0">
 		   AND R.CATEGORY_CUISINE_ID = #{categoryCuisineId}
@@ -425,10 +429,6 @@
 		   AND R.CATEGORY_PURPOSE_ID = #{categoryPurposeId}
 		   </if> 
 	  GROUP BY R.RECIPE_ID
-	  		 , R.TITLE
-	 		 , R.WRITER_ID
-	 		 , U.NICKNAME
-	 		 , U.PROFILE_IMAGE 	   
 	  <if test="conditionalType == conditionalPopular">
       ORDER BY (
 			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
@@ -447,8 +447,9 @@
   		SELECT COUNT(R.RECIPE_ID)
  		  FROM RECIPE AS R
   	     WHERE R.STATUS = #{statusRecipePublic} 
-  	       <if test="keyword != null">
+  	       <if test="keywords != null and keywords.size() > 0">
 		   AND (
+		   		<foreach item="keyword" collection="keywords" separator=" OR ">
 		        R.TITLE LIKE CONCAT('%', #{keyword}, '%')
 		        OR R.DESCRIPTION LIKE CONCAT('%', #{keyword}, '%')
 		        OR EXISTS (
@@ -457,6 +458,7 @@
 		          			WHERE RI.RECIPE_ID = R.RECIPE_ID
 		          			  AND RI.NAME LIKE CONCAT('%', #{keyword}, '%')
 		        		   )
+		        </foreach>
 		        )
 		   </if>
 		   <if test="categoryCuisineId != 0">
@@ -473,6 +475,7 @@
 			 , R.RECIPE_ID 						 		AS RECIPE_ID 				<!-- 레시피 아이디 -->
 			 , R.TITLE 							 		AS RECIPE_TITLE				<!-- 레시피 제목 -->
 			 , R.WRITER_ID 								AS WRITER_ID				<!-- 레시피 작성자 -->
+			 , R.CREATE_AT								AS CREATE_AT				<!-- 레시피 작성 일자 -->
 			 , U.NICKNAME 						 		AS WRITER_NICKNAME			<!-- 레시피 작성자 닉네임 -->
 			 , U.PROFILE_IMAGE 					 		AS WRITER_PROFILE_IMAGE		<!-- 레시피 작성자 프로필 이미지 -->
 			 , COUNT(DISTINCT C.COMMENT_ID) 	 		AS RECIPE_COMMENT_COUNT		<!-- 레시피 댓글 수 -->
@@ -484,6 +487,7 @@
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 	 LEFT JOIN COMMENT 									AS C 						<!-- 레시피 댓글 테이블 -->
 	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
 		 WHERE R.STATUS = #{statusRecipePublic}
 		   <if test="!ingredients.isEmpty()">
 		   AND R.RECIPE_ID IN (
@@ -497,10 +501,6 @@
 		   )
 		   </if>
 	  GROUP BY R.RECIPE_ID
-	 	 	 , R.TITLE
-	 		 , R.WRITER_ID
-	 		 , U.NICKNAME
-	 		 , U.PROFILE_IMAGE
 	  <if test="conditionalType == conditionalPopular">
       ORDER BY (
 			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
@@ -550,16 +550,12 @@
 			ON R.WRITER_ID = U.USER_ID        
 	 LEFT JOIN COMMENT 							 AS C 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
 	 LEFT JOIN RECIPE_LIKE 						 AS RL 
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 		 WHERE F.FOLLOWER_ID = #{userId}                               
 	  	   AND R.STATUS = #{statusRecipePublic}                                  
 	  GROUP BY R.RECIPE_ID
-	  		 , R.THUMBNAIL
-	  		 , R.TITLE
-	  		 , R.WRITER_ID
-	  		 , U.NICKNAME
-	  		 , U.PROFILE_IMAGE
 	  ORDER BY R.CREATE_AT DESC
 	  	 LIMIT #{size}
 		OFFSET #{offset}
@@ -595,17 +591,13 @@
 			ON R.WRITER_ID = U.USER_ID
 	 LEFT JOIN COMMENT 							 AS C 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
 	 LEFT JOIN RECIPE_LIKE 						 AS RL 
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 		 WHERE F.FOLLOWER_ID = #{userId}                                    
 	  	   AND R.STATUS = #{statusRecipePublic}                                   
 	  	   AND F.FOLLOWING_ID= #{followingId}
 	  GROUP BY R.RECIPE_ID
-	  		 , R.THUMBNAIL
-	  		 , R.TITLE
-	  		 , R.WRITER_ID
-	  		 , U.NICKNAME
-	  		 , U.PROFILE_IMAGE
 	  ORDER BY R.CREATE_AT DESC
 	  	 LIMIT #{size}
 		OFFSET #{offset}
@@ -649,7 +641,7 @@
 	</update>
 	
 	<!-- 추천 레시피 가져오기 -->
-	<select id="getRecipeRecommnet">
+	<select id="getRecommentRecipe" resultType="RecipeRecommnetResponseDTO">
 		SELECT R.THUMBNAIL							AS RECIPE_THUMBNAIL			<!-- 레시피 썸네일 -->
 			 , R.RECIPE_ID 						 	AS RECIPE_ID 				<!-- 레시피 아이디 -->
 			 , R.TITLE 							 	AS RECIPE_TITLE				<!-- 레시피 제목 -->
@@ -660,10 +652,9 @@
 	 		ON R.RECIPE_ID = RL.RECIPE_ID		
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
 	     WHERE R.STATUS = #{statusRecipePublic} 
-	  GROUP BY R.THUMBNAIL
-	  		 , R.RECIPE_ID
-	  		 , R.TITLE 	   
+	  GROUP BY R.RECIPE_ID
       ORDER BY (
 			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
 			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
@@ -671,11 +662,14 @@
 	 	 LIMIT #{size}
 	</select>
 	
-	<select id="getSoloMealRecipe" resultType="RecipeCardResponseDTO">
+	
+	<!-- 베스트 레시피 -->
+	<select id="getBestRecipe" resultType="RecipeCardResponseDTO">
 		SELECT R.THUMBNAIL							AS RECIPE_THUMBNAIL			<!-- 레시피 썸네일 -->
 			 , R.RECIPE_ID 						 	AS RECIPE_ID 				<!-- 레시피 아이디 -->
 			 , R.TITLE 							 	AS RECIPE_TITLE				<!-- 레시피 제목 -->
 			 , R.WRITER_ID 							AS WRITER_ID				<!-- 레시피 작성자 -->
+			 , R.CREATE_AT							AS CREATE_AT				<!-- 레시피 작성 일자 -->
 			 , U.NICKNAME 						 	AS WRITER_NICKNAME			<!-- 레시피 작성자 닉네임 -->
 			 , U.PROFILE_IMAGE 					 	AS WRITER_PROFILE_IMAGE		<!-- 레시피 작성자 프로필 이미지 -->
 			 , COUNT(DISTINCT C.COMMENT_ID) 	 	AS RECIPE_COMMENT_COUNT		<!-- 레시피 댓글 수 -->
@@ -687,17 +681,61 @@
 	 		ON R.RECIPE_ID = RL.RECIPE_ID		
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
 	     WHERE R.STATUS = #{statusRecipePublic} 
-		   AND R.CATEGORY_PURPOSE_ID = #{categoryPurposeSoloMeal}
 	  GROUP BY R.RECIPE_ID
-	  		 , R.TITLE
-	 		 , R.WRITER_ID
-	 		 , U.NICKNAME
-	 		 , U.PROFILE_IMAGE 	   
       ORDER BY (
 			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
 			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
       			) DESC
+		 LIMIT #{size}
+	</select>
+	
+	<!-- 혼먹 레시피 -->
+	<select id="getSoloRecipe" resultType="RecipeRecommnetResponseDTO">
+		SELECT R.THUMBNAIL							AS RECIPE_THUMBNAIL			<!-- 레시피 썸네일 -->
+			 , R.RECIPE_ID 						 	AS RECIPE_ID 				<!-- 레시피 아이디 -->
+			 , R.TITLE 							 	AS RECIPE_TITLE				<!-- 레시피 제목 -->
+		  FROM RECIPE 							 	AS R						<!-- 레시피 테이블 -->
+	INNER JOIN USER 							 	AS U 						<!-- 유저 테이블 -->
+			ON R.WRITER_ID = U.USER_ID
+	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
+	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
+	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
+	     WHERE R.STATUS = #{statusRecipePublic} 
+	       AND R.CATEGORY_PURPOSE_ID = #{categoryPurposeSoloMeal}
+	  GROUP BY R.RECIPE_ID
+      ORDER BY (
+			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
+			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
+      			) DESC
+	 	 LIMIT #{size}
+	</select>
+	
+	<!-- 최신 레시피 -->
+	<select id="getRecentRecipe" resultType="RecipeCardResponseDTO">
+		SELECT R.THUMBNAIL							AS RECIPE_THUMBNAIL			<!-- 레시피 썸네일 -->
+			 , R.RECIPE_ID 						 	AS RECIPE_ID 				<!-- 레시피 아이디 -->
+			 , R.TITLE 							 	AS RECIPE_TITLE				<!-- 레시피 제목 -->
+			 , R.WRITER_ID 							AS WRITER_ID				<!-- 레시피 작성자 -->
+			 , R.CREATE_AT							AS CREATE_AT				<!-- 레시피 작성 일자 -->
+			 , U.NICKNAME 						 	AS WRITER_NICKNAME			<!-- 레시피 작성자 닉네임 -->
+			 , U.PROFILE_IMAGE 					 	AS WRITER_PROFILE_IMAGE		<!-- 레시피 작성자 프로필 이미지 -->
+			 , COUNT(DISTINCT C.COMMENT_ID) 	 	AS RECIPE_COMMENT_COUNT		<!-- 레시피 댓글 수 -->
+	    	 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) 	AS RECIPE_LIKE_COUNT		<!-- 레시피 좋아요 수 -->
+		  FROM RECIPE 							 	AS R						<!-- 레시피 테이블 -->
+	INNER JOIN USER 							 	AS U 						<!-- 유저 테이블 -->
+			ON R.WRITER_ID = U.USER_ID
+	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
+	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
+	 		ON R.RECIPE_ID = C.RECIPE_ID
+	 	   AND C.STATUS = #{statusCommentPublic}
+	     WHERE R.STATUS = #{statusRecipePublic} 
+	  GROUP BY R.RECIPE_ID
+      ORDER BY R.CREATE_AT DESC
 		 LIMIT #{size}
 	</select>
 </mapper>

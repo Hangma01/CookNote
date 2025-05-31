@@ -1,5 +1,7 @@
 package com.cooknote.backend.domain.recipe.dto.response;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +15,7 @@ public class RecipeSearchResponseDTO {
 	private Long recipeId;
 	private String recipeThumbnail;
 	private String recipeTitle;
+	private LocalDateTime createAt;
 	private Long writerId;
 	private String writerNickname;
 	private String writerProfileImage;

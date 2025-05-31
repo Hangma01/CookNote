@@ -7,10 +7,8 @@ import { errorMessages } from '@/utils/messages/errorMessages';
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-  
-
 // 화면 전환
-const router = useRouter()
+const router = useRouter();
 
 // 유저 스토어
 const userStore = useUserStore();
@@ -23,7 +21,7 @@ const menus = [
     { label: '회원정보 수정', name: 'profileEdit' },
     { label: '비밀번호 변경', name: 'profilePwEdit' },
     { label: '회원탈퇴', name: 'profileDelete' },
-]
+];
 
 // 현재 활성 경로인지 체크하는 함수
 const isActive = (menuName) => route.name === menuName;
@@ -33,41 +31,38 @@ const confirmUserDelete = async () => {
     const proceed = confirm(commonMessage.USER_DELETE_ASK_MESSAGE);
     if (proceed) {
         try {
-            await userDelete()
-            alert(commonMessage.USER_DELETE_SUCCESS_MESSAGE)
+            await userDelete();
+            alert(commonMessage.USER_DELETE_SUCCESS_MESSAGE);
             userStore.logout();
-            router.replace({ name : 'login' })
-            
+            router.replace({ name: 'login' });
         } catch (e) {
             if (e.response && e.response?.data?.message) {
-                alert(e.response.data.message) 
+                alert(e.response.data.message);
             } else {
-                alert(errorMessages.BADREQUEST)
+                alert(errorMessages.BADREQUEST);
             }
         }
-    
-    } 
+    }
 };
 onMounted(async () => {
     try {
-        const res = await getUserProfile()
+        const res = await getUserProfile();
 
         userStore.setProfile({
-                              ...res.data
-                            , isHostProfile: false
-                            })
+            ...res.data,
+            isHostProfile: false,
+        });
     } catch (e) {
-        console.log(e)
+        console.log(e);
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
 
-        router.push({ name : 'mainPage'})
+        router.push({ name: 'mainPage' });
     }
-    
-})
+});
 </script>
 
 <template>
@@ -78,7 +73,7 @@ onMounted(async () => {
                 :to="menu.name !== 'profileDelete' ? { name: menu.name } : undefined"
                 :class="['menu-btn', { selected: isActive(menu.name) }]"
                 @click="menu.name === 'profileDelete' ? confirmUserDelete() : null"
-                >
+            >
                 <span>{{ menu.label }}</span>
             </component>
         </li>
@@ -88,11 +83,9 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-
 .edit-menu-list {
     display: flex;
     justify-content: space-between;
-
 
     .menu-btn {
         width: 14rem;
@@ -112,9 +105,6 @@ onMounted(async () => {
         background-color: #c09370;
         border: 1px solid #a57954;
         color: white;
-        
     }
-
 }
-
 </style>

@@ -9,23 +9,21 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cooknote.backend.domain.auth.dto.request.UserFindPwResetRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserReportDupliationCheckRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
-import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
@@ -115,14 +113,14 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 	
-	// 프로필 수정 정보
+	// 회원정보 수정 데이터 가져오기
 	@GetMapping("/edit")
 	public ResponseEntity<UserProfileEditInfoResponseDTO> getUserProfileEditInfo(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 		
 		return ResponseEntity.ok(userService.getUserProfileEditInfo(customUserDetails.getUserId()));
 	}
 	
-	// 프로필 업데이트
+	// 회원정보 수정
 	@PatchMapping("/edit")
 	public ResponseEntity<Void> userProfileUpdate(@AuthenticationPrincipal CustomUserDetails customUserDetails
 											 	, @Valid @RequestBody UserProfileUpdateRequestDTO userProfileUpdateRequestDTO
@@ -211,7 +209,17 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 	
-	// 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.5 (인기순)
+	// 신고 내역 가져오기
+	@GetMapping("/report")
+	public ResponseEntity<Page<UserReportResponseDTO>> getReport (@AuthenticationPrincipal CustomUserDetails customUserDetails 
+								   	  , @RequestParam(value = "page", defaultValue = "0") int page
+								   	  , @RequestParam(value = "size", defaultValue = "10") int size) {
+
+	return ResponseEntity.ok(userService.getReport(customUserDetails.getUserId(), page, size));
+	
+	}
+	
+	// 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.4 (인기순)
 	@GetMapping("/search/chef")
 	public ResponseEntity<Page<UserSearchChefResponseDTO>> getSearchChefList(@AuthenticationPrincipal CustomUserDetails customUserDetails
 																		   , @RequestParam(value = "keyword", required = false) String keyword

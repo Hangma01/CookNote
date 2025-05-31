@@ -11,7 +11,9 @@ import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
-import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.domain.user.enums.UserStatus;
 
@@ -56,8 +58,12 @@ public interface UserService {
 
 	// 신고 중복 확인
 	void reportDuplicationCheck(long userId, UserReportDupliationCheckRequestDTO userReportDupliationCheckRequestDTO);
+	
+	// 신고 내역 가져오기
+	Page<UserReportResponseDTO> getReport(Long userId, int page, int size);
 
-	// 쉐프 검색 - 게시글 0.2, 북마크 0.3, 팔로워 0.5 (인기순)
+	// 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.4 (인기순)
 	Page<UserSearchChefResponseDTO> getSearchChefList(Long userId, String keyword, int page, int size);
 
+	
 }

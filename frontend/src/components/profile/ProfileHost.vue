@@ -7,84 +7,112 @@ import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ProfileRecipeCard from './ProfileRecipeCard.vue';
 
-
 // 화면 전환
-const router = useRouter()
+const router = useRouter();
 
 // 유저 스토어
 const userStore = useUserStore();
 const isLoggedIn = userStore.isLoggedIn;
 
 // 프로파일 데이터
-const profile = ref(null)
+const profile = ref(null);
+
+// 페이징
+const currentPage = ref(0);
+const currentPageGroup = ref(0);
 
 // 공개 레시피 데이터
-const hostRecipePublicData = ref(null)
-const recipPublicPage = ref(0)
+const hostRecipePublicData = ref(null);
 
 // 파리미터 값 가져오기
 const route = useRoute();
 const hostId = route.params.hostId;
 
-// 공개 레시피 가져오기
-const loadRecipPublic = async (page = 0) => {
-  try {
-    const res = await getHostRecipePublic(hostId, page); // page 파라미터 넘김
-    hostRecipePublicData.value = res.data
-
-    // 현재 페이지 저장
-    recipPublicPage.value = res.data.page.number;;
-    
-    
-  } catch (e) {        
-    if (e.response && e.response?.data?.message) {
-        alert(e.response.data.message) 
-    } else {
-        alert(errorMessages.BADREQUEST)
-    }
-
-    router.push({ name : 'mainPage'})
-  }
+const scrollToTop = () => {
+    window.scrollTo({ top: 0 });
 };
 
+// 공개 레시피 가져오기
+const loadRecipPublic = async (page = 0) => {
+    try {
+        const res = await getHostRecipePublic(hostId, page); // page 파라미터 넘김
+        hostRecipePublicData.value = res.data;
+
+        currentPage.value = page;
+        currentPageGroup.value = Math.floor(page / 10);
+    } catch (e) {
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message);
+        } else {
+            alert(errorMessages.BADREQUEST);
+        }
+
+        router.push({ name: 'mainPage' });
+    }
+};
+
+// 페이지 그룹 시작 번호 (0부터)
+const pageGroupStart = () => currentPageGroup.value * 10;
+
+// 페이지 그룹 끝 번호 (총 페이지 수보다 크지 않게)
+const pageGroupEnd = () => {
+    if (!hostRecipePublicData.value) return 0;
+    return Math.min(pageGroupStart() + 10, hostRecipePublicData.value.page.totalPages);
+};
+
+// 페이지 이동
 const goToPage = (page) => {
+    scrollToTop();
     loadRecipPublic(page);
+};
+
+// 이전 10페이지 그룹
+const prevPageGroup = () => {
+    if (currentPageGroup.value > 0) {
+        const newPage = (currentPageGroup.value - 1) * 10;
+        scrollToTop();
+        loadRecipPublic(newPage);
+    }
+};
+
+// 다음 10페이지 그룹
+const nextPageGroup = () => {
+    if (hostRecipePublicData.value && (currentPageGroup.value + 1) * 10 < hostRecipePublicData.value.page.totalPages) {
+        const newPage = (currentPageGroup.value + 1) * 10;
+        scrollToTop();
+        loadRecipPublic(newPage);
+    }
 };
 
 onMounted(async () => {
     try {
-        const isHostProfile = ref(true)
-    
-        const [hostProfileRes, hostRecipePublicDataRes] = await Promise.all([
-            getHostProfileLoggedIn(hostId),
-            getHostRecipePublic(hostId)
-        ]);
+        const isHostProfile = ref(true);
 
-        profile.value = hostProfileRes.data
-        hostRecipePublicData.value = hostRecipePublicDataRes.data
-        console.log(profile.value)
-        console.log(hostRecipePublicData.value)
-        if(isLoggedIn) {
-            if(userStore.getUserId == hostId) {
-                isHostProfile.value = false
+        const [hostProfileRes, hostRecipePublicDataRes] = await Promise.all([getHostProfileLoggedIn(hostId), getHostRecipePublic(hostId)]);
+
+        profile.value = hostProfileRes.data;
+        hostRecipePublicData.value = hostRecipePublicDataRes.data;
+
+        if (isLoggedIn) {
+            if (userStore.getUserId == hostId) {
+                isHostProfile.value = false;
             }
         }
 
         userStore.setProfile({
-                              ...profile.value
-                            , isHostProfile: isHostProfile.value
-                            })
+            ...profile.value,
+            isHostProfile: isHostProfile.value,
+        });
     } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
 
-        router.push({ name : 'mainPage'})
+        router.push({ name: 'mainPage' });
     }
-    
-})
+});
 </script>
 
 <template>
@@ -94,26 +122,34 @@ onMounted(async () => {
     <div class="line"></div>
     <div>
         <ul>
-            <li 
-                class="recipe-content"
-                v-for="(item,index) in hostRecipePublicData?.content"
-                :key="index"
-            >
-                <ProfileRecipeCard :recipeData = "item" />
+            <li class="recipe-content" v-for="(item, index) in hostRecipePublicData?.content" :key="index">
+                <ProfileRecipeCard :recipeData="item" />
             </li>
         </ul>
 
         <div class="pagination" v-if="hostRecipePublicData?.page?.totalPages > 1">
+            <!-- 이전 10개 페이지 그룹 버튼 -->
+            <button v-if="hostRecipePublicData.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
+
+            <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
             <button
-                v-for="n in hostRecipePublicData?.page?.totalPages"
-                :key="n"
-                :class="{ active: hostRecipePublicData?.page?.number === n - 1 }"
-                @click="goToPage(n - 1)"
-                >
-                {{ n }}
+                v-for="n in pageGroupEnd() - pageGroupStart()"
+                :key="n + pageGroupStart()"
+                :class="{ active: hostRecipePublicData.page.number === n + pageGroupStart() - 1 }"
+                @click="goToPage(n + pageGroupStart() - 1)"
+            >
+                {{ n + pageGroupStart() }}
+            </button>
+
+            <!-- 다음 10개 페이지 그룹 버튼 -->
+            <button
+                v-if="hostRecipePublicData.page.totalPages > 10 && (currentPageGroup + 1) * 10 < hostRecipePublicData.page.totalPages"
+                @click="nextPageGroup"
+            >
+                &gt;&gt;
             </button>
         </div>
-    </div>        
+    </div>
 </template>
 
 
@@ -138,7 +174,7 @@ onMounted(async () => {
 }
 
 .pagination {
-    margin-top: 1rem;
+    margin-top: 3rem;
     text-align: center;
 
     button {
@@ -149,9 +185,14 @@ onMounted(async () => {
         cursor: pointer;
 
         &.active {
-        background-color: #a89d94;
-        color: white;
-        font-weight: bold;
+            background-color: #a89d94;
+            color: white;
+            font-weight: bold;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
     }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { idRule, pwRule, nameRule, pwConfirmRule, nicknameRule, emailRule, required, authCodeRule } from '@/utils/rules';
 import { existsId, existsNickname, existsEmail, userJoin } from '@/services/authService';
 import { sendMailAuthCode } from '@/services/mailService';
@@ -9,182 +9,259 @@ import { errorMessages } from '@/utils/messages/errorMessages';
 import { successMessage } from '@/utils/messages/successMessage';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'vue-router';
-import { debounce } from 'lodash'
+import { debounce } from 'lodash';
 import LogoMini from '../logo/LogoMini.vue';
 import { useTimer } from '@/utils/useTimer';
-
 
 // 화면 전환
 const router = useRouter();
 
 // 유효성 겁사
-const formRef = ref(null)                     // Form 유효성 검사
-const ruleIdRef = ref(null)                   // 아이디 유효성 검사
-const ruleNicknameRef = ref(null)             // 닉네임 유효성 검사
+const formRef = ref(null); // Form 유효성 검사
+const ruleIdRef = ref(null); // 아이디 유효성 검사
+const ruleNicknameRef = ref(null); // 닉네임 유효성 검사
+const ruleEmailRef = ref(null); // 이메일 유효성 검사
 const pwConfirmRef = ref(null);
 
 // 에러 메시지
-const errorMsgIdDuplicate = ref('')           // 아이디 중복 시 에러 메시지
-const errorMsgNicknameDuplicate = ref('')     // 닉네임 중복 시 에러 메시지
-const errorMsgEmailDuplicate = ref('')        // 메일 중복 시 에러 메시지지
-const errorMsgAuthCode = ref('')              // 메일 인증 코드 에러 메시지
+const errorMsgIdDuplicate = ref(''); // 아이디 중복 시 에러 메시지
+const errorMsgNicknameDuplicate = ref(''); // 닉네임 중복 시 에러 메시지
+const errorMsgEmailDuplicate = ref(''); // 메일 중복 시 에러 메시지
+const errorMsgAuthCode = ref(''); // 메일 인증 코드 에러 메시지
 
 // 성공 메시지
-const isSuccessAuthCode = ref(false)          // 메일 인증 코드 성공 메시지
-const isSuccessIdCheck = ref(false)           // 아이디 인증 성공 메시지
-const isSuccessNicknameCheck = ref(false)     // 닉네임 인증 성공 메시지
+const isSuccessAuthCode = ref(false); // 메일 인증 코드 성공 메시지
+const isSuccessIdCheck = ref(false); // 아이디 인증 성공 메시지
+const isSuccessNicknameCheck = ref(false); // 닉네임 인증 성공 메시지
+const isSuccessEmailCheck = ref(false); // 이메일 인증 성공 메시지지
 
 // etc...
-const isAuthCodeRequest = ref(false)          // 메일 인증 요청 토글
-const pwVisible = ref(false)                  // 비밀번호 필드 토글
-const pwConfirmVisible = ref(false)           // 비밀번호 확인
-const isAtuhCodeimer = ref(false)						// 메일 인증 시간 제한
-
+const isAuthCodeRequest = ref(false); // 메일 인증 요청 토글
+const pwVisible = ref(false); // 비밀번호 필드 토글
+const pwConfirmVisible = ref(false); // 비밀번호 확인
+const isAtuhCodetimer = ref(false); // 메일 인증 시간 제한
 
 // input-field
-const formValues = reactive({                 // Form input-field             
+const formValues = reactive({
+    // Form input-field
     id: '',
     pw: '',
     pwConfirm: '',
     name: '',
     nickname: '',
-    email: ''
-})
+    email: '',
+});
 
-const authCodeValue = ref('')                 // 메일 인증 input-field
-
-
+const authCodeValue = ref(''); // 메일 인증 input-field
 
 // 타이머를 3분으로 설정하고 타이머 종료시 동작
 const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(commonValues.MAIL_AUTH_TIMER, () => {
-    isAtuhCodeimer.value = false
+    isAtuhCodetimer.value = false;
+    alert(errorMessages.MAIL_AUTH_TIME_OVER_MESSAGE);
 });
 
+// Snackbar
+const snackbar = reactive({
+    show: false,
+    message: '',
+    color: 'error', // or 'success'
+});
+
+const showSnackbar = (msg, type = 'error') => {
+    snackbar.message = msg;
+    snackbar.color = type;
+    snackbar.show = true;
+};
+
 // 이름 20자 제한 (한글)
-const handleNameInput = (e) => commonInputHangle(e, 20, (value) => formValues.name = value)
+const handleNameInput = (e) => commonInputHangle(e, 20, (value) => (formValues.name = value));
 
 // 닉네임 15자 제한 (한글)
-const handleNicknameInput = (e) => commonInputHangle(e, 15, (value) => formValues.nickname = value)
-
+const handleNicknameInput = (e) => commonInputHangle(e, 15, (value) => (formValues.nickname = value));
 
 // 아이디 중복 체크
 const handleExistsId = async () => {
-    await commonCheckDuplicate({
-        value: formValues.id,               
-        validatorRef: ruleIdRef,            
-        errorMsgRef: errorMsgIdDuplicate,
-        successMsgRef: isSuccessIdCheck,
-        apiCall: existsId,
-        router : router  
-    });
-  
+    // 아이디 유효성 검사
+    const idValid = idRule(formValues.id) === true;
+    if (!idValid) {
+        alert('아이디를 올바르게 입력해주세요.');
+        return;
+    } else {
+        await commonCheckDuplicate({
+            value: formValues.id,
+            validatorRef: ruleIdRef,
+            errorMsgRef: errorMsgIdDuplicate,
+            successMsgRef: isSuccessIdCheck,
+            apiCall: existsId,
+        });
+    }
 };
-
 
 // 닉네임 중복 체크
 const handleExistsNickname = async () => {
+    // 닉네임 유효성 검사
+    const nicknameValid = nicknameRule(formValues.nickname) === true;
+    if (!nicknameValid) {
+        alert('닉네임을 올바르게 입력해주세요.');
+        return;
+    } else {
+        await commonCheckDuplicate({
+            value: formValues.nickname,
+            validatorRef: ruleNicknameRef,
+            errorMsgRef: errorMsgNicknameDuplicate,
+            successMsgRef: isSuccessNicknameCheck,
+            apiCall: existsNickname,
+        });
+    }
+};
+
+// 이메일 중복 체크
+const handleExistsEmail = async () => {
     await commonCheckDuplicate({
-        value: formValues.nickname,             
-        validatorRef: ruleNicknameRef,          
-        errorMsgRef: errorMsgNicknameDuplicate, 
-        successMsgRef: isSuccessNicknameCheck,
-        apiCall: existsNickname,
-        router : router
+        value: formValues.email,
+        validatorRef: ruleEmailRef,
+        errorMsgRef: errorMsgEmailDuplicate,
+        successMsgRef: isSuccessEmailCheck,
+        apiCall: existsEmail,
     });
 };
 
-
 // 메일 인증 요청하기
 const handleSendMailAuthCode = async () => {
+    const isFormVal = await formRef.value.validate();
 
-    const isFormVal = await formRef.value.validate()
+    // 아이디 유효성 검사
+    const idValid = idRule(formValues.id) === true;
+    if (!idValid) {
+        alert('아이디를 올바르게 입력해주세요.');
+        return;
+    }
 
-    if (
-        isFormVal.valid &&
-        !errorMsgIdDuplicate.value &&
-        !errorMsgNicknameDuplicate.value &&
-        !errorMsgEmailDuplicate.value
-    ) { 
+    // 아이디 중복 체크 여부 확인
+    if (!isSuccessIdCheck.value) {
+        alert(errorMessages.ID_DUPLICATE_CHECK_ERROR_MESSAGE);
+        return;
+    }
 
-      if(isSuccessIdCheck.value === false) {
-            alert(errorMessages.ID_DUPLICATE_CHECK_ERROR_MESSAGE)
-      } else if(isSuccessNicknameCheck.value === false) {
-            alert(errorMessages.NICKNAME_DUPLICATE_CHECK_ERROR_MESSAGE)
-      } else {
-            try {
-                const res = await sendMailAuthCode(formValues.email);
+    // 비밀번호 유효성 검사
+    const pwValid = pwRule(formValues.pw) === true;
+    if (!pwValid) {
+        alert('비밀번호를 올바르게 입력해주세요.');
+        return;
+    }
 
-                resetTimer();   
-                startTimer();
-                isAtuhCodeimer.value = true
+    // 비밀번호 확인 유효성 검사
+    const pwConfirmValid = pwConfirmRule(() => formValues.pw)(formValues.pwConfirm) === true;
+    if (!pwConfirmValid) {
+        alert('비밀번호 확인이 일치하지 않습니다.');
+        return;
+    }
 
-                isAuthCodeRequest.value = true;
-            } catch (e) {
-                alert(errorMessages.BADREQUEST);
-                router.replace({ name: 'login'});
-            }
-        }
-    }  
-}
+    // 이름 유효성 검사
+    const nameValid = nameRule(formValues.name) === true;
+    if (!nameValid) {
+        alert('이름을 올바르게 입력해주세요.');
+        return;
+    }
+
+    // 닉네임 유효성 검사
+    const nicknameValid = nicknameRule(formValues.nickname) === true;
+    if (!nicknameValid) {
+        alert('닉네임을 올바르게 입력해주세요.');
+        return;
+    }
+
+    // 닉네임 중복 검사
+    if (!isSuccessNicknameCheck.value) {
+        alert(errorMessages.NICKNAME_DUPLICATE_CHECK_ERROR_MESSAGE);
+        return;
+    }
+
+    // 이메일 유효성 검사
+    const emailValid = emailRule(formValues.email) === true;
+    if (!emailValid) {
+        alert('이메일을 올바르게 입력해주세요.');
+        return;
+    }
+
+    // 이메일 중복 검사
+    await handleExistsEmail();
+    if (!isSuccessEmailCheck.value) {
+        alert(errorMessages.EMAIL_DUPLICATE_ERROR_MESSAGE);
+        return;
+    }
+
+    try {
+        const res = await sendMailAuthCode(formValues.email);
+
+        stopTimer();
+        resetTimer();
+        startTimer();
+        isAtuhCodetimer.value = true;
+
+        isAuthCodeRequest.value = true;
+    } catch (e) {
+        alert(errorMessages.BADREQUEST);
+        window.location.reload();
+    }
+};
 
 // 메일 재전송
 const handleSendMailAuthCodeRetry = async () => {
     try {
         const res = await sendMailAuthCode(formValues.email);
-        resetTimer();   
+        resetTimer();
         startTimer();
-        isAtuhCodeimer.value = true
+        isAtuhCodetimer.value = true;
 
         isSuccessAuthCode.value = false;
         authCodeValue.value = '';
         alert(successMessage.AUTH_MAIL_RETRY_SUCCESS_MESSAGE);
     } catch (e) {
         alert(errorMessages.BADREQUEST);
-        router.replace({ name: 'login'});
+        router.replace({ name: 'login' });
     }
-}
-
+};
 
 // 회원 가입 하기
 const handleSubmitJoin = debounce(async () => {
-
     const isFormVal = await formRef.value.validate(); // 전체 유효성 검사 확인
 
-    if(!isAtuhCodeimer.value){
-            alert(errorMessages.MAIL_AUTH_TIME_OVER_MESSAGE)
-    } else if(isFormVal.valid) {
+    // 인증번호 유효성 검사
+    if (authCodeValue.value.length !== 6) {
+        showSnackbar('인증번호를 올바르게 입력해주세요.');
+        return;
+    }
 
+    if (isFormVal.valid) {
         // 인증 코드 검증하기
-        await commonVerifyMailAuthCode(
-            formValues.email,
-            authCodeValue,
-            isAuthCodeRequest,
-            (result, message) => {
-                isSuccessAuthCode.value = result;
-                errorMsgAuthCode.value = message;
-            },
-        );
+        await commonVerifyMailAuthCode(formValues.email, authCodeValue, isAuthCodeRequest, (result, message) => {
+            isSuccessAuthCode.value = result;
+            errorMsgAuthCode.value = message;
+            if (message) {
+                showSnackbar(message);
+            }
+        });
 
         if (isSuccessAuthCode.value) {
             try {
-                const res = await userJoin({ ...formValues })
-                
-                alert(successMessage.USER_JOIN_SUCCESS_MESSAGE);
-                router.push({ name: 'login'});
-            } catch (e) {
-                if(e.response && e.response.data.status === HttpStatusCode.BadRequest) {
-                    const errorMessage = e.response.data.message 
+                const res = await userJoin({ ...formValues });
 
-                    if(errorMessage === errorMessages.EMAIL_DUPLICATE_ERROR_MESSAGE) {
-                        alert(errorMessage)
-                        errorMsgEmailDuplicate.value = errorMessage;   
+                alert(successMessage.USER_JOIN_SUCCESS_MESSAGE);
+                router.push({ name: 'login' });
+            } catch (e) {
+                if (e.response && e.response.data.status === HttpStatusCode.BadRequest) {
+                    const errorMessage = e.response.data.message;
+
+                    if (errorMessage === errorMessages.EMAIL_DUPLICATE_ERROR_MESSAGE) {
+                        alert(errorMessage);
+                        errorMsgEmailDuplicate.value = errorMessage;
                         isAuthCodeRequest.value = false;
                         authCodeValue.value = '';
                         errorMsgAuthCode.value = '';
                         isSuccessAuthCode.value = false;
-                        
                     } else {
-                        alert(errorMessage)
+                        alert(errorMessage);
                         window.location.reload();
                     }
                 } else {
@@ -194,45 +271,54 @@ const handleSubmitJoin = debounce(async () => {
             }
         }
     }
-}, commonValues.DEFALUT_DEBOUNCE)
+}, commonValues.DEFALUT_DEBOUNCE);
 
 // 입력 변경 여부 확인
-watch (() => ({ ...formValues }),
+watch(
+    () => ({ ...formValues }),
     (newVal, oldVal) => {
-        if (
-            isAuthCodeRequest.value &&
-            Object.keys(newVal).some(key => newVal[key] !== oldVal[key])
-        ) {
+        if (isAuthCodeRequest.value && Object.keys(newVal).some((key) => newVal[key] !== oldVal[key])) {
             isAuthCodeRequest.value = false;
             authCodeValue.value = '';
             errorMsgAuthCode.value = '';
             isSuccessAuthCode.value = false;
-        } 
-        
-        
-        if(newVal.id !== oldVal.id) {                       // 아이디 입력 변경 여부 확인
+        }
+
+        if (newVal.id !== oldVal.id) {
+            // 아이디 입력 변경 여부 확인
             isSuccessIdCheck.value = false;
-        } else if(newVal.nickname !== oldVal.nickname) {    // 닉네임 입력 변경 여부 확인
+        } else if (newVal.nickname !== oldVal.nickname) {
+            // 닉네임 입력 변경 여부 확인
             isSuccessNicknameCheck.value = false;
         }
     },
-    { deep: true }  // formValues 내부 값들을 추적 가능하게 함
-)
+    { deep: true } // formValues 내부 값들을 추적 가능하게 함
+);
 
 // 패스워드 변경 여부 확인
-watch(() => formValues.pw, () => {
-  if (formValues.pwConfirm !== '' && formRef.value)  {
-    pwConfirmRef.value.validate();
-  }
-});
+watch(
+    () => formValues.pw,
+    () => {
+        if (formValues.pwConfirm !== '' && formRef.value) {
+            pwConfirmRef.value.validate();
+        }
+    }
+);
 
 // 이메일 변경 여부 확인
-watch(() => formValues.email, () => {
-    if(errorMsgEmailDuplicate) {
-        errorMsgEmailDuplicate.value = '';
+watch(
+    () => formValues.email,
+    () => {
+        if (errorMsgEmailDuplicate) {
+            errorMsgEmailDuplicate.value = '';
+        }
     }
-})
+);
 
+onMounted(() => {
+    resetTimer();
+    stopTimer();
+});
 </script>
 
 <template>
@@ -258,18 +344,13 @@ watch(() => formValues.email, () => {
                         :error-messages="errorMsgIdDuplicate"
                         autocomplete="off"
                     />
-                    <v-btn class="id-check-btn" @click="handleExistsId()">
-                        중복확인
-                    </v-btn>
+                    <v-btn class="id-check-btn" @click="handleExistsId()"> 중복확인 </v-btn>
                 </div>
-                    
+
                 <div v-if="isSuccessIdCheck" class="success-message">
-                    <span>
-                        사용 가능한 아이디입니다.
-                    </span>
+                    <span> 사용 가능한 아이디입니다. </span>
                 </div>
             </div>
-
 
             <v-text-field
                 v-model="formValues.pw"
@@ -328,15 +409,11 @@ watch(() => formValues.email, () => {
                         autocomplete="off"
                     />
 
-                    <v-btn class="nickname-check-btn" @click="handleExistsNickname()">
-                        중복확인
-                    </v-btn>
+                    <v-btn class="nickname-check-btn" @click="handleExistsNickname()"> 중복확인 </v-btn>
                 </div>
-                
+
                 <div v-if="isSuccessNicknameCheck" class="success-message">
-                    <span>
-                        사용 가능한 닉네임입니다.
-                    </span>
+                    <span> 사용 가능한 닉네임입니다. </span>
                 </div>
             </div>
 
@@ -351,8 +428,9 @@ watch(() => formValues.email, () => {
                 :rules="[emailRule]"
                 :error-messages="errorMsgEmailDuplicate"
                 autocomplete="off"
-            />        
-            <div> 
+                ref="ruleEmailRef"
+            />
+            <div>
                 <div class="auth-code-wrap">
                     <v-text-field
                         v-model="authCodeValue"
@@ -366,45 +444,45 @@ watch(() => formValues.email, () => {
                         :rules="[authCodeRule]"
                         :error-messages="errorMsgAuthCode"
                         autocomplete="off"
-                    /> 
+                    />
 
-                    <v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest" >
-                        재전송
-                    </v-btn>
-                </div>     
+                    <v-btn type="button" class="auth-mail-retry" @click="handleSendMailAuthCodeRetry" v-if="isAuthCodeRequest"> 재전송 </v-btn>
+                </div>
 
                 <div class="timer" v-if="isAuthCodeRequest">
-                    <span>{{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
+                    <span>인증 시간 : {{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
                 </div>
             </div>
         </div>
 
-        <v-btn type="button" class="join-btn" @click="handleSendMailAuthCode" v-show="!isAuthCodeRequest">
+        <v-btn type="button" class="join-btn" @click="handleSendMailAuthCode" v-show="!isAuthCodeRequest" :disabled="!!errorMsgEmailDuplicate">
             인증요청
         </v-btn>
 
-        <v-btn type="submit" class="join-btn" v-if="isAuthCodeRequest">
-            인증 후 회원가입
-        </v-btn>
+        <v-btn type="submit" class="join-btn" v-if="isAuthCodeRequest" :disabled="!isAtuhCodetimer"> 인증 후 회원가입 </v-btn>
     </v-form>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="bottom">
+        {{ snackbar.message }}
+    </v-snackbar>
 </template>
 
 
 <style lang="scss" scoped>
-.title-wrap{
-	display: flex;
-	align-items: end;
-	margin-top: 6rem;
-	margin-bottom: 3rem;
-	border-bottom: 1px solid #eee;
-	padding-bottom: 1rem;
-	gap: 4rem;
+.title-wrap {
+    display: flex;
+    align-items: end;
+    margin-top: 6rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    gap: 4rem;
 
-	.title {
-		font-size: 1.5rem;
-		color: #2c2c30;
-		font-weight: 600;
-	}
+    .title {
+        font-size: 1.5rem;
+        color: #2c2c30;
+        font-weight: 600;
+    }
 }
 
 .join-form {
@@ -422,8 +500,8 @@ watch(() => formValues.email, () => {
         .id-form {
             display: flex;
             gap: 1rem;
-            
-          .id-check-btn {
+
+            .id-check-btn {
                 margin-top: 0.1rem;
                 font-size: 0.8rem;
             }
@@ -439,28 +517,26 @@ watch(() => formValues.email, () => {
             }
         }
 
-
-        .auth-code-wrap{
+        .auth-code-wrap {
             display: flex;
             gap: 1.3rem;
 
-          .auth-mail-retry {
+            .auth-mail-retry {
                 margin-top: 0.1rem;
                 display: inline;
                 background-color: #888;
                 color: white;
-          }
+            }
         }
     }
 
-    .join-btn{
+    .join-btn {
         background-color: #c09370;
         color: white;
         font-size: 1rem;
         height: 2.5rem;
     }
 
-    
     .success-message {
         padding-left: 1rem;
         padding-top: 0.3rem;
@@ -468,11 +544,11 @@ watch(() => formValues.email, () => {
         color: green;
     }
 
-    .timer{
-		font-size: 0.8rem;
-		color: #FF3F3F;
-		margin-top: 0.5rem;
-		margin-left: 1rem;
-	}
+    .timer {
+        font-size: 0.8rem;
+        color: #ff3f3f;
+        margin-top: 0.5rem;
+        margin-left: 1rem;
+    }
 }
 </style>

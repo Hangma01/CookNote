@@ -10,10 +10,10 @@ export const routes = [
             {
                 path: '',
                 name: 'mainPage',
-                component: () => import('@/views/MainView.vue')
+                component: () => import('@/views/MainView.vue'),
             },
             // 레시피 라우터
-            {  
+            {
                 path: '/recipe',
                 component: () => import('@/views/RecipeView.vue'),
                 children: [
@@ -21,7 +21,7 @@ export const routes = [
                         path: 'write',
                         name: 'recipeWrite',
                         component: () => import('@/components/recipe/recipeWrite/RecipeWrite.vue'),
-                        meta: { requiresAuth: true},
+                        meta: { requiresAuth: true },
                     },
                     {
                         path: 'edit/:recipeId',
@@ -34,7 +34,7 @@ export const routes = [
                         name: 'recipeDetail',
                         component: () => import('../components/recipe/recipeDetail/RecipeDetail.vue'),
                     },
-                ]
+                ],
             },
             // 프로필 라우터
             {
@@ -71,7 +71,7 @@ export const routes = [
                                 name: 'profileFollow',
                                 component: () => import('@/components/profile/ProfileFollow.vue'),
                             },
-                        ]
+                        ],
                     },
                     {
                         path: 'edit',
@@ -82,21 +82,37 @@ export const routes = [
                                 path: '',
                                 name: 'profileEdit',
                                 component: () => import('@/components/profile/edit/ProfileEdit.vue'),
-                            
                             },
                             {
                                 path: 'pw-rest',
                                 name: 'profilePwEdit',
                                 component: () => import('@/components/profile/edit/ProfilePwEdit.vue'),
                             },
-                        ]
+                        ],
+                    },
+                    {
+                        path: 'report',
+                        component: () => import('@/components/profile/report/ProfileReportHome.vue'),
+                        meta: { requiresAuth: true },
+                        children: [
+                            {
+                                path: '',
+                                name: 'profileReport',
+                                component: () => import('@/components/profile/report/ProfileReport.vue'),
+                            },
+                            {
+                                path: 'pw-rest',
+                                name: 'profileSanction',
+                                component: () => import('@/components/profile/report/ProfileSanction.vue'),
+                            },
+                        ],
                     },
                     {
                         path: ':hostId',
                         name: 'profileHost',
                         component: () => import('@/components/profile/ProfileHost.vue'),
                     },
-                ]
+                ],
             },
             // 검색 라우터
             {
@@ -119,8 +135,8 @@ export const routes = [
                 name: 'followFeed',
                 component: () => import('../views/FeedView.vue'),
                 meta: { requiresAuth: true },
-            }
-        ]
+            },
+        ],
     },
     // 로그인 라우터
     {
@@ -152,25 +168,35 @@ export const routes = [
                 path: 'userfindpw',
                 component: () => import('../components/auth/FindPw.vue'),
                 children: [
-                {
-                    path: '',
-                    name: 'userFindPw',
-                    component: () => import('../components/auth/FindPwForm.vue'),
-                },
-                {
-                    path: 'pwreset',
-                    name: 'pwReset',
-                    component: () => import('../components/auth/FindPwResetForm.vue'),
-                    meta: { requiresFlow: true },
-                },
-                ]
+                    {
+                        path: '',
+                        name: 'userFindPw',
+                        component: () => import('../components/auth/FindPwForm.vue'),
+                    },
+                    {
+                        path: 'pwreset',
+                        name: 'pwReset',
+                        component: () => import('../components/auth/FindPwResetForm.vue'),
+                        meta: { requiresFlow: true },
+                    },
+                ],
             },
-        ]
+        ],
+    },
+    {
+        path: '/policies/terms',
+        name: 'terms',
+        component: () => import('../views/TermsOfPolicyView.vue'),
+    },
+    {
+        path: '/policies/privacy',
+        name: 'policy',
+        component: () => import('../views/PrivacyOfPolicyView.vue'),
     },
     // 404 페이지 라우터 추가
     {
         path: '/:pathMatch(.*)*',
         name: 'notFound',
         component: () => import('../views/NotFound.vue'),
-    }
-]
+    },
+];

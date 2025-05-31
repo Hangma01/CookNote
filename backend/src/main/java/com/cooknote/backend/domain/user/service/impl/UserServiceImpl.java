@@ -23,6 +23,7 @@ import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
 import com.cooknote.backend.domain.user.entity.User;
@@ -139,10 +140,12 @@ public class UserServiceImpl implements UserService {
 		String updateNickname = null;
 		String moveProfileUrl = null;
 		
+		// 닉네임 변경 사항 체크
 		if(!CommonFunctionUtil.match(newNickname, user.getNickname())) {
 			updateNickname = newNickname;
 		}
 		
+		// 이미지 변경 사항 체크
 		if(!CommonFunctionUtil.match(newProfileImage, user.getProfileImage())) {
 			moveProfileUrl = s3Service.moveImage(newProfileImage, userId, Constans.S3_MOVE_USER_PROFILE_PATH, null);
 			
@@ -173,7 +176,7 @@ public class UserServiceImpl implements UserService {
 		
         // 기존 비밀번호가 일치하는지 확인
         if (!bCryptPasswordEncoder.matches(userPwEditRequestDTO.getCurrentPw(), user.getPassword())) {
-            throw new CustomCommonException(CommonErrorCode.INPUT_MATCH_EXCEPTIOON);
+            throw new CustomCommonException(CommonErrorCode.INPUT_MATCH_EXCEPTION);
         }
         
         // 새로운 비밀번호 및 확인용 비밀번호 일치하는지 체크
@@ -223,8 +226,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void reportInsert(Long userId, UserReportInsertRequestDTO userReportInsertRequestDTO) {
 		
-		
-		
 		userMapper.reportInsert(userId, userReportInsertRequestDTO, ReportType.RECIPE, ReportType.COMMENT);
 	}
 
@@ -239,7 +240,21 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-	// 쉐프 검색 - 게시글 0.2, 북마크 0.3, 팔로워 0.5 (인기순)
+	// 신고 내역 가져오기
+	@Override
+	public Page<UserReportResponseDTO> getReport(Long userId, int page, int size) {
+		
+		int offset = page * size;
+		List<UserReportResponseDTO> result = userMapper.getReports(userId, size, offset);
+		int total = userMapper.getReportsCount(userId);
+		
+		List<UserReportResponseDTO> reportList = result.stream()
+			    .peek(dto -> dto.setReportStatusLabel(dto.getReportStatus().getLabel()))  // 상태 라벨 설정
+			    .toList();
+		return new PageImpl<>(reportList, PageRequest.of(page, size), total);
+	}
+	
+	// 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.4 (인기순)
 	@Override
 	public Page<UserSearchChefResponseDTO> getSearchChefList(Long userId, String keyword, int page, int size) {
 		

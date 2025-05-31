@@ -1,54 +1,46 @@
 
 
 <script setup>
-import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Navigation } from 'swiper/modules'; 
-import 'swiper/css';
-import 'swiper/css/navigation';
-import RecipeCard from '../ui/RecipeCard.vue';
-
-const props = defineProps({ 
-    soloMealRecipeData: Object ,  
-})
-
+const props = defineProps({
+    soloRecipeData: Object,
+});
 </script>
 
 <template>
     <section>
-        <div class="section-tag  solo-recipe-container">
+        <div class="section-tag solo-recipe-container">
             <div class="section-title">
-                <h1>SOLO RECIPES</h1>
-                <h2>자취생을 위한 추천 레시피</h2>
+                <h1>SOLO RECIPE</h1>
+                <h2>혼먹 자취생들을 위한 추천 레시피</h2>
             </div>
-            
-            <div class="solo-recipe-slide">
-                 <Swiper
-                :modules="[Navigation]"
-                :slides-per-view="4"
-                navigation
-                class="solo-swiper"
-                :watch-overflow="false" 
-                >
-                    <SwiperSlide
-                        v-for="(item,index) in soloMealRecipeData"
-                        :key="item.recipeId"
-                    >
-                        <v-card  height="320" width="250">
-                            <RecipeCard :recipeData="item" />
-                        </v-card>
-                    </SwiperSlide>
-                </Swiper>
+
+            <div>
+                <ul class="cardlist">
+                    <li v-for="item in props?.soloRecipeData" :key="item.recipeId" class="card">
+                        <router-link :to="{ name: 'recipeDetail', params: { recipeId: item.recipeId } }">
+                            <img :src="item.recipeThumbnail" class="image" />
+                        </router-link>
+
+                        <div class="title">
+                            <span>{{ item.recipeTitle }}</span>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </section>
-    
 </template>
 
 <style lang="scss" scoped>
-.solo-recipe-container{
-    
-    background-color: rgb(255, 249, 222);
-    .section-title{
+.solo-recipe-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5.5rem 10rem;
+
+    .section-title {
+        margin-bottom: 5.5rem;
 
         h1 {
             font-size: 1.8rem;
@@ -58,47 +50,76 @@ const props = defineProps({
         }
         h2 {
             font-weight: normal;
-            font-family: "Noto Serif KR", serif, Helvetica, "Helvetica Neue", Arial;
+            font-family: 'Noto Serif KR', serif, Helvetica, 'Helvetica Neue', Arial;
             font-size: 1.3rem;
             text-align: center;
             margin-top: 2rem;
         }
     }
-}
 
+    .cardlist {
+        display: grid;
+        width: 70rem;
+        grid-template-columns: 23.5% 23.5% 49%;
+        grid-template-rows: 1fr 1fr;
+        margin: auto;
+        gap: 20px;
+        height: 27rem;
+    }
 
-.section-tag { 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5.5rem 10rem;
+    .card {
+        height: 100%;
+        overflow: hidden; // 넘치는 이미지 잘라냄
+        position: relative;
+        transition: transform 0.3s ease;
 
-    .solo-recipe-slide {
-        width: 79rem;
-        margin-top: 6rem;
-
-        .solo-swiper {
-            padding-left: 5rem;  /* 왼쪽 버튼과 슬라이드 사이 여백 */
-            padding-right: 3.5rem;
+        .title {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white; // 배경색 대비를 위해
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0.5rem;
+            border-radius: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            text-shadow: rgba(0, 0, 0, 0.25) 0px 0.2rem 0.2rem;
+            pointer-events: none;
         }
+    }
 
-        // Swiper 버튼 위치 조정
-        ::v-deep(.swiper-button-prev),
-        ::v-deep(.swiper-button-next) {
-            color: rgb(147, 112, 98); // 버튼 색상
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 100;
-        }
+    .card:hover {
+        transform: scale(1.03);
+    }
 
-        ::v-deep(.swiper-button-prev.swiper-button-disabled),
-        ::v-deep(.swiper-button-next.swiper-button-disabled) {
-        opacity: 0;      /* 비활성화 시 완전 투명 */
-        pointer-events: none;  /* 클릭 방지 */
-        }
+    .cardlist > .card:nth-of-type(1) {
+        grid-area: 1 / 1 / 2 / 2;
+        background-color: rgb(249, 255, 232);
+    }
 
+    .cardlist > .card:nth-of-type(2) {
+        grid-area: 1 / 2 / 2 / 3;
+        background-color: rebeccapurple;
+    }
+
+    .cardlist > .card:nth-of-type(3) {
+        grid-area: 1 / 3 / 3 / 4;
+        background-color: saddlebrown;
+    }
+
+    .cardlist > .card:nth-of-type(4) {
+        grid-area: 2 / 1 / 3 / 3;
+        background-color: rgb(249, 255, 232);
+    }
+
+    .image {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        border: 1px solid rgba(147, 112, 98, 0.6);
     }
 }
-
 </style>

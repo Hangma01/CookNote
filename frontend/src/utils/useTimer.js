@@ -18,11 +18,11 @@ export const useTimer = (initialTime = 120, onTimerEnd = () => {}) => {
 
         isTimerRunning.value = true;
         timerInterval.value = setInterval(() => {
-        if (timer.value > 0) {
-            timer.value--; // 1초씩 감소
-        } else {
-            handleTimerEnd(); // 타이머 종료
-        }
+            if (timer.value > 0) {
+                timer.value--; // 1초씩 감소
+            } else {
+                handleTimerEnd(); // 타이머 종료
+            }
         }, 1000); // 1초마다 실행
     };
 
@@ -53,6 +53,6 @@ export const useTimer = (initialTime = 120, onTimerEnd = () => {}) => {
         isTimerRunning,
         startTimer,
         stopTimer,
-        resetTimer
+        resetTimer,
     };
 };

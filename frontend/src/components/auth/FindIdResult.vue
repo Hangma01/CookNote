@@ -1,9 +1,7 @@
 <script setup>
 import AuthHeader from '../header/authHeader/AuthHeader.vue';
 
-
 const id = history.state.id;
-
 </script>
 
 <template>
@@ -15,11 +13,11 @@ const id = history.state.id;
 
     <div class="page-router-btn-wrap">
         <router-link :to="{ name: 'login' }">
-        <v-btn class="page-router-btn login-page-router-btn">로그인하기</v-btn>
+            <v-btn class="page-router-btn login-page-router-btn">로그인하기</v-btn>
         </router-link>
-        
+
         <router-link :to="{ name: 'userFindPw' }">
-        <v-btn class="page-router-btn find-pw-page-router-btn">비밀번호 찾기</v-btn>
+            <v-btn class="page-router-btn find-pw-page-router-btn">비밀번호 찾기</v-btn>
         </router-link>
     </div>
 </template>
@@ -34,7 +32,7 @@ const id = history.state.id;
     font-size: 1.3rem;
     text-align: center;
 
-    .find-id-value{
+    .find-id-value {
         color: #c09370;
         font-weight: 700;
         font-size: 2rem;
@@ -47,13 +45,13 @@ const id = history.state.id;
     gap: 2rem;
     justify-content: center;
 
-    .page-router-btn{
+    .page-router-btn {
         height: 3rem;
         width: 8rem;
         font-size: 1rem;
     }
 
-    .login-page-router-btn{
+    .login-page-router-btn {
         background-color: #c09370;
         color: white;
         font-weight: 700;

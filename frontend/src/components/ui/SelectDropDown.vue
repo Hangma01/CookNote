@@ -7,14 +7,14 @@ const props = defineProps({
     label: String,
     itemTitle: String,
     itemValue: String,
-})
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue']);
 
 const localValue = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
-})
+    get: () => props.modelValue,
+    set: (val) => emit('update:modelValue', val),
+});
 </script>
 
 <template>
@@ -23,7 +23,7 @@ const localValue = computed({
         :items="items"
         :label="label"
         :item-title="itemTitle"
-        :item-value="itemValue"  
+        :item-value="itemValue"
         return-object
         variant="outlined"
         hide-details

@@ -32,6 +32,7 @@ import com.cooknote.backend.domain.recipe.dto.response.RecipePublicResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeRecommnetResponseDTO;
 import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.category.enums.CategoryPurposeEnum;
+import com.cooknote.backend.domain.comment.enums.CommentStatus;
 import com.cooknote.backend.domain.recipe.dto.request.RecipeSaveRequestDTO;
 import com.cooknote.backend.domain.recipe.entity.Recipe;
 import com.cooknote.backend.domain.recipe.enums.ConditionalType;
@@ -449,8 +450,16 @@ public class RecipeServiceImpl implements RecipeService {
 	// 레시피 검색
 	@Override
 	public Page<RecipeSearchResponseDTO> getRecipeSearch(String keyword, int categoryCuisineId, int categoryPurposeId, int page, int size, ConditionalType conditionalType) {
+		
+		List<String> keywords = new ArrayList<>();
+		if (keyword != null && !keyword.isBlank()) {
+			keywords = Arrays.stream(keyword.trim().split("\\s+"))
+			                 .filter(k -> !k.isBlank())
+			                 .toList();
+		}
+		
 		int offset = page * size;
-		List<RecipeSearchResponseDTO> recipes = recipeMapper.getRecipeSearch(keyword
+		List<RecipeSearchResponseDTO> recipes = recipeMapper.getRecipeSearch(keywords
 																		   , categoryCuisineId
 																		   , categoryPurposeId
 																		   , size
@@ -458,8 +467,10 @@ public class RecipeServiceImpl implements RecipeService {
 																		   , RecipeStatus.PUBLIC
 																		   , conditionalType
 																		   , ConditionalType.POPULAR
-																		   , ConditionalType.LATEST);
-		int total = recipeMapper.getRecipeSearchCount(keyword, categoryCuisineId, categoryPurposeId, RecipeStatus.PUBLIC);
+																		   , ConditionalType.LATEST
+																		   , CommentStatus.PUBLIC);
+		
+		int total = recipeMapper.getRecipeSearchCount(keywords, categoryCuisineId, categoryPurposeId, RecipeStatus.PUBLIC);
 		
 		return new PageImpl<>(recipes, PageRequest.of(page, size), total);
 	}
@@ -485,7 +496,8 @@ public class RecipeServiceImpl implements RecipeService {
 																			   , RecipeStatus.PUBLIC
 																			   , conditionalType
 																			   , ConditionalType.POPULAR
-																			   , ConditionalType.LATEST);
+																			   , ConditionalType.LATEST
+																			   , CommentStatus.PUBLIC);
 	
 		int total = recipeMapper.getIngredientSearchCount(ingredients, ingredientCount, RecipeStatus.PUBLIC);
 		
@@ -496,25 +508,47 @@ public class RecipeServiceImpl implements RecipeService {
 	// 추천 레시피
 	@Override
 	public List<RecipeRecommnetResponseDTO> getRecommentRecipe() {
-		List<RecipeRecommnetResponseDTO> recommentList = recipeMapper.getRecipeRecommnet(RecipeStatus.PUBLIC, Constans.GET_RECIPE_LIMIT);
-		int resultSize = Math.min(recommentList.size(), Constans.RECOMMENT_RECIPE_MIN_VALUE);
-		Collections.shuffle(recommentList);
-		return recommentList.subList(0, resultSize);
+		List<RecipeRecommnetResponseDTO> recommentRecipeList = recipeMapper.getRecommentRecipe(RecipeStatus.PUBLIC
+																						     , Constans.GET_RECIPE_LIMIT
+																						     , CommentStatus.PUBLIC);
+		int resultSize = Math.min(recommentRecipeList.size(), Constans.RECOMMENT_RECIPE_MIN_VALUE);
+		Collections.shuffle(recommentRecipeList);
+		
+		return recommentRecipeList.subList(0, resultSize);
+	}
+	
+	// 베스트 레시피 가져오기
+	@Override
+	public List<RecipeCardResponseDTO> getBestRecipe() {
+		List<RecipeCardResponseDTO> bestRecipeList = recipeMapper.getBestRecipe(RecipeStatus.PUBLIC
+																			  , Constans.BEST_RECIPE_MIN_VALUE
+																			  , CommentStatus.PUBLIC);
+		
+		return bestRecipeList;
 	}
 	
 	// 혼밥 레시피 가져오기
 	@Override
-	public List<RecipeCardResponseDTO> getSoloMealRecipe() {
-		List<RecipeCardResponseDTO> recommentList = recipeMapper.getSoloMealRecipe(RecipeStatus.PUBLIC, CategoryPurposeEnum.SOLO_MEAL.getCode(), Constans.GET_RECIPE_LIMIT);
-		int resultSize = Math.min(recommentList.size() ,Constans.SOLO_RECIPE_MIN_VALUE);
-		Collections.shuffle(recommentList);
-		return recommentList.subList(0, resultSize);
+	public List<RecipeRecommnetResponseDTO> getSoloRecipe() {
+		List<RecipeRecommnetResponseDTO> soloRecitList = recipeMapper.getSoloRecipe(RecipeStatus.PUBLIC
+																				  , CategoryPurposeEnum.SOLO_MEAL.getCode()
+																				  , Constans.GET_RECIPE_LIMIT
+																				  , CommentStatus.PUBLIC);
+		
+		int resultSize = Math.min(soloRecitList.size() ,Constans.SOLO_RECIPE_MIN_VALUE);
+		Collections.shuffle(soloRecitList);
+		
+		return soloRecitList.subList(0, resultSize);
 	}
 	
+	// 최신 레시피 가져오기
 	@Override
-	public List<RecipeCardResponseDTO> getBestRecipe() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<RecipeCardResponseDTO> getRecentRecipe() {
+		List<RecipeCardResponseDTO> recentRecipeList = recipeMapper.getRecentRecipe(RecipeStatus.PUBLIC
+																				  , Constans.RECENT_RECIPE_MIN_VALUE
+																				  , CommentStatus.PUBLIC);
+
+		return recentRecipeList;
 	}
 	
 
@@ -522,7 +556,7 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public Page<RecipeSearchResponseDTO> getRecipesOfFollowingUsers(Long userId, int page, int size) {
 		int offset = page * size;
-		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesOfFollowingUsers(userId, size, offset, RecipeStatus.PUBLIC);
+		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesOfFollowingUsers(userId, size, offset, RecipeStatus.PUBLIC, CommentStatus.PUBLIC);
 		int total = recipeMapper.getRecipesOfFollowingUsersCount(userId, RecipeStatus.PUBLIC);
 		
 		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
@@ -533,7 +567,7 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public Page<RecipeSearchResponseDTO> getRecipesByFollowingUser(Long userId, Long followingId, int page, int size) {
 		int offset = page * size;
-		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesByFollowingUser(userId, followingId, size, offset, RecipeStatus.PUBLIC);
+		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesByFollowingUser(userId, followingId, size, offset, RecipeStatus.PUBLIC, CommentStatus.PUBLIC);
 		int total = recipeMapper.getRecipesByFollowingUserCount(userId, followingId, RecipeStatus.PUBLIC);
 		
 		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
@@ -578,5 +612,9 @@ public class RecipeServiceImpl implements RecipeService {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 	}
+
+
+
+
 
 }

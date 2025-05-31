@@ -10,13 +10,16 @@ import { onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 // 화면 전환
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 // 받을 데이터
-const recipesData = ref(null)
-const followingUsers = ref(null)
+const recipesData = ref(null);
+const followingUsers = ref(null);
 
+// 페이징
+const currentPage = ref(0);
+const currentPageGroup = ref(0);
 
 const selectedFollowingId = ref(null);
 
@@ -25,54 +28,78 @@ const handleUserClick = async (followingId, page = 0) => {
         if (followingId === selectedFollowingId.value) {
             selectedFollowingId.value = null;
             const res = await getRecipesOfFollowingUsers(page);
-            recipesData.value = res.data 
+            currentPage.value = page;
+            currentPageGroup.value = Math.floor(page / 10);
+            recipesData.value = res.data;
         } else {
-            console.log(followingId)
             selectedFollowingId.value = followingId;
             const res = await getRecipesOfFollowingUser(followingId, page);
-            recipesData.value = res.data
-        }    
+            recipesData.value = res.data;
+            currentPage.value = page;
+            currentPageGroup.value = Math.floor(page / 10);
+        }
     } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message)  
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
 
-        window.location.reload()
+        window.location.reload();
     }
 };
 
+// 페이지 그룹 시작 번호 (0부터)
+const pageGroupStart = () => currentPageGroup.value * 10;
 
+// 페이지 그룹 끝 번호 (총 페이지 수보다 크지 않게)
+const pageGroupEnd = () => {
+    if (!recipesData.value) return 0;
+    return Math.min(pageGroupStart() + 10, recipesData.value.page.totalPages);
+};
+
+// 페이지 이동
 const goToPage = (page) => {
     handleUserClick(selectedFollowingId.value, page);
 };
 
+// 이전 10페이지 그룹
+const prevPageGroup = () => {
+    if (currentPageGroup.value > 0) {
+        const newPage = (currentPageGroup.value - 1) * 10;
+        handleUserClick(selectedFollowingId.value, newPage);
+    }
+};
+// 다음 10페이지 그룹
+const nextPageGroup = () => {
+    if (recipesData.value && (currentPageGroup.value + 1) * 10 < recipesData.value.page.totalPages) {
+        const newPage = (currentPageGroup.value + 1) * 10;
+        handleUserClick(selectedFollowingId.value, newPage);
+    }
+};
 
 // 초기 셋팅
-onMounted( async () => {
+onMounted(async () => {
     const page = parseInt(route.query.page) || 0;
 
     try {
         const [getRecipesOfFollowingUsersRes, getFollowingLatestForRecipeRes] = await Promise.all([
-                getRecipesOfFollowingUsers(page),
-                getFollowingLatestForRecipe(),
-            ]);
+            getRecipesOfFollowingUsers(page),
+            getFollowingLatestForRecipe(),
+        ]);
 
-        recipesData.value = getRecipesOfFollowingUsersRes.data
-        followingUsers.value = getFollowingLatestForRecipeRes.data
+        recipesData.value = getRecipesOfFollowingUsersRes.data;
+        followingUsers.value = getFollowingLatestForRecipeRes.data;
     } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message)  
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
 
-        router.push({ name: 'mainPage' })
+        router.push({ name: 'mainPage' });
     }
-            
-
-})
+});
 </script>
 
 <template>
@@ -80,47 +107,65 @@ onMounted( async () => {
         <section class="following-user-section">
             <div><h1>팔로우</h1></div>
             <ul class="following-user-wrap">
-                <li
-                    v-for="(item) in followingUsers"
-                    :key="item.followingId"
-                    @click="handleUserClick(item.followingId)"
-                    class="following-user-box"
-                >
+                <li v-for="item in followingUsers" :key="item.followingId" @click="handleUserClick(item.followingId)" class="following-user-box">
                     <div class="following-info">
                         <div class="following-profile-image-box">
-                            <img :src="item.profileImage" :class="['following-profile-image', { active: selectedFollowingId === item.followingId }]"/>
+                            <img
+                                :src="item.profileImage"
+                                :class="[
+                                    'following-profile-image',
+                                    {
+                                        active: selectedFollowingId === item.followingId,
+                                    },
+                                ]"
+                            />
                         </div>
-                        <span :class="['nickname', { active: selectedFollowingId === item.followingId }]">{{ item.nickname }}</span>
+                        <span
+                            :class="[
+                                'nickname',
+                                {
+                                    active: selectedFollowingId === item.followingId,
+                                },
+                            ]"
+                            >{{ item.nickname }}</span
+                        >
                     </div>
                 </li>
             </ul>
-        </section> 
+        </section>
 
         <section class="feed-recipe-list">
             <div>
                 <ul class="recipe-card-wrap">
-                    <li
-                        v-for="(item, index) in recipesData?.content"
-                        :key="index"
-                    >
-                        <RecipeCard :recipeData = "item" />
+                    <li v-for="(item, index) in recipesData?.content" :key="index">
+                        <RecipeCard :recipeData="item" />
                     </li>
                 </ul>
             </div>
 
             <div class="pagination" v-if="recipesData?.page?.totalPages > 1">
+                <!-- 이전 10개 페이지 그룹 버튼 -->
+                <button v-if="recipesData?.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
+
+                <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
                 <button
-                    v-for="n in recipesData?.page?.totalPages"
-                    :key="n"
-                    :class="{ active: recipesData?.page?.number === n - 1 }"
-                    @click="goToPage(n - 1)"
-                    >
-                    {{ n }}
+                    v-for="n in pageGroupEnd() - pageGroupStart()"
+                    :key="n + pageGroupStart()"
+                    :class="{
+                        active: recipesData?.page.number === n + pageGroupStart() - 1,
+                    }"
+                    @click="goToPage(n + pageGroupStart() - 1)"
+                >
+                    {{ n + pageGroupStart() }}
+                </button>
+
+                <!-- 다음 10개 페이지 그룹 버튼 -->
+                <button v-if="recipesData?.page.totalPages > 10 && (currentPageGroup + 1) * 10 < recipesData?.page.totalPages" @click="nextPageGroup">
+                    &gt;&gt;
                 </button>
             </div>
         </section>
     </div>
-    
 </template>
 
 <style lang="scss" scoped>
@@ -130,12 +175,12 @@ onMounted( async () => {
     padding-top: 4rem;
     padding-bottom: 4rem;
 
-    .following-user-section{
-        .following-user-wrap{
+    .following-user-section {
+        .following-user-wrap {
             display: flex;
             overflow-x: scroll; // 항상 공간 확보
             margin-top: 1rem;
-            
+
             // 크롬, 엣지, 사파리
             &::-webkit-scrollbar {
                 height: 6px;
@@ -149,14 +194,13 @@ onMounted( async () => {
                 background-color: rgba(150, 150, 150, 0.5); // 항상 보이게
                 border-radius: 4px;
             }
-            
-            .following-user-box {
 
+            .following-user-box {
                 cursor: pointer;
                 width: 8rem;
                 min-width: 8rem;
                 margin-top: 1rem;
-                
+
                 .following-info {
                     text-align: center;
                     .following-profile-image-box {
@@ -188,29 +232,26 @@ onMounted( async () => {
                         letter-spacing: 0.05rem;
                         width: 6rem;
                         margin: auto;
-                        
-                        &.active{
+
+                        &.active {
                             color: rgb(170, 81, 45);
                             font-weight: bold;
                         }
                     }
-
                 }
             }
         }
-        
     }
-   
-    
-    .feed-recipe-list { 
+
+    .feed-recipe-list {
         margin-top: 3rem;
-        
+
         .recipe-card-wrap {
-            display: grid; 
+            display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 4rem 1.5rem;
             border-top: 1px solid rgb(224, 224, 224);
-            padding-top: 3rem
+            padding-top: 3rem;
         }
 
         .pagination {
@@ -229,9 +270,13 @@ onMounted( async () => {
                     color: white;
                     font-weight: bold;
                 }
+
+                &:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                }
             }
         }
-    }   
+    }
 }
-
 </style>

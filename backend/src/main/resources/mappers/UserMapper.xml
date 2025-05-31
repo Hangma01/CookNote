@@ -238,6 +238,7 @@
 					   COMMENT_ID
 					  </if>							<!-- 타겟 아이디 (RECIPE_ID, COMMENT_ID) -->
 		  			 , REPORTER_ID					<!-- 신고자 -->
+		  			 , REPORTED_ID
 		  			 , CATEGORY_REPORT_REASON_ID	<!-- 신고 카테고리 아이디 -->
 		  			  )
 		VALUES (
@@ -249,6 +250,7 @@
 			    #{reportInsertReq.commentId}
 			    </if>
 			  , #{userId}
+			  , #{reportInsertReq.reportedId}
 			  , #{reportInsertReq.categoryReportReasonId}
 				)
 	</insert>
@@ -300,6 +302,31 @@
 		 WHERE WRITER_ID = #{userId}
 		    OR PARENT_COMMENT_ID = #{userId}
 	</update>
+	
+	<!-- 신고 내역 가져오기 -->
+	<select id="getReports" resultType="UserReportResponseDTO">
+		SELECT RPT.REPORT_TYPE 		  AS REPORT_TYPE
+			 , RPT.CREATE_AT 		  AS REPORT_CREATE_AT
+			 , RPT.STATUS 			  AS REPORT_STATUS
+			 , U.NICKNAME 			  AS REPORTED_NICKNAME
+			 , CRR.TYPE 			  AS REPORT_REASON
+		  FROM REPORT 				  AS RPT
+	INNER JOIN USER 				  AS U
+		    ON RPT.REPORTER_ID = U.USER_ID
+    INNER JOIN CATEGORY_REPORT_REASON AS CRR
+    		ON CRR.CATEGORY_REPORT_REASON_ID = RPT.CATEGORY_REPORT_REASON_ID
+    	 WHERE RPT.REPORTER_ID = #{userId}
+      ORDER BY RPT.CREATE_AT DESC
+    	 LIMIT #{size}
+    	OFFSET #{offset}
+	</select>
+	
+	<!-- 신고 내역 카운트 -->
+	<select id="getReportsCount">
+		SELECT COUNT(REPORT_ID)
+		  FROM REPORT
+    	 WHERE REPORTER_ID = #{userId}
+	</select>
 	
 	<!-- 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.5 (인기순) -->
 	<select id="getSearchChefList" resultType="UserSearchChefResponseDTO">

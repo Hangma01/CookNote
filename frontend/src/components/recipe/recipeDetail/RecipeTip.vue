@@ -1,19 +1,16 @@
 <script setup>
-import { getDetailRecipe } from "@/services/recipeService";
-import { onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-
+import { getDetailRecipe } from '@/services/recipeService';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 // 화면 전환
 const router = useRouter();
 
-
-const props = defineProps({ 
-    recipeTip: { 
-        type: String
+const props = defineProps({
+    recipeTip: {
+        type: String,
     },
-})
-
+});
 </script>
 
 <template>
@@ -34,20 +31,18 @@ const props = defineProps({
 <style lang="scss" scoped>
 .recipe-detail-seq-section {
     margin-top: 5rem;
-    
 
     .section-title {
         font-size: 1.2rem;
         font-weight: bold;
         border-bottom: 2px solid rgb(147, 112, 98);
         padding-bottom: 1rem;
-        margin-bottom: 0.7em
+        margin-bottom: 0.7em;
     }
 
     .recipe-tip {
         white-space: pre-wrap;
         font-size: 0.9rem;
     }
-
 }
 </style>

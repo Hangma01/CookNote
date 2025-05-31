@@ -1,19 +1,16 @@
 <script setup>
-import { getDetailRecipe } from "@/services/recipeService";
-import { onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-
+import { getDetailRecipe } from '@/services/recipeService';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 // 화면 전환
 const router = useRouter();
 
-
-const props = defineProps({ 
-    recipeIngredients: { 
-        type: Object    
+const props = defineProps({
+    recipeIngredients: {
+        type: Object,
     },
-})
-
+});
 </script>
 
 <template>
@@ -36,7 +33,7 @@ const props = defineProps({
                     </div>
 
                     <div class="igredients-remark" v-if="item.remark">
-                        <font-awesome-icon :icon="['far', 'circle-check']" class="remark-icon"/>
+                        <font-awesome-icon :icon="['far', 'circle-check']" class="remark-icon" />
                         <span>{{ item.remark }}</span>
                     </div>
                 </li>
@@ -48,7 +45,6 @@ const props = defineProps({
 
 <style lang="scss" scoped>
 .recipe-detail-ingredient-section {
-
     margin-top: 5rem;
 
     .section-title {
@@ -56,16 +52,16 @@ const props = defineProps({
         font-weight: bold;
         border-bottom: 2px solid rgb(147, 112, 98);
         padding-bottom: 1rem;
-        margin-bottom: 0.7em
+        margin-bottom: 0.7em;
     }
-    
+
     .item-grid {
-        column-count: 2; 
-        column-gap: 2rem; 
+        column-count: 2;
+        column-gap: 2rem;
     }
-    
+
     .item-box {
-        break-inside: avoid; 
+        break-inside: avoid;
         padding: 0 0.3rem;
         padding-top: 0.5rem;
         font-size: 0.85rem;
@@ -81,9 +77,8 @@ const props = defineProps({
                 .igredients-quantity {
                     color: rgb(117, 117, 117);
                 }
-            }    
+            }
             .igredients-remark {
-                
                 font-size: 0.8rem;
                 color: rgb(117, 117, 117);
 
@@ -95,6 +90,4 @@ const props = defineProps({
         }
     }
 }
-
-
 </style>

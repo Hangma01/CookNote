@@ -1,10 +1,9 @@
-<script setup>const props = defineProps({ 
-
-youtubeVideoId: { 
-        type: String    
+<script setup>
+const props = defineProps({
+    youtubeVideoId: {
+        type: String,
     },
-})
-
+});
 </script>
 
 <template>
@@ -13,13 +12,14 @@ youtubeVideoId: {
             <p>동영상</p>
         </div>
         <div class="youtube-video-wrap">
-            <iframe :src="`https://www.youtube.com/embed/${props?.youtubeVideoId}`" 
-            title="YouTube video player" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin" 
-            allowfullscreen
-            class="yotube-video"
+            <iframe
+                :src="`https://www.youtube.com/embed/${props?.youtubeVideoId}`"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+                class="yotube-video"
             ></iframe>
         </div>
     </div>
@@ -35,7 +35,7 @@ youtubeVideoId: {
         font-weight: bold;
         border-bottom: 2px solid rgb(147, 112, 98);
         padding-bottom: 1rem;
-        margin-bottom: 0.7em
+        margin-bottom: 0.7em;
     }
 
     .youtube-video-wrap {
@@ -48,6 +48,5 @@ youtubeVideoId: {
             border-radius: 0.8rem;
         }
     }
-
 }
 </style>

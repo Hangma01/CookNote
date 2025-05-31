@@ -19,13 +19,8 @@ public class CommentUserWriteResponseDTO {
 	private String title;						// 레시피 제목
     private String description;					// 레시피 요리소개
     private String thumbnail;					// 레시피 썸네일
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
     private LocalDateTime createAt;				// 레시피 작성 날짜
-
     private Long commentId;						// 댓글 아이디
-    
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
     private LocalDateTime commentCreateAt;		// 댓글 작성 날짜
 	private String commentContent;				// 댓글 내용		
 	

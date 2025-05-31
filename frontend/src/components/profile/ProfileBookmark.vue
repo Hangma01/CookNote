@@ -4,37 +4,40 @@ import { getRecipeBookmark, recipeBookmarkDelete } from '@/services/recipeServic
 import { errorMessages } from '@/utils/messages/errorMessages';
 import ProfileRecipeCard from './ProfileRecipeCard.vue';
 
-
-const activeRecipeMenuMap = reactive({});           // 게시글 메뉴 활성화
-const recipeItemRefs = ref({});                     // 외부 클릭 시 게시글 메뉴 닫히기
+const activeRecipeMenuMap = reactive({}); // 게시글 메뉴 활성화
+const recipeItemRefs = ref({}); // 외부 클릭 시 게시글 메뉴 닫히기
 
 // 레시피 데이터
 const recipeData = ref(null);
+
+// 페이징
+const currentPage = ref(0);
+const currentPageGroup = ref(0);
 
 // 메뉴 토글
 const toggleRecipeMenu = (event, recipeId) => {
     event.stopPropagation();
     activeRecipeMenuMap[recipeId] = !activeRecipeMenuMap[recipeId];
-    closeRecipeMenu(event)
+    closeRecipeMenu(event);
 };
 
 // 외부 클릭 시 메뉴 닫기
 const closeRecipeMenu = (event) => {
-  for (const recipeId in activeRecipeMenuMap) {
-    const refElement = recipeItemRefs.value[recipeId];
-    
-    if (activeRecipeMenuMap[recipeId] && refElement && !refElement.contains(event.target)) {
-      activeRecipeMenuMap[recipeId] = false;
+    for (const recipeId in activeRecipeMenuMap) {
+        const refElement = recipeItemRefs.value[recipeId];
+
+        if (activeRecipeMenuMap[recipeId] && refElement && !refElement.contains(event.target)) {
+            activeRecipeMenuMap[recipeId] = false;
+        }
     }
-  }
 };
 
 const setRecipeMenuRef = (el, recipeId) => {
-  if (el) {
-    recipeItemRefs.value[recipeId] = el;
-  } else {
-    delete recipeItemRefs.value[recipeId];
-  }
+    if (el) {
+        recipeItemRefs.value[recipeId] = el;
+    } else {
+        delete recipeItemRefs.value[recipeId];
+    }
 };
 
 // 데이터 가져오기
@@ -42,61 +45,88 @@ const loadRecipBookmark = async (page = 0) => {
     try {
         const res = await getRecipeBookmark(page); // page 파라미터 넘김
 
-        recipeData.value = res.data
-
-    } catch (e) {        
+        recipeData.value = res.data;
+        currentPage.value = page;
+        currentPageGroup.value = Math.floor(page / 10);
+    } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
 
-        router.push({ name : 'mainPage'})
+        router.push({ name: 'mainPage' });
     }
 };
-
 
 // 북마크 삭제하기
 const handleBookmarkDelete = async (recipeId) => {
-    
-    const proceed = confirm("북마크를 정말 삭제하시겠습니까?");
+    const proceed = confirm('북마크를 정말 삭제하시겠습니까?');
 
-    if(proceed) {
+    if (proceed) {
         try {
             await recipeBookmarkDelete(recipeId);
-            loadRecipBookmark();
+
+            // 현재 페이지와 탭 정보 저장
+            const currentPageValue = currentPage.value;
+            const res = loadRecipBookmark(currentPageValue);
+
+            const content = res.data?.content || [];
+
+            if (content.length === 0 && currentPageValue > 0) {
+                // 현재 페이지에 댓글이 더 이상 없고, 이전 페이지가 있다면 이전 페이지로 이동
+                await loadRecipBookmark(currentPage.value - 1);
+            } else {
+                recipeData.value = res.data;
+                currentPage.value = currentPageValue;
+                currentPageGroup.value = Math.floor(currentPageValue / 10);
+            }
         } catch (e) {
-            alert('북마크를 삭제하지 못했습니다.')
+            alert('북마크를 삭제하지 못했습니다.');
         }
-    } else{
+    } else {
         activeRecipeMenuMap[recipeId] = !activeRecipeMenuMap[recipeId];
     }
-}
+};
 
+// 페이지 그룹 시작 번호 (0부터)
+const pageGroupStart = () => currentPageGroup.value * 10;
+
+// 페이지 그룹 끝 번호 (총 페이지 수보다 크지 않게)
+const pageGroupEnd = () => {
+    if (!recipeData.value) return 0;
+    return Math.min(pageGroupStart() + 10, recipeData.value.page.totalPages);
+};
+
+// 페이지 이동
 const goToPage = (page) => {
-    loadRecipBookmark(page)
+    loadRecipBookmark(page);
+};
+
+// 이전 10페이지 그룹
+const prevPageGroup = () => {
+    if (currentPageGroup.value > 0) {
+        const newPage = (currentPageGroup.value - 1) * 10;
+        loadRecipBookmark(newPage);
+    }
+};
+// 다음 10페이지 그룹
+const nextPageGroup = () => {
+    if (recipeData.value && (currentPageGroup.value + 1) * 10 < recipeData.value.page.totalPages) {
+        const newPage = (currentPageGroup.value + 1) * 10;
+        loadRecipBookmark(newPage);
+    }
 };
 
 onMounted(async () => {
-    try {
-        loadRecipBookmark();
-    } catch (e) {
-        if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
-        } else {
-            alert(errorMessages.BADREQUEST)
-        }
+    loadRecipBookmark();
 
-        router.push({ name : 'mainPage'})
-    }
-    
     document.addEventListener('click', closeRecipeMenu);
-})
+});
 
 onBeforeUnmount(() => {
     document.removeEventListener('click', closeRecipeMenu);
 });
-
 </script>
 
 <template>
@@ -105,41 +135,40 @@ onBeforeUnmount(() => {
     </div>
     <div class="line"></div>
 
-    
     <div v-if="recipeData?.content.length > 0">
         <ul>
-            <li 
-                class="recipe-bookmark-content"
-                v-for="(item) in recipeData?.content"
-                :key="item.recipeId"
-            >
-                <ProfileRecipeCard :recipeData = "item" />
+            <li class="recipe-bookmark-content" v-for="item in recipeData?.content" :key="item.recipeId">
+                <ProfileRecipeCard :recipeData="item" />
 
                 <div class="menu-wrap">
-                <div class="menu-icon" @click="toggleRecipeMenu($event, item.recipeId)">
-                    <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" />
-                </div>
-                
+                    <div class="menu-icon" @click="toggleRecipeMenu($event, item.recipeId)">
+                        <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" />
+                    </div>
 
-                <div class="menu"
-                        v-if="activeRecipeMenuMap[item.recipeId]" 
-                        :ref="el => setRecipeMenuRef(el, item.recipeId)">
-                        <button @click="handleBookmarkDelete(item.recipeId)" class="btn">
-                            삭제
-                        </button>
+                    <div class="menu" v-if="activeRecipeMenuMap[item.recipeId]" :ref="(el) => setRecipeMenuRef(el, item.recipeId)">
+                        <button @click="handleBookmarkDelete(item.recipeId)" class="btn">삭제</button>
                     </div>
                 </div>
             </li>
         </ul>
 
         <div class="pagination" v-if="recipeData?.page?.totalPages > 1">
+            <!-- 이전 10개 페이지 그룹 버튼 -->
+            <button v-if="recipeData.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
+
+            <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
             <button
-                v-for="n in recipeData?.page?.totalPages"
-                :key="n"
-                :class="{ active: recipeData?.page?.number === n - 1 }"
-                @click="goToPage(n - 1)"
-                >
-                {{ n }}
+                v-for="n in pageGroupEnd() - pageGroupStart()"
+                :key="n + pageGroupStart()"
+                :class="{ active: recipeData.page.number === n + pageGroupStart() - 1 }"
+                @click="goToPage(n + pageGroupStart() - 1)"
+            >
+                {{ n + pageGroupStart() }}
+            </button>
+
+            <!-- 다음 10개 페이지 그룹 버튼 -->
+            <button v-if="recipeData.page.totalPages > 10 && (currentPageGroup + 1) * 10 < recipeData.page.totalPages" @click="nextPageGroup">
+                &gt;&gt;
             </button>
         </div>
     </div>
@@ -163,15 +192,12 @@ onBeforeUnmount(() => {
     color: #c09370;
 }
 
-
 .recipe-bookmark-content {
     display: flex;
     justify-content: space-between;
     margin-top: 2rem;
     padding-bottom: 2rem;
-    border-bottom: 1px solid rgb(224, 224, 224);    
-
-
+    border-bottom: 1px solid rgb(224, 224, 224);
 
     .menu-wrap {
         color: rgb(124, 124, 124);
@@ -204,9 +230,8 @@ onBeforeUnmount(() => {
     }
 }
 
-
 .pagination {
-    margin-top: 1rem;
+    margin-top: 3rem;
     text-align: center;
 
     button {
@@ -217,9 +242,14 @@ onBeforeUnmount(() => {
         cursor: pointer;
 
         &.active {
-        background-color: #a89d94;
-        color: white;
-        font-weight: bold;
+            background-color: #a89d94;
+            color: white;
+            font-weight: bold;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
     }
 }

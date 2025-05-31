@@ -1,11 +1,10 @@
 <script setup>
-import { defineAsyncComponent } from "vue"
+import { defineAsyncComponent } from 'vue';
 
-const Logo = defineAsyncComponent(() => import("@/components/logo/Logo.vue"))
-const SearchBar = defineAsyncComponent(() => import("./SearchBar.vue"))
-const UserAciton = defineAsyncComponent(() => import("./UserAction.vue"))
-const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
-
+const Logo = defineAsyncComponent(() => import('@/components/logo/Logo.vue'));
+const SearchBar = defineAsyncComponent(() => import('./SearchBar.vue'));
+const UserAciton = defineAsyncComponent(() => import('./UserAction.vue'));
+const NavMenu = defineAsyncComponent(() => import('./NavMenu.vue'));
 </script>
 
 <template>
@@ -17,7 +16,7 @@ const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
             <!-- <SearchBar /> -->
             <UserAciton />
         </div>
-        
+
         <nav class="nav">
             <NavMenu />
         </nav>
@@ -36,9 +35,9 @@ const NavMenu = defineAsyncComponent(() => import("./NavMenu.vue"))
     padding-bottom: 2rem;
 }
 
-.nav{
-    border-bottom: 1px solid rgb(244,244,244);
-    background-color: rgb(244, 240, 239) ;
+.nav {
+    border-bottom: 1px solid rgb(244, 244, 244);
+    background-color: rgb(244, 240, 239);
     height: 3rem;
 }
 </style>

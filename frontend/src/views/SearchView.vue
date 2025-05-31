@@ -10,75 +10,70 @@ import { onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 // 화면 전환
-const router = useRouter()
-const route = useRoute()
-
-
+const router = useRouter();
+const route = useRoute();
 
 // 검색 데이터
-const searchData = ref()
+const searchData = ref();
+
+// 페이징
+const currentPage = ref(0);
+const currentPageGroup = ref(0);
 
 // 검색어
-const keyword = ref(null)
+const keyword = ref(null);
 
 // 카테고리 데이터
-const categories = ref(null)
+const categories = ref(null);
 
 // 조건 데이터
-const conditionalType = ref(ConditonalType.POPULAR)
+const conditionalType = ref(ConditonalType.POPULAR);
 
 // 조건 토글
 const selectConditionalType = (type) => {
-  conditionalType.value = type;
-  handleSearch(); // 정렬 변경 후 재검색
+    conditionalType.value = type;
+    handleSearch(currentPage.value, false);
 };
 
 const formValues = reactive({
     categories: {
         cuisine: { id: 0, type: '종류' },
-        purpose: { id: 0, type: '목적' }
-    }
-})
-
-const handleSearchReq = () => {
-    
-    if (!keyword.value || keyword.value.trim() === '') {
-        keyword.value=''
-        alert(errorMessages.SEARCH_EMPTY_VALUE_ERROR_MESSAGE);
-        return;  // 검색 진행하지 않고 함수 종료
-    }
-    
-    handleSearch()
-}
+        purpose: { id: 0, type: '목적' },
+    },
+});
 
 // 검색 실행
-const handleSearch = async(page = 0) => {
-    // 쿼리스트링에 검색조건 반영
-    router.replace({
-        query: {
-            keyword: keyword.value || '',
-            categorycuisine: formValues.categories.cuisine.id,
-            categorypurpose: formValues.categories.purpose.id,            
-            conditionalType: conditionalType.value,
-            page,
-        }
-    });
-
+const handleSearch = async (page = 0, isReplace = true) => {
+    if (isReplace) {
+        // 쿼리스트링에 검색조건 반영
+        router.replace({
+            query: {
+                keyword: keyword.value || '',
+                categorycuisine: formValues.categories.cuisine.id,
+                categorypurpose: formValues.categories.purpose.id,
+                conditionalType: conditionalType.value,
+                page,
+            },
+        });
+    }
 
     try {
         const res = await getRecipeSearch(
-              keyword.value
-            , formValues.categories.cuisine.id
-            , formValues.categories.purpose.id
-            , conditionalType.value
-            , page
-        )
-        searchData.value = res.data
+            keyword.value,
+            formValues.categories.cuisine.id,
+            formValues.categories.purpose.id,
+            conditionalType.value,
+            page
+        );
+        searchData.value = res.data;
+
+        currentPage.value = page;
+        currentPageGroup.value = Math.floor(page / 10);
     } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
     }
 };
@@ -88,72 +83,99 @@ const initCategoryFromQuery = () => {
     const cuisineId = parseInt(route.query.categorycuisine);
     const purposeId = parseInt(route.query.categorypurpose);
     keyword.value = route.query.keyword || '';
-    conditionalType.value = route.query.conditionalType || ConditonalType.POPULAR
+    conditionalType.value = route.query.conditionalType || ConditonalType.POPULAR;
 
     if (!isNaN(cuisineId) && categories.value?.categoryCuisineList) {
-        const cuisine = categories.value.categoryCuisineList.find(c => c.id === cuisineId);
+        const cuisine = categories.value.categoryCuisineList.find((c) => c.id === cuisineId);
         if (cuisine) {
-            formValues.categories.cuisine = cuisine
+            formValues.categories.cuisine = cuisine;
         }
     }
 
     if (!isNaN(purposeId) && categories.value?.categoryPurposeList) {
-        const purpose = categories.value.categoryPurposeList.find(p => p.id === purposeId);
+        const purpose = categories.value.categoryPurposeList.find((p) => p.id === purposeId);
         if (purpose) {
-            formValues.categories.purpose = purpose
+            formValues.categories.purpose = purpose;
         }
     }
-
 };
 
+// 페이지 그룹 시작 번호 (0부터)
+const pageGroupStart = () => currentPageGroup.value * 10;
 
+// 페이지 그룹 끝 번호 (총 페이지 수보다 크지 않게)
+const pageGroupEnd = () => {
+    if (!searchData.value) return 0;
+    return Math.min(pageGroupStart() + 10, searchData.value.page.totalPages);
+};
+
+// 페이지 이동
 const goToPage = (page) => {
     handleSearch(page);
 };
 
-watch(() => formValues.categories.cuisine.id, () => {
-    handleSearch()
-})
-
-watch(() => formValues.categories.purpose.id, () => {
-    handleSearch()
-})
-
+// 이전 10페이지 그룹
+const prevPageGroup = () => {
+    if (currentPageGroup.value > 0) {
+        const newPage = (currentPageGroup.value - 1) * 10;
+        handleSearch(newPage);
+    }
+};
+// 다음 10페이지 그룹
+const nextPageGroup = () => {
+    if (searchData.value && (currentPageGroup.value + 1) * 10 < searchData.value.page.totalPages) {
+        const newPage = (currentPageGroup.value + 1) * 10;
+        handleSearch(newPage);
+    }
+};
 
 watch(
-  () => route.query,
-  (newQuery, oldQuery) => {
-    // 쿼리 변경 시 검색 조건 초기화 또는 검색 실행
-    initCategoryFromQuery()
-  }
-)
+    () => formValues.categories.cuisine.id,
+    () => {
+        handleSearch();
+    }
+);
+
+watch(
+    () => formValues.categories.purpose.id,
+    () => {
+        handleSearch();
+    }
+);
+
+watch(
+    () => route.query,
+    (newQuery, oldQuery) => {
+        // 쿼리 변경 시 검색 조건 초기화 또는 검색 실행
+        initCategoryFromQuery();
+    }
+);
 
 // 초기 셋팅
 onMounted(async () => {
     const page = parseInt(route.query.page) || 0;
     try {
-        const categoriesRes = await getCategory()
+        const categoriesRes = await getCategory();
         categories.value = {
-                            categoryCuisineList: [{ id: 0, type: '종류' }, ...categoriesRes.data.categoryCuisineList],
-                            categoryPurposeList: [{ id: 0, type: '목적' }, ...categoriesRes.data.categoryPurposeList],
-        }
+            categoryCuisineList: [{ id: 0, type: '종류' }, ...categoriesRes.data.categoryCuisineList],
+            categoryPurposeList: [{ id: 0, type: '목적' }, ...categoriesRes.data.categoryPurposeList],
+        };
 
         // 카테고리 로딩 후 쿼리 반영
         initCategoryFromQuery();
     } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message)  
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
     }
 
     handleSearch(page);
-})
+});
 </script>
 
 <template>
-
     <div class="search-container">
         <section class="search-bar-wrap">
             <div class="search-bar">
@@ -166,9 +188,9 @@ onMounted(async () => {
                     placeholder="검색어를 입력하세요."
                     append-inner-icon="mdi-magnify"
                     aria-autocomplete="false"
-                    @click:append-inner="handleSearchReq()"
-                    @keyup.enter="handleSearchReq()"
-			/>
+                    @click:append-inner="handleSearch()"
+                    @keyup.enter="handleSearch()"
+                />
             </div>
 
             <div class="category-wrap">
@@ -189,50 +211,61 @@ onMounted(async () => {
                     class="category"
                 />
             </div>
-            
+
             <div class="conditional-box">
-                <button 
-                class="conditional-btn"
-                :class="{ active: conditionalType === ConditonalType.POPULAR }"
-                @click="selectConditionalType(ConditonalType.POPULAR)"
+                <button
+                    class="conditional-btn"
+                    :class="{
+                        active: conditionalType === ConditonalType.POPULAR,
+                    }"
+                    @click="selectConditionalType(ConditonalType.POPULAR)"
                 >
                     인기순
                 </button>
                 <button
-                class="conditional-btn"
-                :class="{ active: conditionalType === ConditonalType.LATEST }"
-                @click="selectConditionalType(ConditonalType.LATEST)"
+                    class="conditional-btn"
+                    :class="{
+                        active: conditionalType === ConditonalType.LATEST,
+                    }"
+                    @click="selectConditionalType(ConditonalType.LATEST)"
                 >
                     최신순
                 </button>
             </div>
-        </section> 
+        </section>
 
         <section class="search-recipe-list">
             <div>
                 <ul class="recipe-card-wrap">
-                    <li
-                        v-for="(item, index) in searchData?.content"
-                        :key="index"
-                    >
-                        <RecipeCard :recipeData = "item" />
+                    <li v-for="(item, index) in searchData?.content" :key="index">
+                        <RecipeCard :recipeData="item" />
                     </li>
                 </ul>
             </div>
 
             <div class="pagination" v-if="searchData?.page?.totalPages > 1">
+                <!-- 이전 10개 페이지 그룹 버튼 -->
+                <button v-if="searchData?.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
+
+                <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
                 <button
-                    v-for="n in searchData?.page?.totalPages"
-                    :key="n"
-                    :class="{ active: searchData?.page?.number === n - 1 }"
-                    @click="goToPage(n - 1)"
-                    >
-                    {{ n }}
+                    v-for="n in pageGroupEnd() - pageGroupStart()"
+                    :key="n + pageGroupStart()"
+                    :class="{
+                        active: searchData?.page.number === n + pageGroupStart() - 1,
+                    }"
+                    @click="goToPage(n + pageGroupStart() - 1)"
+                >
+                    {{ n + pageGroupStart() }}
+                </button>
+
+                <!-- 다음 10개 페이지 그룹 버튼 -->
+                <button v-if="searchData?.page.totalPages > 10 && (currentPageGroup + 1) * 10 < searchData?.page.totalPages" @click="nextPageGroup">
+                    &gt;&gt;
                 </button>
             </div>
         </section>
     </div>
-    
 </template>
 
 <style lang="scss" scoped>
@@ -242,11 +275,10 @@ onMounted(async () => {
     padding-top: 4rem;
     padding-bottom: 4rem;
 
-
     .search-bar-wrap {
         text-align: center;
-        border-bottom: 1px solid rgb(224,224,224);
-        
+        border-bottom: 1px solid rgb(224, 224, 224);
+
         .search-bar {
             width: 30rem;
             margin: auto;
@@ -262,9 +294,8 @@ onMounted(async () => {
             .category {
                 width: 3rem;
             }
-
         }
-        
+
         .conditional-box {
             margin-top: 3rem;
             margin-bottom: 1rem;
@@ -275,7 +306,7 @@ onMounted(async () => {
 
             .conditional-btn {
                 color: #a89d94;
-                
+
                 &.active {
                     color: rgb(147, 112, 98);
                     font-weight: bold;
@@ -283,13 +314,12 @@ onMounted(async () => {
             }
         }
     }
-    
-    
-    .search-recipe-list { 
+
+    .search-recipe-list {
         margin-top: 2rem;
-        
+
         .recipe-card-wrap {
-            display: grid; 
+            display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 4rem 1.5rem;
         }
@@ -310,9 +340,13 @@ onMounted(async () => {
                     color: white;
                     font-weight: bold;
                 }
+
+                &:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                }
             }
         }
-    }   
+    }
 }
-
 </style>

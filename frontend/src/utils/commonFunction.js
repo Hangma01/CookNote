@@ -1,13 +1,13 @@
-import { HttpStatusCode } from "axios";
+import { HttpStatusCode } from 'axios';
 import { verifyMailAuthCode } from '@/services/mailService';
-import { getUserProfile } from "@/services/userService";
-import { useUserStore } from "@/stores/user";
-
+import { getUserProfile } from '@/services/userService';
+import { useUserStore } from '@/stores/user';
+import { errorMessages } from './messages/errorMessages';
 
 const userStore = useUserStore();
 
 // 중복 체크 함수
-export const commonCheckDuplicate = async ({ value, validatorRef, errorMsgRef, successMsgRef, apiCall, router }) => {
+export const commonCheckDuplicate = async ({ value, validatorRef, errorMsgRef, successMsgRef, apiCall }) => {
     const isValid = await validatorRef.value?.validate();
 
     if (!value || isValid?.[0]) {
@@ -18,25 +18,21 @@ export const commonCheckDuplicate = async ({ value, validatorRef, errorMsgRef, s
 
     try {
         const res = await apiCall(value);
-        errorMsgRef.value = ''
-        successMsgRef.value = true
+        errorMsgRef.value = '';
+        successMsgRef.value = true;
     } catch (e) {
-        
         if (e.response.data && e.response.data.status === HttpStatusCode.BadRequest && e.response.data.message) {
             errorMsgRef.value = e.response.data.message;
             successMsgRef.value = false;
         } else {
-            alert('서버와의 통신이 원활하지 않습니다. 잠시 후 다시 시도해주세요.');
-            if (router) {
-                router.replace('/login');
-            }
+            alert(errorMessages.BADREQUEST);
+            window.location.reload();
         }
     }
 };
 
 // 메일 인증 코드 검증
-export const commonVerifyMailAuthCode = async (
-  email, authCodeValue, isAuthCodeRequest, setResultState) => {
+export const commonVerifyMailAuthCode = async (email, authCodeValue, isAuthCodeRequest, setResultState) => {
     try {
         const res = await verifyMailAuthCode(email, authCodeValue.value);
 
@@ -53,7 +49,7 @@ export const commonVerifyMailAuthCode = async (
         }
 
         isAuthCodeRequest.value = false;
-        authCodeValue.value = ''
+        authCodeValue.value = '';
         setResultState(false, '');
     }
 };
@@ -66,24 +62,21 @@ export const commonInputHangle = (e, maxLength, setValue) => {
 
 // 로그인 체크
 export const loginCheck = (router) => {
-    const proceed = confirm("로그인이 필요한 서비스입니다. 로그인 페이지로 이동할까요?");
+    const proceed = confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동할까요?');
     if (proceed) {
-        router.push({ name: 'login'})
+        router.push({ name: 'login' });
     }
-}
-
+};
 
 // 랜덤 UUID 추출출
 export const generateId = () => crypto.randomUUID();
 
-
 // 프로필 로드
 export const loadProfile = async (isHostProfileStatus) => {
-
-    const res = await getUserProfile()
-    console.log(res)
+    const res = await getUserProfile();
+    console.log(res);
     userStore.setProfile({
-                            ...res.data
-                        , isHostProfile: isHostProfileStatus
-                        })
-}
+        ...res.data,
+        isHostProfile: isHostProfileStatus,
+    });
+};

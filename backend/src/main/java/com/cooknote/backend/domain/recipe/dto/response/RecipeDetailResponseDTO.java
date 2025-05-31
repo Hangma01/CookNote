@@ -43,7 +43,6 @@ public class RecipeDetailResponseDTO {
     private int categoryCuisineId;									// 카테고리 - 요리 종류 (FK)
     private int categoryPurposeId;									// 카테고리 - 요리 목적 (FK)
     private Long writerId;											// 작성자 아이디
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime createAt;									// 생성 날짜
     
     private String writerNickname;									// 레시피 작성자 닉네임

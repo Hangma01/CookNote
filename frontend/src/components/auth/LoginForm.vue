@@ -17,45 +17,44 @@ const router = useRouter();
 const userStore = useUserStore();
 
 // 유효성 겁사
-const formRef = ref(null);      				// Form 유효성 검사
+const formRef = ref(null); // Form 유효성 검사
 
 // input-field
-const formValues = reactive({             	    // Form input-field 
-  id: '',
-  password: '',
-})
+const formValues = reactive({
+    // Form input-field
+    id: '',
+    password: '',
+});
 
 // etc...
-const pwVisible = ref(false)            		// 새 비밀번호 필드 토글
-
+const pwVisible = ref(false); // 새 비밀번호 필드 토글
 
 // 로그인 요청
 const handleLogin = debounce(async () => {
-	
-	const isFormVal = await formRef.value.validate()
+    const isFormVal = await formRef.value.validate();
 
-	if (isFormVal.valid) {
+    if (isFormVal.valid) {
         try {
-            const res = await login({...formValues})
-            const accessToken = res.headers[commonValues.AUTHORIZATION_HEADER]
+            const res = await login({ ...formValues });
+            const accessToken = res.headers[commonValues.AUTHORIZATION_HEADER];
 
             // jwt 디코딩
-            const token = accessToken.replace('Bearer ', '')
-            const decodedToken = jwtDecode(token)
-            const userId = decodedToken.userId  
+            const token = accessToken.replace('Bearer ', '');
+            const decodedToken = jwtDecode(token);
+            const userId = decodedToken.userId;
 
-            userStore.login(accessToken, userId)
-        
-            router.replace({name : "mainPage"})
+            userStore.login(accessToken, userId);
+
+            router.replace({ name: 'mainPage' });
         } catch (e) {
-            alert(errorMessages.LOGIN_ERROR)
+            alert(errorMessages.LOGIN_ERROR);
         }
-	}
+    }
 }, commonValues.DEFALUT_DEBOUNCE);
 </script>
 
 <template>
-  <AuthHeader />
+    <AuthHeader />
     <v-form ref="formRef" class="login-form" @submit.prevent="handleLogin">
         <div class="login-content">
             <v-text-field
@@ -83,30 +82,21 @@ const handleLogin = debounce(async () => {
             />
         </div>
 
-        <v-btn type="submit" class="login-btn">
-            로그인
-        </v-btn>
+        <v-btn type="submit" class="login-btn"> 로그인 </v-btn>
     </v-form>
 
-    
     <div class="find-wrap">
         <ul class="find-box">
             <li>
-                <router-link :to="{ name: 'userFindPw' }" class="find-text">
-                    비밀번호 찾기
-                </router-link>
+                <router-link :to="{ name: 'userFindPw' }" class="find-text"> 비밀번호 찾기 </router-link>
             </li>
 
             <li>
-                <router-link :to="{ name: 'userFindId' }" class="find-text">
-                    아이디 찾기
-                </router-link>
+                <router-link :to="{ name: 'userFindId' }" class="find-text"> 아이디 찾기 </router-link>
             </li>
 
-            <li> 
-                <router-link :to="{ name: 'userjoin' }" class="find-text">
-                    회원가입
-                </router-link>
+            <li>
+                <router-link :to="{ name: 'userjoin' }" class="find-text"> 회원가입 </router-link>
             </li>
         </ul>
     </div>
@@ -115,30 +105,29 @@ const handleLogin = debounce(async () => {
 
 <style lang="scss" scoped>
 .login-form {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 16rem;
-
-  .login-content {
     display: flex;
     flex-direction: column;
-    gap: 1.8rem;
-  }    
-  .login-btn {
-    margin-top: 2rem;
-    font-size: 1rem;
-    height: 2.5rem;
-    background-color: #c09370;
-    color: white;
-  }
+    justify-content: space-between;
+    height: 16rem;
+
+    .login-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+    .login-btn {
+        margin-top: 2rem;
+        font-size: 1rem;
+        height: 2.5rem;
+        background-color: #c09370;
+        color: white;
+    }
 }
 
-.find-wrap{
+.find-wrap {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-
 
     .find-box {
         margin-top: 3rem;
@@ -150,7 +139,7 @@ const handleLogin = debounce(async () => {
             position: relative;
             font-size: 0.85rem;
 
-            .find-text{
+            .find-text {
                 color: #888;
             }
         }

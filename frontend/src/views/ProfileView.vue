@@ -1,6 +1,5 @@
 <script setup>
 import ProfileInfo from '@/components/profile/ProfileInfo.vue';
-
 </script>
 
 
@@ -36,12 +35,10 @@ import ProfileInfo from '@/components/profile/ProfileInfo.vue';
         .profile-menu {
             flex: 4;
         }
-    
+
         .profile {
             flex: 2;
         }
-
     }
-    
 }
 </style>

@@ -1,62 +1,60 @@
 <script setup>
-import RecipeInfo from "./RecipeInfo.vue";
-import RecipeIngredient from "./RecipeIngredient.vue";
-import RecipeSet from "./RecipeSet.vue";
-import RecipeSeq from "./RecipeSeq.vue";
-import { onMounted, ref } from "vue";
-import { debounce } from "lodash";
-import { commonValues } from "@/utils/commonValues";
+import RecipeInfo from './RecipeInfo.vue';
+import RecipeIngredient from './RecipeIngredient.vue';
+import RecipeSet from './RecipeSet.vue';
+import RecipeSeq from './RecipeSeq.vue';
+import { onMounted, ref } from 'vue';
+import { debounce } from 'lodash';
+import { commonValues } from '@/utils/commonValues';
 import { getOriRecipe, editRecipe, saveRecipe, deleteRecipe } from '@/services/recipeService';
-import { errorMessages } from "@/utils/messages/errorMessages";
-import { useRoute, useRouter } from "vue-router";
-import { getCategoryAll } from "@/services/categoryService";
-import { isEqual } from "lodash";
-import { HttpStatusCode } from "axios";
+import { errorMessages } from '@/utils/messages/errorMessages';
+import { useRoute, useRouter } from 'vue-router';
+import { getCategoryAll } from '@/services/categoryService';
+import { isEqual } from 'lodash';
+import { HttpStatusCode } from 'axios';
 
 // 화면 전환
 const router = useRouter();
 
 // 컴포넌트 별 Ref => 자식 데이터를 가져오기 위함
-const recipeInfoRef = ref(null)
-const recipeIngredienRef = ref(null)
-const recipeSeqRef = ref(null)
-const recipeSetRef = ref(null)
+const recipeInfoRef = ref(null);
+const recipeIngredienRef = ref(null);
+const recipeSeqRef = ref(null);
+const recipeSetRef = ref(null);
 
 // 카테고리 데이터
-const categories = ref(null)
+const categories = ref(null);
 
 // 레시피 수정 데이터
-const originalRecipeData = ref(null)
+const originalRecipeData = ref(null);
 
 // 수정 모드 인지 체크
-const route = useRoute()
-const recipeId = route.params.recipeId || null
-const isEditMode = ref(!!recipeId) 
-
+const route = useRoute();
+const recipeId = route.params.recipeId || null;
+const isEditMode = ref(!!recipeId);
 
 // 레시피 저장
-const handleRecipeSave = debounce (async () => {
-
+const handleRecipeSave = debounce(async () => {
     // 유효성 검사
-    const recipeInfoValidResult = recipeInfoRef.value.validation()
-    const recipeIngredientsValidResult =  recipeIngredienRef.value.validation()
+    const recipeInfoValidResult = recipeInfoRef.value.validation();
+    const recipeIngredientsValidResult = recipeIngredienRef.value.validation();
     const recipeSeqValidResult = recipeSeqRef.value.validation();
     const recipeSetValidResult = recipeSetRef.value.validation();
 
-    if(recipeInfoValidResult !== true) {
-        alert(recipeInfoValidResult)
+    if (recipeInfoValidResult !== true) {
+        alert(recipeInfoValidResult);
     } else if (recipeIngredientsValidResult !== true) {
-        alert(recipeIngredientsValidResult)  
+        alert(recipeIngredientsValidResult);
     } else if (recipeSeqValidResult !== true) {
-        alert(recipeSeqValidResult)
+        alert(recipeSeqValidResult);
     } else if (recipeSetValidResult !== true) {
-        alert(recipeSetValidResult)
+        alert(recipeSetValidResult);
     } else {
         // 데이터 가져오기
-        const recipeInfo = recipeInfoRef.value.getData()
-        const recipeIngredients = recipeIngredienRef.value.getData()
-        const recipeSeq = recipeSeqRef.value.getData()
-        const recipeSet = recipeSetRef.value.getData()
+        const recipeInfo = recipeInfoRef.value.getData();
+        const recipeIngredients = recipeIngredienRef.value.getData();
+        const recipeSeq = recipeSeqRef.value.getData();
+        const recipeSet = recipeSetRef.value.getData();
 
         const formValues = {
             title: recipeInfo.title,
@@ -72,140 +70,135 @@ const handleRecipeSave = debounce (async () => {
             recipeIngredients: recipeIngredients.ingredients,
             recipeSeqs: recipeSeq.seqs,
             status: recipeSet.data.toUpperCase(),
-        }
+        };
 
         // 수정 시 원본 이미지 데이터 넣기기
         if (isEditMode.value) {
-            formValues.recipeId = recipeId
-            formValues.originalThumbnail = originalRecipeData.value.thumbnail
-            formValues.originalRecipeSeqs = originalRecipeData.value.recipeSeqs
+            formValues.recipeId = recipeId;
+            formValues.originalThumbnail = originalRecipeData.value.thumbnail;
+            formValues.originalRecipeSeqs = originalRecipeData.value.recipeSeqs;
         }
 
         //서버에 전송
         try {
             if (isEditMode.value) {
-                await editRecipe(formValues)
+                await editRecipe(formValues);
             } else {
-                await saveRecipe(formValues)
+                await saveRecipe(formValues);
             }
 
             router.replace({ name: 'profileRecipe', query: { tab: recipeSet.selectedStatus } });
-
         } catch (e) {
             if (e.response && e.response?.data?.message) {
-                alert(e.response.data.message)  
+                alert(e.response.data.message);
             } else {
-                alert(errorMessages.BADREQUEST)
+                alert(errorMessages.BADREQUEST);
             }
-            
-            router.push({ name: 'mainPage' })
-        } 
-  }
-}, commonValues.DEFALUT_DEBOUNCE)
+
+            router.push({ name: 'mainPage' });
+        }
+    }
+}, commonValues.DEFALUT_DEBOUNCE);
 
 // 레시피 삭제
-const handleRecipeDelete = debounce (async () => {
-    const proceed = confirm("레시피를 정말 삭제하시겠습니까?");
+const handleRecipeDelete = debounce(async () => {
+    const proceed = confirm('레시피를 정말 삭제하시겠습니까?');
     if (proceed) {
         try {
-            await deleteRecipe(recipeId)
-            
-            router.replace({ name: 'mainPage'});
+            await deleteRecipe(recipeId);
+
+            router.replace({ name: 'mainPage' });
         } catch (e) {
             if (e.response && e.response?.data?.message) {
-                alert(e.response.data.message)  
+                alert(e.response.data.message);
             } else {
-                alert(errorMessages.BADREQUEST)
+                alert(errorMessages.BADREQUEST);
             }
-            
+
             window.location.reload();
         }
     }
-}, commonValues.DEFALUT_DEBOUNCE)
+}, commonValues.DEFALUT_DEBOUNCE);
 
 // 취소
-const handleCancle = debounce (async () => {
+const handleCancle = debounce(async () => {
     router.back();
-}, commonValues.DEFALUT_DEBOUNCE)
-
+}, commonValues.DEFALUT_DEBOUNCE);
 
 // 레시피 작성 / 수정 시 가져올 데이터
 onMounted(async () => {
-    if (isEditMode.value) { // 레시피 수정시요청 데이터
+    if (isEditMode.value) {
+        // 레시피 수정시요청 데이터
 
         try {
-            const [originalRecipeRes, categoriesRes] = await Promise.all([
-                getOriRecipe(recipeId),
-                getCategoryAll(),
-            ]);
+            const [originalRecipeRes, categoriesRes] = await Promise.all([getOriRecipe(recipeId), getCategoryAll()]);
 
-            originalRecipeData.value = originalRecipeRes.data
-            categories.value = categoriesRes.data
-
-
+            originalRecipeData.value = originalRecipeRes.data;
+            categories.value = categoriesRes.data;
         } catch (e) {
             if (e.response && e.response?.data?.message) {
-                if(e.status === HttpStatusCode.NotFound) {
-                    router.push({ name: 'notFound' })
+                if (e.status === HttpStatusCode.NotFound) {
+                    router.push({ name: 'notFound' });
                 } else {
-                    alert(e.response.data.message)
-                    router.back()
-                }  
+                    alert(e.response.data.message);
+                    router.back();
+                }
             } else {
-                alert(errorMessages.BADREQUEST)
-                router.back()
+                alert(errorMessages.BADREQUEST);
+                router.back();
             }
         }
-    } else {  // 레시피 작성시 요청 데이터
+    } else {
+        // 레시피 작성시 요청 데이터
         try {
-            const categoriesRes = await getCategoryAll()
-            categories.value = categoriesRes.data
+            const categoriesRes = await getCategoryAll();
+            categories.value = categoriesRes.data;
         } catch (e) {
             if (e.response && e.response?.data?.message) {
-                alert(e.response.data.message)  
+                alert(e.response.data.message);
             } else {
-                alert(errorMessages.BADREQUEST)
+                alert(errorMessages.BADREQUEST);
             }
-            router.push({ name: "mainPage" })
+            router.push({ name: 'mainPage' });
         }
     }
-})
+});
 </script>
 
 <template>
     <v-form ref="formRef" @submit.prevent>
         <div class="recipe-write-container">
-            <h1 class="title"> 레시피 작성 </h1>
+            <h1 class="title">레시피 작성</h1>
 
             <div class="recipe-wrap">
                 <section>
-                    <RecipeInfo ref="recipeInfoRef" :originalRecipeData = "originalRecipeData" :categories="categories" :isEditMode="isEditMode" />
-                </section>
-            </div>
-        
-            <div class="recipe-wrap">
-                <section>
-                    <RecipeIngredient ref="recipeIngredienRef" :originalRecipeData = "originalRecipeData"/>
+                    <RecipeInfo ref="recipeInfoRef" :originalRecipeData="originalRecipeData" :categories="categories" :isEditMode="isEditMode" />
                 </section>
             </div>
 
             <div class="recipe-wrap">
                 <section>
-                    <RecipeSeq ref="recipeSeqRef" :originalRecipeData = "originalRecipeData"/>
+                    <RecipeIngredient ref="recipeIngredienRef" :originalRecipeData="originalRecipeData" />
                 </section>
             </div>
-      
+
             <div class="recipe-wrap">
                 <section>
-                    <RecipeSet ref="recipeSetRef" :originalRecipeData = "originalRecipeData"/>
+                    <RecipeSeq ref="recipeSeqRef" :originalRecipeData="originalRecipeData" />
+                </section>
+            </div>
+
+            <div class="recipe-wrap">
+                <section>
+                    <RecipeSet ref="recipeSetRef" :originalRecipeData="originalRecipeData" />
                 </section>
             </div>
 
             <div class="write-btn-wrap">
-                    <button type="button" class="write-btn cancle-btn" @click="handleCancle()">취소</button>
-                    <button type="button" class="write-btn delete-btn" @click="handleRecipeDelete()" v-if="isEditMode">삭제</button>
-                    <button type="button" class="write-btn save-btn"  @click.prevent="handleRecipeSave()">저장</button>
-            </div>  
+                <button type="button" class="write-btn cancle-btn" @click="handleCancle()">취소</button>
+                <button type="button" class="write-btn delete-btn" @click="handleRecipeDelete()" v-if="isEditMode">삭제</button>
+                <button type="button" class="write-btn save-btn" @click.prevent="handleRecipeSave()">저장</button>
+            </div>
         </div>
     </v-form>
 </template>
@@ -229,7 +222,7 @@ onMounted(async () => {
         padding: 1rem 2.5rem;
     }
 
-    .write-btn-wrap{
+    .write-btn-wrap {
         display: flex;
         justify-content: end;
         gap: 2rem;
@@ -261,6 +254,4 @@ onMounted(async () => {
         }
     }
 }
-
-
 </style>

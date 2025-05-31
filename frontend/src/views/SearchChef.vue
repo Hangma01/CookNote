@@ -8,78 +8,92 @@ import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 // 화면 전환
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 // 검색 데이터
-const searchData = ref()
+const searchData = ref();
+
+// 페이징
+const currentPage = ref(0);
+const currentPageGroup = ref(0);
 
 // 검색어
-const keyword = ref(null)
+const keyword = ref(null);
 
 // 유저 스토어
 const userStore = useUserStore();
 const isLoggedIn = userStore.isLoggedIn;
 const userId = userStore.getUserId;
 
-// 검색 요청 시
-const handleSearchReq = () => {
-    if (!keyword.value || keyword.value.trim() === '') {
-        keyword.value=''
-        alert(errorMessages.SEARCH_INGREDIENT_EMPTY_VALUE_ERROR_MESSAGE);
-        return;  // 검색 진행하지 않고 함수 종료
-    }
-
-    handleSearch()
-}
-
 // 검색 실행
-const handleSearch = async(page = 0) => {
-
+const handleSearch = async (page = 0) => {
     // 쿼리스트링에 검색조건 반영
     router.replace({
         query: {
             keyword: keyword.value || '',
             page,
-        }
+        },
     });
 
     try {
         let res = null;
-        if(isLoggedIn) {
-            res = await getChefSearchLoggined(
-                keyword.value, 
-                page
-            )
+        if (isLoggedIn) {
+            res = await getChefSearchLoggined(keyword.value, page);
         } else {
-            res = await getChefSearch(
-                keyword.value, 
-                page
-            )
+            res = await getChefSearch(keyword.value, page);
         }
-        console.log(res.data)
-        searchData.value = res.data
+
+        searchData.value = res.data;
+
+        currentPage.value = page;
+        currentPageGroup.value = Math.floor(page / 10);
     } catch (e) {
         if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message) 
+            alert(e.response.data.message);
         } else {
-            alert(errorMessages.BADREQUEST)
+            alert(errorMessages.BADREQUEST);
         }
     }
 };
 
+// 페이지 그룹 시작 번호 (0부터)
+const pageGroupStart = () => currentPageGroup.value * 10;
+
+// 페이지 그룹 끝 번호 (총 페이지 수보다 크지 않게)
+const pageGroupEnd = () => {
+    if (!searchData.value) return 0;
+    return Math.min(pageGroupStart() + 10, searchData.value.page.totalPages);
+};
+
+// 페이지 이동
 const goToPage = (page) => {
     handleSearch(page);
 };
 
+// 이전 10페이지 그룹
+const prevPageGroup = () => {
+    if (currentPageGroup.value > 0) {
+        const newPage = (currentPageGroup.value - 1) * 10;
+        handleSearch(newPage);
+    }
+};
+
+// 다음 10페이지 그룹
+const nextPageGroup = () => {
+    if (reportsData.value && (currentPageGroup.value + 1) * 10 < reportsData.value.page.totalPages) {
+        const newPage = (currentPageGroup.value + 1) * 10;
+        handleSearch(newPage);
+    }
+};
 
 // 초기 셋팅
-onMounted( () => {
+onMounted(() => {
     const page = parseInt(route.query.page) || 0;
     keyword.value = route.query.keyword || '';
 
-    handleSearch(page)
-})
+    handleSearch(page);
+});
 </script>
 
 <template>
@@ -94,38 +108,44 @@ onMounted( () => {
                     hide-details="auto"
                     placeholder="쉐프를 검색해 보세요."
                     append-inner-icon="mdi-magnify"
-                    @click:append-inner="handleSearchReq()"
-                    @keyup.enter="handleSearchReq()"
-			/>
+                    @click:append-inner="handleSearch()"
+                    @keyup.enter="handleSearch()"
+                />
             </div>
-        </section> 
+        </section>
 
         <section class="search-chef-list">
             <div>
                 <ul>
-                    <li
-                        v-for="(item, index) in searchData?.content"
-                        :key="index"
-                        class="chef-card-wrap"
-                    >   
-                        <ChefCard :chefData = "item" :index = "index"/>
+                    <li v-for="(item, index) in searchData?.content" :key="index" class="chef-card-wrap">
+                        <ChefCard :chefData="item" :index="index + currentPage * 30" />
                     </li>
                 </ul>
             </div>
 
             <div class="pagination" v-if="searchData?.page?.totalPages > 1">
+                <!-- 이전 10개 페이지 그룹 버튼 -->
+                <button v-if="searchData?.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
+
+                <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
                 <button
-                    v-for="n in searchData?.page?.totalPages"
-                    :key="n"
-                    :class="{ active: searchData?.page?.number === n - 1 }"
-                    @click="goToPage(n - 1)"
-                    >
-                    {{ n }}
+                    v-for="n in pageGroupEnd() - pageGroupStart()"
+                    :key="n + pageGroupStart()"
+                    :class="{
+                        active: searchData?.page.number === n + pageGroupStart() - 1,
+                    }"
+                    @click="goToPage(n + pageGroupStart() - 1)"
+                >
+                    {{ n + pageGroupStart() }}
+                </button>
+
+                <!-- 다음 10개 페이지 그룹 버튼 -->
+                <button v-if="searchData?.page.totalPages > 10 && (currentPageGroup + 1) * 10 < searchData?.page.totalPages" @click="nextPageGroup">
+                    &gt;&gt;
                 </button>
             </div>
         </section>
     </div>
-    
 </template>
 
 <style lang="scss" scoped>
@@ -135,11 +155,10 @@ onMounted( () => {
     padding-top: 4rem;
     padding-bottom: 4rem;
 
-
     .search-bar-wrap {
         text-align: center;
         margin-bottom: 3rem;
-        
+
         .search-bar {
             width: 30rem;
             margin: auto;
@@ -157,12 +176,11 @@ onMounted( () => {
             }
         }
     }
-    
-    
-    .search-chef-list { 
+
+    .search-chef-list {
         margin-top: 6rem;
-        border-top: 1px solid rgb(224,224,224);
-        
+        border-top: 1px solid rgb(224, 224, 224);
+
         .chef-card-wrap {
             border-bottom: 1px solid rgb(224, 224, 224);
             padding-bottom: 1rem;
@@ -185,9 +203,13 @@ onMounted( () => {
                     color: white;
                     font-weight: bold;
                 }
+
+                &:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                }
             }
         }
-    }   
+    }
 }
-
 </style>

@@ -80,14 +80,17 @@ public interface RecipeService {
 
 	// 추천 레시피 가져오기
 	List<RecipeRecommnetResponseDTO> getRecommentRecipe();
-
-	// 혼밥 레시피 가져오기
-	List<RecipeCardResponseDTO> getSoloMealRecipe();
 	
 	// 베스트 레시피 가져오기
 	List<RecipeCardResponseDTO> getBestRecipe();
+	
+	// 혼밥 레시피 가져오기
+	List<RecipeRecommnetResponseDTO> getSoloRecipe();
 
 	// 최신 레시피 가져오기
+	List<RecipeCardResponseDTO> getRecentRecipe();
+
+
 
 
 

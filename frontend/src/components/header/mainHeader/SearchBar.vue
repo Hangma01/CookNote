@@ -1,24 +1,25 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const isFocused = ref(false)
-const searchValue = ref('')
-
+const isFocused = ref(false);
+const searchValue = ref('');
 
 // searchValue
 const handleInput = (e) => {
-    searchValue.value = e.target.value
-}
+    searchValue.value = e.target.value;
+};
 </script>
 
 <template>
-    <div class="search-bar-container" :class="{ focused: isFocused}" >
-        <input class="search-bar-input-field input-field"
-                placeholder="검색어를 입력하세요."
-                :value="searchValue"
-                @input="handleInput"
-                @focus="isFocused = true"
-                @blur="isFocused = false" />
+    <div class="search-bar-container" :class="{ focused: isFocused }">
+        <input
+            class="search-bar-input-field input-field"
+            placeholder="검색어를 입력하세요."
+            :value="searchValue"
+            @input="handleInput"
+            @focus="isFocused = true"
+            @blur="isFocused = false"
+        />
 
         <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="search-bar-icon" />
     </div>
@@ -37,7 +38,6 @@ const handleInput = (e) => {
     align-items: center;
     padding: 0rem 20px;
 
-
     &.focused {
         border-width: 3px;
         border-color: #c09370;
@@ -52,7 +52,7 @@ const handleInput = (e) => {
 
     .search-bar-icon {
         font-size: 1.1rem;
-        color: #454F5B;
+        color: #454f5b;
     }
 }
 </style>

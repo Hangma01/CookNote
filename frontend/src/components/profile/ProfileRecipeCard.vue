@@ -1,30 +1,32 @@
 <script setup>
 import { commonValues } from '@/utils/commonValues';
+import dayjs from '@/plugin/dayjs';
 
-
-const props = defineProps({ 
-    recipeData: { // 레시피 수정 시 오는 데이터
-        type: Object    
+const props = defineProps({
+    recipeData: {
+        // 레시피 수정 시 오는 데이터
+        type: Object,
     },
     recipeStatus: {
         type: String,
-        default: commonValues.PUBLIC_TEXT
-    }
-})
+        default: commonValues.PUBLIC_TEXT,
+    },
+});
+
+function relativeTime(date) {
+    return dayjs(date).fromNow();
+}
 </script>
 
 <template>
     <div class="recipe-image">
-        <router-link
-            :to="{ name: 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }"
-        >
+        <router-link :to="{ name: 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }">
             <img :src="props.recipeData?.thumbnail" class="image" />
         </router-link>
     </div>
     <div class="recipe-info">
         <div class="recipe-title">
-            <router-link 
-                :to="{name : 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }">
+            <router-link :to="{ name: 'recipeDetail', params: { recipeId: props.recipeData?.recipeId } }">
                 <span>{{ props.recipeData?.title }}</span>
             </router-link>
         </div>
@@ -34,16 +36,14 @@ const props = defineProps({
         </div>
 
         <div class="recipe-date">
-            <span>{{ props.recipeData?.createAt }}</span>
+            <span>{{ relativeTime(props.recipeData?.createAt) }}</span>
         </div>
-    </div>          
+    </div>
 </template>
 
 
 <style lang="scss" scoped>
-
 .recipe-image {
-    
     border: 1px solid rgb(144, 144, 144);
     flex: 0.8;
     height: 7rem;
@@ -70,7 +70,6 @@ const props = defineProps({
         font-weight: bold;
     }
 
-
     .recipe-summary {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -90,7 +89,6 @@ const props = defineProps({
         color: #999999;
     }
 }
-
 </style>
 
 

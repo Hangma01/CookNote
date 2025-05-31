@@ -4,16 +4,15 @@ import SelectDropDown from '../../ui/SelectDropDown.vue';
 import { commonInputHangle } from '@/utils/commonFunction';
 import { reactive, ref, watch } from 'vue';
 import { commonValues } from '@/utils/commonValues';
-import { youtubeApi } from '@/services/googleService';
+import { getYoutubeThumbnail } from '@/services/googleService';
 import { debounce } from 'lodash';
 
-
 // RecipeWrite.vue로부터 받는 데이터
-const props = defineProps({ 
-    categories: Object,  // 레시피 작성 시 오는 데이터
+const props = defineProps({
+    categories: Object, // 레시피 작성 시 오는 데이터
     originalRecipeData: Object, // 레시피 수정 시 오는 데이터
     isEditMode: Boolean,
-})
+});
 
 // 입력 값 선언
 const formValues = reactive({
@@ -25,54 +24,53 @@ const formValues = reactive({
     level: null,
     categories: {
         cuisine: null,
-        purpose: null
-    }
-})
+        purpose: null,
+    },
+});
 
 // 이미지 파일 선언
-const imageFile = ref(null)
+const imageFile = ref(null);
+const youtubeThumbnail = ref(null);
 
 // url 선언
-const url = ref('')
-
+const url = ref('');
 
 // 레시피 수정 시 데이터가 바뀐것을 감지해야햠
-watch(() => props.originalRecipeData, (newVal) => {
-    console.log(newVal)
-    if (newVal) {
-        formValues.title = newVal.title || ''
-        formValues.description = newVal.description || ''
-        formValues.videoId = newVal.videoId || null
-        formValues.serving = props.categories.recipeServingList?.find(s => s.name === newVal.serving) || null
-        formValues.duration = props.categories.recipeDurationList?.find(d => d.name === newVal.duration) || null
-        formValues.level = props.categories.recipeLevelList?.find(l => l.name === newVal.level) || null
-        formValues.categories.cuisine = props.categories.categoryCuisineList?.find(
-            c => c.id === newVal.categoryCuisineId
-        ) || null
+watch(
+    () => props.originalRecipeData,
+    (newVal) => {
+        console.log(newVal);
+        if (newVal) {
+            formValues.title = newVal.title || '';
+            formValues.description = newVal.description || '';
+            formValues.videoId = newVal.videoId || null;
+            formValues.serving = props.categories.recipeServingList?.find((s) => s.name === newVal.serving) || null;
+            formValues.duration = props.categories.recipeDurationList?.find((d) => d.name === newVal.duration) || null;
+            formValues.level = props.categories.recipeLevelList?.find((l) => l.name === newVal.level) || null;
+            formValues.categories.cuisine = props.categories.categoryCuisineList?.find((c) => c.id === newVal.categoryCuisineId) || null;
 
-        formValues.categories.purpose = props.categories.categoryPurposeList?.find(
-            p => p.id === newVal.categoryPurposeId
-        ) || null
+            formValues.categories.purpose = props.categories.categoryPurposeList?.find((p) => p.id === newVal.categoryPurposeId) || null;
 
-        imageFile.value = newVal.thumbnail || null
-        url.value = newVal.videoId ? `https://www.youtube.com/watch?v=${newVal.videoId}` : '';
+            imageFile.value = newVal.thumbnail || null;
+            url.value = newVal.videoId ? `https://www.youtube.com/watch?v=${newVal.videoId}` : '';
+        }
     }
-})
+);
 
 // 유효성 검사사
 const validation = () => {
-    if (!formValues.title) return '제목을 입력하세요'
-    else if (!formValues.description) return '레시피 소개를 입력하세요'
-    else if (formValues.description.length <= 10) return '레시피 소개는 10자 이상 작성해주세요.'
-    else if (!imageFile.value) return '썸네일을 넣어주세요.'
-    else if (url.value && !formValues.videoId) return '유효한 유튜브 동영상 URL을 입력하세요.'
-    else if (!formValues.categories.cuisine) return '카테고리 종류를 선택하세요'
-    else if (!formValues.categories.purpose) return '카테고리 목적을 선택하세요'
-    else if (!formValues.serving) return '인원수를 선택하세요'
-    else if (!formValues.duration) return '요리시간을 선택하세요'
-    else if (!formValues.level) return '난이도를 선택하세요'
-    else return true
-}
+    if (!formValues.title) return '제목을 입력하세요';
+    else if (!formValues.description) return '레시피 소개를 입력하세요';
+    else if (formValues.description.length <= 10) return '레시피 소개는 10자 이상 작성해주세요.';
+    else if (!imageFile.value) return '썸네일을 넣어주세요.';
+    else if (url.value && !formValues.videoId) return '유효한 유튜브 동영상 URL을 입력하세요.';
+    else if (!formValues.categories.cuisine) return '카테고리 종류를 선택하세요';
+    else if (!formValues.categories.purpose) return '카테고리 목적을 선택하세요';
+    else if (!formValues.serving) return '인원수를 선택하세요';
+    else if (!formValues.duration) return '요리시간을 선택하세요';
+    else if (!formValues.level) return '난이도를 선택하세요';
+    else return true;
+};
 
 // RecipeWrite.vue에게 보낼 데이터
 const getData = () => ({
@@ -85,54 +83,53 @@ const getData = () => ({
     level: formValues.level?.name,
     categories: {
         cuisine: formValues.categories.cuisine?.id || null,
-        purpose: formValues.categories.purpose?.id || null
+        purpose: formValues.categories.purpose?.id || null,
     },
-})
+});
 
 // Youtube VideoId 추출
-const handleGetVideoId = debounce( async () => {
-  const videoId = getYoutubeVideoId()
+const handleGetVideoId = debounce(async () => {
+    const videoId = getYoutubeVideoId();
 
-  const googleApiKey = import.meta.env.VITE_API_GOOGLE_KEY
-  const url = `https://www.googleapis.com/youtube/v3/videos?part=id&id=${videoId}&key=${googleApiKey}`;
-  try {
-    const res = await youtubeApi(url);
-    
-    if(res.data.items.length > 0) {
-      formValues.videoId = videoId
-    }else {
-      formValues.videoId = null;
+    if (videoId !== null) {
+        try {
+            const res = await getYoutubeThumbnail(videoId);
+            formValues.videoId = videoId;
+            console.log(res);
+            youtubeThumbnail.value = res.data.youtubeThumbnailUrl;
+        } catch (e) {
+            formValues.videoId = null;
+            youtubeThumbnail.value = null;
+        }
+    } else {
+        formValues.videoId = null;
+        youtubeThumbnail.value = null;
     }
-  } catch (error) {
-    formValues.videoId = null;
-  }
-}, commonValues.DEFALUT_DEBOUNCE)
+}, commonValues.DEFALUT_DEBOUNCE);
 
 const getYoutubeVideoId = () => {
     const regex = commonValues.YOUTUBE_VIDEO_ID_REGEX;
-    const match = url.value.match(regex)
-    return match ? match[1] : null
-}
-
+    const match = url.value.match(regex);
+    return match ? match[1] : null;
+};
 
 // 제목 50자 제한 (한글)
-const handleTitleInput = (e) => commonInputHangle(e, 50, (value) => formValues.title = value)
+const handleTitleInput = (e) => commonInputHangle(e, 50, (value) => (formValues.title = value));
 
 // 레시피 소개 400자 제한 (한글)
-const handleDescriptionInput = (e) => commonInputHangle(e, 400, (value) => formValues.description = value)
-
+const handleDescriptionInput = (e) => commonInputHangle(e, 400, (value) => (formValues.description = value));
 
 // 부모가 사용할 수 있게 expose
 defineExpose({
     getData,
-    validation
-})
+    validation,
+});
 </script>
 
 <template>
     <h2 class="sub-title">
         <span>기본정보</span>
-        
+
         <p class="required">ⓘ 제목, 레시피 소개, 썸네일, 카테고리는 필수 입력 항목입니다.</p>
     </h2>
 
@@ -144,13 +141,13 @@ defineExpose({
 
             <div class="input-filed-wrap">
                 <v-text-field
-                v-model="formValues.title"
-                @input="handleTitleInput"
-                type="text"
-                placeholder="제목은 50자 이내로 작성해주세요."
-                variant="outlined"
-                density="compact"
-                hide-details=true
+                    v-model="formValues.title"
+                    @input="handleTitleInput"
+                    type="text"
+                    placeholder="제목은 50자 이내로 작성해주세요."
+                    variant="outlined"
+                    density="compact"
+                    hide-details="true"
                 />
             </div>
 
@@ -160,14 +157,14 @@ defineExpose({
 
             <div class="input-filed-wrap">
                 <v-textarea
-                v-model="formValues.description"
-                @input="handleDescriptionInput"
-                placeholder="레시피 소개는 최소 10자 이상 400자 이내로 작성해주세요."
-                rows="7"
-                no-resize
-                variant="outlined"
-                density="compact"
-                hide-details=true
+                    v-model="formValues.description"
+                    @input="handleDescriptionInput"
+                    placeholder="레시피 소개는 최소 10자 이상 400자 이내로 작성해주세요."
+                    rows="7"
+                    no-resize
+                    variant="outlined"
+                    density="compact"
+                    hide-details="true"
                 />
             </div>
 
@@ -175,9 +172,9 @@ defineExpose({
                 <div class="label-title">
                     <p>레시피 동영상 URL</p>
                     <p class="label-title-sub">ⓘ 레시피 동영상 등록은 Youtube만 가능합니다.</p>
-                    </div>
+                </div>
 
-                    <v-text-field
+                <v-text-field
                     v-model="url"
                     type="text"
                     placeholder="https://"
@@ -185,32 +182,28 @@ defineExpose({
                     @input="handleGetVideoId"
                     variant="outlined"
                     density="compact"
-                    hide-details=true
-                    />
-                </div>
+                    hide-details="true"
+                />
             </div>
+        </div>
 
-
-            <div class="section-group-second">
+        <div class="section-group-second">
             <div class="image-preview-wrap">
                 <div class="label-title">
-                <p>썸네일</p>        
+                    <p>썸네일</p>
                 </div>
-                
-                <ImageUploader v-model="imageFile"/>
+
+                <ImageUploader v-model="imageFile" />
             </div>
-        
+
             <div class="image-preview-wrap">
                 <div class="label-title">
                     <p>동영상 썸네일</p>
                 </div>
-                    
+
                 <div class="video-thumnail-wrap">
                     <div v-if="formValues.videoId" class="video-thumnail-box">
-                        <img 
-                        class="video-thumnail"
-                        :src="`https://img.youtube.com/vi/${formValues.videoId}/0.jpg`" 
-                        alt="Youtube 동영상 썸네일"/>
+                        <img class="video-thumnail" :src="youtubeThumbnail" alt="Youtube 동영상 썸네일" />
                     </div>
 
                     <div v-else>
@@ -236,47 +229,39 @@ defineExpose({
                     label="종류"
                 />
             </div>
-            
-            <div class="category-item">
 
+            <div class="category-item">
                 <SelectDropDown
-                v-model="formValues.categories.purpose"
-                :items="categories?.categoryPurposeList"
-                item-value="id"
-                item-title="type"
-                label="목적"
+                    v-model="formValues.categories.purpose"
+                    :items="categories?.categoryPurposeList"
+                    item-value="id"
+                    item-title="type"
+                    label="목적"
                 />
             </div>
 
             <div class="category-item">
                 <SelectDropDown
-                v-model="formValues.serving"
-                :items="categories?.recipeServingList"
-                item-value="name"
-                item-title="label"
-                label="인원수"
+                    v-model="formValues.serving"
+                    :items="categories?.recipeServingList"
+                    item-value="name"
+                    item-title="label"
+                    label="인원수"
                 />
             </div>
 
             <div class="category-item">
                 <SelectDropDown
-                v-model="formValues.duration"
-                :items="categories?.recipeDurationList"
-                item-value="name"
-                item-title="label"
-                label="요리시간"
+                    v-model="formValues.duration"
+                    :items="categories?.recipeDurationList"
+                    item-value="name"
+                    item-title="label"
+                    label="요리시간"
                 />
             </div>
 
             <div class="category-item">
-
-                <SelectDropDown
-                v-model="formValues.level"
-                :items="categories?.recipeLevelList"
-                item-value="name"
-                item-title="label"
-                label="난이도"
-                />
+                <SelectDropDown v-model="formValues.level" :items="categories?.recipeLevelList" item-value="name" item-title="label" label="난이도" />
             </div>
         </div>
     </div>
@@ -302,7 +287,7 @@ defineExpose({
     .section-group-first {
         width: 40rem;
 
-        .input-filed-wrap{
+        .input-filed-wrap {
             padding-bottom: 2rem;
 
             .textarea-filed {
@@ -321,12 +306,11 @@ defineExpose({
     .section-group-second {
         width: 20rem;
 
-        
-        .image-preview-wrap{
+        .image-preview-wrap {
             padding-bottom: 2rem;
         }
 
-        .video-thumnail-wrap{
+        .video-thumnail-wrap {
             width: 100%;
             height: 12rem;
             border: 1px solid #e7e7e7;
@@ -338,7 +322,8 @@ defineExpose({
             color: #aaa;
             font-size: 1.2rem;
 
-            .video-thumnail-box, .video-thumnail{
+            .video-thumnail-box,
+            .video-thumnail {
                 width: 100%;
                 height: 100%;
                 border-radius: 1rem;
@@ -348,32 +333,31 @@ defineExpose({
 }
 
 .label-title.required::before {
-  position: absolute;
-  content: '*';
-  color: red;
-  margin-right: 0.25rem;
-  font-weight: bold;
-  left: -0.7rem;
+    position: absolute;
+    content: '*';
+    color: red;
+    margin-right: 0.25rem;
+    font-weight: bold;
+    left: -0.7rem;
 }
 
 .label-title {
-  position: relative;
-  padding-bottom: 0.6rem;
+    position: relative;
+    padding-bottom: 0.6rem;
 
-  .label-title-sub{
-    font-size: 0.8rem;
-    color: #777;
-  }
+    .label-title-sub {
+        font-size: 0.8rem;
+        color: #777;
+    }
 }
 
 .category-wrap {
-  display: flex;
-  gap: 3rem;  
-  padding-bottom: 2rem;
+    display: flex;
+    gap: 3rem;
+    padding-bottom: 2rem;
 
-  .category-item{
-    width: 8rem;
-  }
-  
+    .category-item {
+        width: 8rem;
+    }
 }
 </style>

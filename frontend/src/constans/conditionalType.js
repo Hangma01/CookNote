@@ -1,4 +1,4 @@
 export const ConditonalType = {
-  POPULAR: 'POPULAR',
-  LATEST: 'LATEST',
+    POPULAR: 'POPULAR',
+    LATEST: 'LATEST',
 };

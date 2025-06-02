@@ -134,7 +134,7 @@ onMounted(async () => {
             </ul>
         </section>
 
-        <section class="feed-recipe-list">
+        <section class="feed-recipe-list" v-if="recipesData?.content.length > 0">
             <div>
                 <ul class="recipe-card-wrap">
                     <li v-for="(item, index) in recipesData?.content" :key="index">
@@ -165,6 +165,12 @@ onMounted(async () => {
                 </button>
             </div>
         </section>
+
+        <div v-else class="keyword-non">
+            <div class="keyword-box">
+                <p>작성한 레시피가 없습니다.</p>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -275,6 +281,24 @@ onMounted(async () => {
                     cursor: not-allowed;
                     opacity: 0.5;
                 }
+            }
+        }
+    }
+
+    .keyword-non {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 30rem;
+        font-size: 2rem;
+        word-break: break-all; /* 긴 단어 줄바꿈 */
+        padding-top: 10rem;
+        text-align: center;
+
+        .keyword-box {
+            width: 50rem;
+            .keyword {
+                color: green;
             }
         }
     }

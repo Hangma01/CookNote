@@ -22,6 +22,8 @@ const currentPageGroup = ref(0);
 
 // 검색어
 const keyword = ref(null);
+const serchedFlag = ref(false);
+const serchedKeyword = ref(null);
 
 // 조건 데이터
 const conditionalType = ref(ConditonalType.POPULAR);
@@ -49,11 +51,13 @@ const handleSearch = async (page = 0, isReplace = true) => {
         const res = await getRecipeSearchIngredient(keyword.value, conditionalType.value, page);
 
         searchData.value = res.data;
-
+        serchedFlag.value = true;
+        serchedKeyword.value = keyword.value;
         currentPage.value = page;
         currentPageGroup.value = Math.floor(page / 10);
     } catch (e) {
-        console.log(e);
+        serchedFlag.value = true;
+        serchedKeyword.value = keyword.value;
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message);
         } else {
@@ -126,28 +130,36 @@ onMounted(() => {
             </div>
 
             <div class="conditional-box">
-                <button
-                    class="conditional-btn"
-                    :class="{
-                        active: conditionalType === ConditonalType.POPULAR,
-                    }"
-                    @click="selectConditionalType(ConditonalType.POPULAR)"
-                >
-                    인기순
-                </button>
-                <button
-                    class="conditional-btn"
-                    :class="{
-                        active: conditionalType === ConditonalType.LATEST,
-                    }"
-                    @click="selectConditionalType(ConditonalType.LATEST)"
-                >
-                    최신순
-                </button>
+                <div>
+                    총 <span class="recipe-count">{{ searchData?.content.length }}</span
+                    >개의 결과
+                </div>
+                <div>
+                    <button
+                        class="conditional-btn"
+                        :class="{
+                            active: conditionalType === ConditonalType.POPULAR,
+                        }"
+                        @click="selectConditionalType(ConditonalType.POPULAR)"
+                        v-if="searchData?.content.length > 0"
+                    >
+                        인기순
+                    </button>
+                    <button
+                        class="conditional-btn"
+                        :class="{
+                            active: conditionalType === ConditonalType.LATEST,
+                        }"
+                        @click="selectConditionalType(ConditonalType.LATEST)"
+                        v-if="searchData?.content.length > 0"
+                    >
+                        최신순
+                    </button>
+                </div>
             </div>
         </section>
 
-        <section class="search-recipe-list">
+        <section class="search-recipe-list" v-if="searchData?.content.length > 0">
             <div>
                 <ul class="recipe-card-wrap">
                     <li v-for="(item, index) in searchData?.content" :key="index">
@@ -178,6 +190,15 @@ onMounted(() => {
                 </button>
             </div>
         </section>
+
+        <div v-else-if="serchedFlag" class="keyword-non">
+            <div class="keyword-box">
+                <p>
+                    <span class="keyword">'{{ serchedKeyword || '전체' }}'</span>
+                    에 대한 검색결과가 존재하지 않습니다.
+                </p>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -226,6 +247,11 @@ onMounted(() => {
             margin-right: 1rem;
             gap: 2rem;
 
+            .recipe-count {
+                color: rgb(147, 112, 98);
+                font-weight: 600;
+            }
+
             .conditional-btn {
                 color: #a89d94;
 
@@ -233,6 +259,10 @@ onMounted(() => {
                     color: rgb(147, 112, 98);
                     font-weight: bold;
                 }
+            }
+
+            .latest-btn {
+                margin-left: 2rem;
             }
         }
     }
@@ -267,6 +297,23 @@ onMounted(() => {
                     cursor: not-allowed;
                     opacity: 0.5;
                 }
+            }
+        }
+    }
+
+    .keyword-non {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 30rem;
+        font-size: 2rem;
+        word-break: break-all; /* 긴 단어 줄바꿈 */
+        padding-top: 10rem;
+
+        .keyword-box {
+            width: 50rem;
+            .keyword {
+                color: green;
             }
         }
     }

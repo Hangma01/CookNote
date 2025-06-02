@@ -3,6 +3,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.cooknote.backend.mappers.UserMapper">
+	<resultMap id="UserSanctionResponseMap" type="UserSacntionResponseDTO">
+	    <result property="reportType" column="REPORT_TYPE"/>
+	    <result property="targetContent" column="TARGET_CONTENT"/>
+	    <result property="reportProcessedAt" column="REPORT_PROCESSED_AT"/>
+	
+	    <collection property="categoryReportReasons" ofType="CategoryReportReason">
+	        <result property="type" column="REPORT_REASON"/>
+	    </collection>
+	</resultMap>
+
     
     <!-- 로그인 회원 정보 가져오기 -->
 	<select id="getLoginUser" resultType="User">
@@ -326,6 +336,48 @@
 		SELECT COUNT(REPORT_ID)
 		  FROM REPORT
     	 WHERE REPORTER_ID = #{userId}
+	</select>
+	
+	<!-- 제재 내역 가져오기 -->
+	<select id="getSanction" resultMap="UserSanctionResponseMap">
+	   	SELECT RPT.REPORT_TYPE AS REPORT_TYPE
+			 , CASE
+			   WHEN RPT.REPORT_TYPE = 'RECIPE' 
+			   THEN R.TITLE
+			   ELSE C.CONTENT
+			    END AS TARGET_CONTENT
+			 , CRR.TYPE AS REPORT_REASON
+		     , RPT.PROCESSED_AT AS REPORT_PROCESSED_AT
+		  FROM REPORT AS RPT
+    INNER JOIN USER AS U
+		    ON RPT.REPORTED_ID = U.USER_ID
+    INNER JOIN CATEGORY_REPORT_REASON AS CRR
+	 	    ON RPT.CATEGORY_REPORT_REASON_ID = CRR.CATEGORY_REPORT_REASON_ID
+	 LEFT JOIN RECIPE AS R
+	        ON RPT.RECIPE_ID = R.RECIPE_ID
+	 LEFT JOIN COMMENT AS C 
+	 	    ON RPT.COMMENT_ID = C.COMMENT_ID
+ 	     WHERE RPT.REPORTED_ID = #{userId}
+		   AND RPT.STATUS = #{statusReportApproved}
+	  ORDER BY RPT.CREATE_AT DESC;
+	</select>
+	
+	<!-- 제재 내역 카운트 -->
+	<select id="getSanctionCount" resultType="int">
+	   	SELECT COUNT(DISTINCT_REPORTS.REPORT_TARGET_ID) AS sanction_count
+		  FROM (
+		    	SELECT DISTINCT RECIPE_ID AS REPORT_TARGET_ID
+		    	  FROM REPORT
+	    		 WHERE REPORTED_ID = #{userId}
+	      		   AND STATUS = #{statusReportApproved}
+		      	   AND RECIPE_ID IS NOT NULL
+		    	 UNION
+		    	SELECT DISTINCT COMMENT_ID AS REPORT_TARGET_ID
+		    	  FROM REPORT
+		    	 WHERE REPORTED_ID = #{userId}
+	      		   AND STATUS = #{statusReportApproved}
+		      	   AND COMMENT_ID IS NOT NULL
+				) AS DISTINCT_REPORTS;
 	</select>
 	
 	<!-- 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.5 (인기순) -->

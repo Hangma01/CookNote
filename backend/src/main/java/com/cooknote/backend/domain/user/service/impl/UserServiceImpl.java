@@ -24,6 +24,7 @@ import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecip
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserSacntionResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
 import com.cooknote.backend.domain.user.entity.User;
@@ -254,6 +255,22 @@ public class UserServiceImpl implements UserService {
 		return new PageImpl<>(reportList, PageRequest.of(page, size), total);
 	}
 	
+	// 제재 내역 가져오기
+	@Override
+	public Page<UserSacntionResponseDTO> getSanction(Long userId, int page, int size) {
+		
+		int offset = page * size;
+		List<UserSacntionResponseDTO> result = userMapper.getSanction(userId, size, offset, ReportStatus.APPROVED);
+		int total = userMapper.getSanctionCount(userId, ReportStatus.APPROVED);
+		
+		List<UserSacntionResponseDTO> sanctionList = result.stream()
+			    .peek(dto -> dto.setReportLabel(dto.getReportType().getLabel()))  // 상태 라벨 설정
+			    .toList();
+		
+		return new PageImpl<>(sanctionList, PageRequest.of(page, size), total);
+	}
+	
+	
 	// 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.4 (인기순)
 	@Override
 	public Page<UserSearchChefResponseDTO> getSearchChefList(Long userId, String keyword, int page, int size) {
@@ -264,4 +281,6 @@ public class UserServiceImpl implements UserService {
 		
 		return new PageImpl<>(chefList, PageRequest.of(page, size), total);
 	}
+
+
 }

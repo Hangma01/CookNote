@@ -24,6 +24,7 @@ import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserSacntionResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
@@ -212,10 +213,20 @@ public class UserController {
 	// 신고 내역 가져오기
 	@GetMapping("/report")
 	public ResponseEntity<Page<UserReportResponseDTO>> getReport (@AuthenticationPrincipal CustomUserDetails customUserDetails 
-								   	  , @RequestParam(value = "page", defaultValue = "0") int page
-								   	  , @RequestParam(value = "size", defaultValue = "10") int size) {
+																, @RequestParam(value = "page", defaultValue = "0") int page
+																, @RequestParam(value = "size", defaultValue = "10") int size) {
 
 	return ResponseEntity.ok(userService.getReport(customUserDetails.getUserId(), page, size));
+	
+	}
+	
+	// 제재 내역 가져오기
+	@GetMapping("/report/sanction")
+	public ResponseEntity<Page<UserSacntionResponseDTO>> getSanction (@AuthenticationPrincipal CustomUserDetails customUserDetails 
+															   	  , @RequestParam(value = "page", defaultValue = "0") int page
+															   	  , @RequestParam(value = "size", defaultValue = "10") int size) {
+	
+		return ResponseEntity.ok(userService.getSanction(customUserDetails.getUserId(), page, size));
 	
 	}
 	

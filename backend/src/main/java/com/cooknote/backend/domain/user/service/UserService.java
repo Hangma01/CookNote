@@ -13,6 +13,7 @@ import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserSacntionResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.domain.user.enums.UserStatus;
@@ -61,9 +62,13 @@ public interface UserService {
 	
 	// 신고 내역 가져오기
 	Page<UserReportResponseDTO> getReport(Long userId, int page, int size);
+	
+	// 제재 내역 가져오기
+	Page<UserSacntionResponseDTO> getSanction(Long userId, int page, int size);
 
+	
 	// 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.4 (인기순)
 	Page<UserSearchChefResponseDTO> getSearchChefList(Long userId, String keyword, int page, int size);
 
-	
+
 }

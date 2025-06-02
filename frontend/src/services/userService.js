@@ -95,6 +95,15 @@ export const getReports = async (page) => {
     });
 };
 
+// 제재 내역 가져오기
+export const getSanction = async (page) => {
+    return await privateAPI.get(`user/report/sanction`, {
+        params: {
+            page: page,
+        },
+    });
+};
+
 // 쉐프 검색
 export const getChefSearch = async (keyword, page) => {
     return await publicAPI.get('/user/search/chef', {

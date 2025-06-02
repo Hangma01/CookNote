@@ -20,6 +20,8 @@ const currentPageGroup = ref(0);
 
 // 검색어
 const keyword = ref(null);
+const serchedFlag = ref(false);
+const serchedKeyword = ref(null);
 
 // 유저 스토어
 const userStore = useUserStore();
@@ -45,10 +47,13 @@ const handleSearch = async (page = 0) => {
         }
 
         searchData.value = res.data;
-
+        serchedFlag.value = true;
+        serchedKeyword.value = keyword.value;
         currentPage.value = page;
         currentPageGroup.value = Math.floor(page / 10);
     } catch (e) {
+        serchedFlag.value = true;
+        serchedKeyword.value = keyword.value;
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message);
         } else {
@@ -114,7 +119,7 @@ onMounted(() => {
             </div>
         </section>
 
-        <section class="search-chef-list">
+        <section class="search-chef-list" v-if="searchData?.content.length > 0">
             <div>
                 <ul>
                     <li v-for="(item, index) in searchData?.content" :key="index" class="chef-card-wrap">
@@ -145,6 +150,15 @@ onMounted(() => {
                 </button>
             </div>
         </section>
+
+        <div v-else-if="serchedFlag" class="keyword-non">
+            <div class="keyword-box">
+                <p>
+                    <span class="keyword">'{{ serchedKeyword || '전체' }}'</span>
+                    쉐프에 대한 검색결과가 존재하지 않습니다.
+                </p>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -208,6 +222,22 @@ onMounted(() => {
                     cursor: not-allowed;
                     opacity: 0.5;
                 }
+            }
+        }
+    }
+
+    .keyword-non {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        word-break: break-all; /* 긴 단어 줄바꿈 */
+        padding-top: 10rem;
+
+        .keyword-box {
+            width: 50rem;
+            .keyword {
+                color: green;
             }
         }
     }

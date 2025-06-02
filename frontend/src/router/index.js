@@ -8,11 +8,11 @@ const router = createRouter({
     scrollBehavior(to, from, savedPosition) {
         // 1. 브라우저 뒤로가기/앞으로가기 시에는 이전 위치로 복원
         if (savedPosition) {
-            // 데이터가 로드될 때까지 대기(예: 300ms) 후 복원
+            // 데이터가 로드될 때까지 대기(예: 20ms) 후 복원
             return new Promise((resolve) => {
                 setTimeout(() => {
                     resolve(savedPosition);
-                }, 20);
+                }, 40);
             });
         }
         return { top: 0 };

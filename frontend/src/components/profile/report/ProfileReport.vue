@@ -63,165 +63,171 @@ onMounted(async () => {
 });
 </script>
 <template>
-    <div class="report-title">
-        <p>신고 수 {{ reportsData?.page.totalElements }}</p>
-    </div>
-
-    <div class="line"></div>
-
-    <div v-if="reportsData?.content.length > 0">
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th>신고 종류</th>
-                    <th>피신고자</th>
-                    <th>신고 사유</th>
-                    <th>신고일</th>
-                    <th>처리 상태</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in reportsData.content" :key="index">
-                    <td>
-                        {{ item.reportType === 'RECIPE' ? '레시피' : '댓글' }}
-                    </td>
-                    <td>{{ item.reportedNickname }}</td>
-                    <td>{{ item.reportReason }}</td>
-                    <td>{{ item.reportCreateAt }}</td>
-                    <td :class="`status ${item.reportStatus.toLowerCase()}`">
-                        {{ item.reportStatusLabel }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="pagination" v-if="reportsData?.page?.totalPages > 1">
-            <!-- 이전 10개 페이지 그룹 버튼 -->
-            <button v-if="reportsData.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
-
-            <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
-            <button
-                v-for="n in pageGroupEnd() - pageGroupStart()"
-                :key="n + pageGroupStart()"
-                :class="{
-                    active: reportsData.page.number === n + pageGroupStart() - 1,
-                }"
-                @click="goToPage(n + pageGroupStart() - 1)"
-            >
-                {{ n + pageGroupStart() }}
-            </button>
-
-            <!-- 다음 10개 페이지 그룹 버튼 -->
-            <button v-if="reportsData.page.totalPages > 10 && (currentPageGroup + 1) * 10 < reportsData.page.totalPages" @click="nextPageGroup">
-                &gt;&gt;
-            </button>
+    <div class="report-cotainer">
+        <div class="report-title">
+            <p>신고 수 {{ reportsData?.page.totalElements }}</p>
         </div>
-    </div>
 
-    <div v-else class="non-report">
-        <p>신고한 내역이 없습니다.</p>
+        <div class="line"></div>
+
+        <div v-if="reportsData?.content.length > 0">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>신고 종류</th>
+                        <th>피신고자</th>
+                        <th>신고 사유</th>
+                        <th>신고일</th>
+                        <th>처리 상태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in reportsData.content" :key="index">
+                        <td>
+                            {{ item.reportType === 'RECIPE' ? '레시피' : '댓글' }}
+                        </td>
+                        <td>{{ item.reportedNickname }}</td>
+                        <td>{{ item.reportReason }}</td>
+                        <td>{{ item.reportCreateAt }}</td>
+                        <td :class="`status ${item.reportStatus.toLowerCase()}`">
+                            {{ item.reportStatusLabel }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination" v-if="reportsData?.page?.totalPages > 1">
+                <!-- 이전 10개 페이지 그룹 버튼 -->
+                <button v-if="reportsData.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
+
+                <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
+                <button
+                    v-for="n in pageGroupEnd() - pageGroupStart()"
+                    :key="n + pageGroupStart()"
+                    :class="{
+                        active: reportsData.page.number === n + pageGroupStart() - 1,
+                    }"
+                    @click="goToPage(n + pageGroupStart() - 1)"
+                >
+                    {{ n + pageGroupStart() }}
+                </button>
+
+                <!-- 다음 10개 페이지 그룹 버튼 -->
+                <button v-if="reportsData.page.totalPages > 10 && (currentPageGroup + 1) * 10 < reportsData.page.totalPages" @click="nextPageGroup">
+                    &gt;&gt;
+                </button>
+            </div>
+        </div>
+
+        <div v-else class="non-report">
+            <p>신고한 내역이 없습니다.</p>
+        </div>
     </div>
 </template>
 <style lang="scss" scoped>
-.report-title {
-    margin-top: 2rem;
-    font-weight: 500;
-    margin-bottom: 1rem;
-    padding-left: 0.2rem;
-}
+.report-cotainer {
+    margin-bottom: 10rem;
 
-.line {
-    border-bottom: 2px solid;
-    color: #c09370;
-}
-
-.report-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 2rem;
-    font-size: 0.8rem;
-
-    th,
-    td {
-        padding: 0.75rem 1rem;
-        border: 1px solid #ddd;
-        text-align: center;
+    .report-title {
+        margin-top: 2rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        padding-left: 0.2rem;
     }
 
-    th {
-        background-color: #f8f8f8;
-        font-weight: bold;
-        color: #333;
+    .line {
+        border-bottom: 2px solid;
+        color: #c09370;
     }
 
-    th:nth-child(1),
-    td:nth-child(1) {
-        width: 12%;
-    }
-    th:nth-child(2),
-    td:nth-child(2) {
-        width: 12%;
-    }
-    th:nth-child(3),
-    td:nth-child(3) {
-        width: 39%;
-    }
-    th:nth-child(4),
-    td:nth-child(4) {
-        width: 21%;
-    }
-    th:nth-child(5),
-    td:nth-child(5) {
-        width: 13%;
-    }
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2rem;
+        font-size: 0.8rem;
 
-    tbody tr:nth-child(even) {
-        background-color: #fcfcfc;
-    }
+        th,
+        td {
+            padding: 0.75rem 1rem;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
 
-    tbody tr:hover {
-        background-color: #f1f1f1;
-    }
+        th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+            color: #333;
+        }
 
-    .status.approved {
-        font-weight: bold;
-    }
-    .status.rejected {
-        font-weight: bold;
-    }
-}
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 12%;
+        }
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 12%;
+        }
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 39%;
+        }
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 21%;
+        }
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 13%;
+        }
 
-.pagination {
-    margin-top: 3rem;
-    text-align: center;
+        tbody tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
 
-    button {
-        margin: 0 0.25rem;
-        padding: 0.3rem 0.6rem;
-        border: 1px solid #ccc;
-        background-color: white;
-        cursor: pointer;
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
 
-        &.active {
-            background-color: #a89d94;
-            color: white;
+        .status.approved {
             font-weight: bold;
         }
-
-        &:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
+        .status.rejected {
+            font-weight: bold;
         }
     }
-}
 
-.non-report {
-    height: 30rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    color: #333333;
+    .pagination {
+        margin-top: 3rem;
+        text-align: center;
+
+        button {
+            margin: 0 0.25rem;
+            padding: 0.3rem 0.6rem;
+            border: 1px solid #ccc;
+            background-color: white;
+            cursor: pointer;
+
+            &.active {
+                background-color: #a89d94;
+                color: white;
+                font-weight: bold;
+            }
+
+            &:disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+            }
+        }
+    }
+
+    .non-report {
+        height: 30rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        color: #333333;
+    }
 }
 </style>

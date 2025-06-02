@@ -273,7 +273,13 @@ watch(activeTab, (newTab) => {
         </div>
     </div>
 
-    <div v-else class="non-recipe">
+    <div
+        v-if="
+            (activeTab === commonValues.PUBLIC_TEXT && userProfile?.recipePublicCount === 0) ||
+            (activeTab === commonValues.PRIVATE_TEXT && userProfile?.recipePrivateCount === 0)
+        "
+        class="non-recipe"
+    >
         <p>작성한 레시피가 없습니다.</p>
         <p>새로운 레시피를 작성해보세요.</p>
 

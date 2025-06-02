@@ -5,9 +5,12 @@ import MainHeader from '@/components/header/mainHeader/MainHeader.vue';
 
 <template>
     <MainHeader />
-    <RouterView />
+    <RouterView class="view" />
     <Footer />
 </template>
 
 <style scoped>
+.view {
+    margin-bottom: 10rem;
+}
 </style>

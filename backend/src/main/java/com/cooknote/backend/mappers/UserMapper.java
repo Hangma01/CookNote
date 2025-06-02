@@ -8,17 +8,17 @@ import org.apache.ibatis.annotations.Param;
 
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.comment.enums.CommentStatus;
-import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.user.dto.request.UserReportDupliationCheckRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
-import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
+import com.cooknote.backend.domain.user.dto.response.UserSacntionResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserSearchChefResponseDTO;
 import com.cooknote.backend.domain.user.entity.Follow;
 import com.cooknote.backend.domain.user.entity.User;
+import com.cooknote.backend.domain.user.enums.ReportStatus;
 import com.cooknote.backend.domain.user.enums.ReportType;
 import com.cooknote.backend.domain.user.enums.UserStatus;
 
@@ -123,11 +123,25 @@ public interface UserMapper {
 	// 신고 내역 카운트 가져오기
 	int getReportsCount(@Param("userId") Long userId);
 	
+	// 제재 내역 가져오기
+	List<UserSacntionResponseDTO> getSanction(@Param("userId") Long userId
+											, @Param("size") int size
+											, @Param("offset") int offset
+											, @Param("statusReportApproved") ReportStatus statusReportApproved);
+	
+	// 제재 내역 카운트
+	int getSanctionCount(@Param("userId") Long userId
+					   , @Param("statusReportApproved") ReportStatus statusReportApproved);
+	
 	
 	// 쉐프 검색된 토탈 갯수
 	int getSearchChefListCount(@Param("userId") Long userId
 							 , @Param("keyword") String keyword
 							 , @Param("statusRecipePublic") RecipeStatus statusRecipePublic
 							 , @Param("statusUserActive") UserStatus statusUserActive);
+
+
+
+
 
 }

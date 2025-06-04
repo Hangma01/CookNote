@@ -32,6 +32,8 @@ privateAPI.interceptors.response.use(
         const originalRequest = error.config;
         const isTokenExpired =
             error.response?.status === HttpStatusCode.Unauthorized && error.response?.data?.message === errorMessages.ACCESS_TOKEN_EXPIRED_MESSAGE;
+        const isBlackList =
+            error.response?.status === HttpStatusCode.Unauthorized && error.response?.data?.message === errorMessages.BALACKLIST_EXCEPTION_MESSAGE;
 
         //if (isTokenExpired && !originalRequest._retry) {
         if (isTokenExpired) {
@@ -50,8 +52,12 @@ privateAPI.interceptors.response.use(
                 alert(e.response?.data?.message);
                 userStore.logout();
                 window.location.href = '/login';
-                return Promise.reject(e);
+                return;
             }
+        } else if (isBlackList) {
+            userStore.logout();
+            window.location.href = '/login';
+            return;
         }
 
         return Promise.reject(error);

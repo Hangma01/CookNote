@@ -7,6 +7,7 @@ public class Constans {
     public static final String MAIL_AUTH_PREFIX = "authMail:";
     public static final String REFRESH_TOKEN_PREFIX = "refreshToken:";
     public static final String BEARER_PREFIX = "Bearer ";
+    public static final String BLACKLIST_PREFIX = "blacklist:";
     
     // TOKEN
     public static final String ACCESS_TOKEN_NAME = "accessToken";
@@ -14,6 +15,7 @@ public class Constans {
     public static final int ACCESS_TOKEN_EXPIRED_MS = 1800000; 		// 60 * 30  * 1000 => 30분 1800000
     public static final int REFRESH_TOKEN_EXPIRED_MS = 86400000;	// 60 * 60 * 24 * 1000 => 86400000 1일
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final int BLACKLIST_EXPIRED_SEC = 3600;			// 60 * 60 => 1시간 3600
     
     // JWT
     public static final String ID_NAME_TEXT = "id";

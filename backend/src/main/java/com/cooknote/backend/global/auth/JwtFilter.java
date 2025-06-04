@@ -14,7 +14,9 @@ import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.auth.JWTResponseUtil;
+import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.common.ResponseUtil;
+import com.cooknote.backend.global.utils.redis.RedisUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -29,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
-    
+    private final RedisUtil redisUtil;
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -43,14 +45,28 @@ public class JwtFilter extends OncePerRequestFilter {
 				
             return;
 	    }
+	    
+	    // 블랙 리스트 체크
+	    Long userId =  jwtUtil.getUserId(accessToken);
+	    if(userId == null) {
+	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	    	return;
+	    }
+	    
+	    String blacklistKey = Constans.BLACKLIST_PREFIX + userId;
+	    String blacklistValue = redisUtil.getData(blacklistKey);
+	    if(CommonFunctionUtil.match(userId.toString(), blacklistValue)) {
+	    	ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.BALACKLIST_EXCEPTION.getMessage());
+	    	return;
+	    }
+	    
+	    
 
 	    // accessToken 유효성 검사
         try {
-        	if(accessToken != null 
-        		&& jwtUtil.isValidToken(accessToken)){
+        	if(jwtUtil.isValidToken(accessToken)){
         		
         		String id = jwtUtil.getId(accessToken);
-    			long userId = jwtUtil.getUserId(accessToken);
             	
             	User user = User.builder()
             						.userId(userId)
@@ -62,10 +78,10 @@ public class JwtFilter extends OncePerRequestFilter {
             	Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, null);
     			
     			// 현재 Security Context에 설정
-            	SecurityContextHolder.getContext().setAuthentication(authentication);
+            	SecurityContextHolder.getContext().setAuthentication(authentication); 
     		}
         } catch (ExpiredJwtException e) {				// Access Token 만료
-	    	JWTResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE.getMessage());
+	    	ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.ACCESS_TOKEN_EXPIRED_MESSAGE.getMessage());
 	    	return;
 	    } catch (RuntimeException e) {
 	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

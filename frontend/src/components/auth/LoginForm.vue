@@ -9,6 +9,7 @@ import { login } from '@/services/authService';
 import { useUserStore } from '@/stores/user';
 import { defaultIdRule, defaultPwRule } from '@/utils/rules';
 import { jwtDecode } from 'jwt-decode';
+import { HttpStatusCode } from 'axios';
 
 // 화면 전환
 const router = useRouter();
@@ -47,7 +48,14 @@ const handleLogin = debounce(async () => {
 
             router.replace({ name: 'mainPage' });
         } catch (e) {
-            alert(errorMessages.LOGIN_ERROR);
+            console.log(e);
+            if (e.response && e.response?.data?.message) {
+                alert(e.response.data.message);
+            } else {
+                alert(errorMessages.LOGIN_ERROR);
+            }
+
+            // router.push({ name: 'mainPage' });
         }
     }
 }, commonValues.DEFALUT_DEBOUNCE);

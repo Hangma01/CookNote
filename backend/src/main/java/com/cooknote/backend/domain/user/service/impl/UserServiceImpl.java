@@ -7,12 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cooknote.backend.domain.comment.enums.CommentStatus;
-import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.user.dto.request.UserProfileUpdateRequestDTO;
 import com.cooknote.backend.domain.user.dto.request.UserPwEditRequestDTO;
@@ -20,7 +18,6 @@ import com.cooknote.backend.domain.user.dto.request.UserReportDupliationCheckReq
 import com.cooknote.backend.domain.user.dto.request.UserReportInsertRequestDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileEditInfoResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserFollowResponseDTO;
-import com.cooknote.backend.domain.user.dto.response.UserFollowingLatestForRecipeResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserHostProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserProfileResponseDTO;
 import com.cooknote.backend.domain.user.dto.response.UserReportResponseDTO;
@@ -73,7 +70,11 @@ public class UserServiceImpl implements UserService {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 		
-		return userMapper.getHostProfile(userId, hostId, RecipeStatus.PUBLIC, RecipeStatus.PRIVATE);
+		if(host.getStatus() == UserStatus.SUSPEND) {
+			throw new CustomUserException(UserErrorCode.SUSPEND_USER_EXCEPTION);
+		}
+		
+		return userMapper.getHostProfile(userId, hostId, RecipeStatus.PUBLIC, RecipeStatus.PRIVATE, UserStatus.ACTIVE);
 		
 	}
 
@@ -81,16 +82,16 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserProfileResponseDTO getProfile(Long userId) {
 
-		return userMapper.getProfile(userId, RecipeStatus.PUBLIC, RecipeStatus.PRIVATE);
+		return userMapper.getProfile(userId, RecipeStatus.PUBLIC, RecipeStatus.PRIVATE, UserStatus.ACTIVE);
 	}
 
 	// 유저 팔로우 조회
 	@Override
 	public UserFollowResponseDTO getFollow(Long userId) {
 		
-		List<Follow> getFollower = userMapper.getFollower(userId);
+		List<Follow> getFollower = userMapper.getFollower(userId, UserStatus.ACTIVE);
 		
-		List<Follow> getFollowing = userMapper.getFollowing(userId);
+		List<Follow> getFollowing = userMapper.getFollowing(userId, UserStatus.ACTIVE);
 		
 		UserFollowResponseDTO userFollowResponseDTO = UserFollowResponseDTO.builder()
 																			.follower(getFollower)
@@ -220,7 +221,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<UserProfileEditInfoResponseDTO> getFollowingLatestForRecipe(Long userId) {
 		
-		return userMapper.getFollowingLatestForRecipe(userId, RecipeStatus.PUBLIC);
+		return userMapper.getFollowingLatestForRecipe(userId, RecipeStatus.PUBLIC, UserStatus.ACTIVE);
 	}
 
 	// 신고 생성

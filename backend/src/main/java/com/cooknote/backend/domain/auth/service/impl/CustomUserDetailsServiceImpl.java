@@ -10,6 +10,8 @@ import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.domain.user.enums.UserStatus;
 import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
+import com.cooknote.backend.global.error.exceptionCode.UserErrorCode;
+import com.cooknote.backend.global.error.excption.CustomUserException;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.mappers.UserMapper;
 
@@ -29,8 +31,10 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
 		// 유저 조회 실패
 		if(getUser == null) {
-
 			throw new UsernameNotFoundException(ErrorMessage.LOGIN_FAIL_MESSAGE.getMessage());
+			
+		} else if (getUser.getStatus() == UserStatus.SUSPEND) {
+			throw new UsernameNotFoundException(ErrorMessage.SUSPEND_USER_EXCEPTION.getMessage());
 		}
 		
 		// UserDetails에 담아서 return 하면 AuthenticationManager가 검증함

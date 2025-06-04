@@ -137,8 +137,8 @@ public class CommentServiceImpl implements CommentService {
 		
 		
 		int offset = page * size;
-		List<CommentUserWriteResponseDTO> comments = commentMapper.getCommentUserWrite(userId, size, offset, CommentStatus.PUBLIC);
-		int total = commentMapper.getCommentUserWriteCount(userId, CommentStatus.PUBLIC);
+		List<CommentUserWriteResponseDTO> comments = commentMapper.getCommentUserWrite(userId, size, offset, CommentStatus.PUBLIC, CommentStatus.PRIVATE_ADMIN);
+		int total = commentMapper.getCommentUserWriteCount(userId, CommentStatus.PUBLIC, CommentStatus.PRIVATE_ADMIN);
 		
 		return new PageImpl<>(comments, PageRequest.of(page, size), total);
 	}

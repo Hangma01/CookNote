@@ -7,7 +7,7 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.auth.JWTResponseUtil;
+import com.cooknote.backend.global.utils.common.ResponseUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 
@@ -53,7 +53,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         // 쿠키 체크
         if (cookies == null) {
-        	JWTResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
+        	ResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
         	return;
         }
 
@@ -66,7 +66,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 		
         // refreshToekn 체크
         if(refreshToken == null) {
-        	JWTResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
+        	ResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
         	return;
         }
         
@@ -77,17 +77,20 @@ public class CustomLogoutFilter extends GenericFilterBean {
         try {
 			jwtUtil.isExpired(refreshToken);
 		} catch (Exception e) {
-			JWTResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
+			ResponseUtil.writeJson(response, HttpStatus.UNAUTHORIZED.value());
 			return;
 		}
 
         // 레디스의 refreshToekn 확인
-        long userId = jwtUtil.getUserId(refreshToken);
+        Long userId = jwtUtil.getUserId(refreshToken);
         String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId;
 		String refreshTokenReidsValue = redisUtil.getData(refreshTokenRedisKey);
 				
 		if(refreshTokenReidsValue != null) {
 			redisUtil.deleteData(refreshTokenRedisKey);
+			
+			String blacklistKey = Constans.BLACKLIST_PREFIX + userId;
+			redisUtil.setDataExpire(blacklistKey, userId.toString(), Constans.BLACKLIST_EXPIRED_SEC);
 		}
 		
 		response.setStatus(HttpStatus.OK.value());

@@ -103,7 +103,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="follow-feed-container">
+    <div class="follow-feed-container" v-if="followingUsers?.length > 0">
         <section class="following-user-section">
             <div><h1>팔로우</h1></div>
             <ul class="following-user-wrap">
@@ -112,23 +112,10 @@ onMounted(async () => {
                         <div class="following-profile-image-box">
                             <img
                                 :src="item.profileImage"
-                                :class="[
-                                    'following-profile-image',
-                                    {
-                                        active: selectedFollowingId === item.followingId,
-                                    },
-                                ]"
+                                :class="['following-profile-image', { active: selectedFollowingId === item.followingId }]"
                             />
                         </div>
-                        <span
-                            :class="[
-                                'nickname',
-                                {
-                                    active: selectedFollowingId === item.followingId,
-                                },
-                            ]"
-                            >{{ item.nickname }}</span
-                        >
+                        <span :class="['nickname', { active: selectedFollowingId === item.followingId }]">{{ item.nickname }}</span>
                     </div>
                 </li>
             </ul>
@@ -171,6 +158,11 @@ onMounted(async () => {
                 <p>작성한 레시피가 없습니다.</p>
             </div>
         </div>
+    </div>
+
+    <div v-else class="follow-non">
+        <p>팔로우한 쉐프가 없습니다.</p>
+        <p>쉐프 검색을 통해 팔로우를 해보세요.</p>
     </div>
 </template>
 
@@ -302,5 +294,15 @@ onMounted(async () => {
             }
         }
     }
+}
+
+.follow-non {
+    width: 69rem;
+    margin: 0 auto;
+    padding-top: 15rem;
+    padding-bottom: 25rem;
+    text-align: center;
+    font-size: 2rem;
+    height: 100px;
 }
 </style>

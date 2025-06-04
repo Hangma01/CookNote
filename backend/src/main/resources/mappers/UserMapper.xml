@@ -19,6 +19,7 @@
 		SELECT USER_ID
 			 , ID
 			 , PASSWORD
+			 , STATUS
 		  FROM USER
 	 	 WHERE ID = #{id}
 	 	   AND STATUS != #{statusUserDelete}
@@ -33,6 +34,7 @@
 			 , EMAIL
 			 , NICKNAME
 			 , PROFILE_IMAGE
+			 , STATUS
 			 , CREATE_AT
 			 , UPDATE_AT
 		  FROM USER
@@ -60,13 +62,19 @@
 		     ) 				   AS RECIPE_PRIVATE_COUNT
 		     , (
 		     	SELECT COUNT(FOLLOWING_ID) 
-		     	  FROM FOLLOW 
-		     	 WHERE FOLLOWING_ID = #{hostId}
+		     	  FROM FOLLOW AS FLW 
+		    INNER JOIN USER   AS USR
+		            ON FLW.FOLLOWING_ID = USR.USER_ID
+		     	 WHERE FLW.FOLLOWER_ID = #{hostId}
+		     	   AND USR.STATUS = #{statusUserActive}
 		     ) 				   AS FOLLOWING_COUNT
 		     , (
 		     	SELECT COUNT(FOLLOWER_ID) 
-		     	  FROM FOLLOW 
-		     	 WHERE FOLLOWER_ID = #{hostId}
+		     	  FROM FOLLOW AS FLW
+		    INNER JOIN USER   AS USR
+		            ON FLW.FOLLOWER_ID = USR.USER_ID
+		     	 WHERE FLW.FOLLOWING_ID = #{hostId}
+		     	   AND USR.STATUS = #{statusUserActive}
 		     ) 				   AS FOLLOWER_COUNT
 		     <if test="userId != null"> <!-- 본인 프로필인지 확인을 위함 -->
 		     , EXISTS (
@@ -79,7 +87,7 @@
 		 FROM USER 			    AS U
 		 LEFT JOIN RECIPE 	    AS R 
 		   ON U.USER_ID = R.WRITER_ID
-		WHERE USER_ID = #{hostId}
+		WHERE U.USER_ID = #{hostId}
 	</select>
 	
 	<!-- 본인 프로필 가져오기 -->
@@ -102,13 +110,19 @@
 		     ) 				   AS RECIPE_PRIVATE_COUNT
 		     , (
 		     	SELECT COUNT(FOLLOWING_ID) 
-		     	  FROM FOLLOW 
-		     	 WHERE FOLLOWING_ID = #{userId}
+		     	  FROM FOLLOW AS FLW 
+		    INNER JOIN USER AS USR
+		            ON FLW.FOLLOWER_ID = USR.USER_ID
+		     	 WHERE FLW.FOLLOWING_ID = #{userId}
+		     	   AND USR.STATUS = #{statusUserActive}
 		     ) 				   AS FOLLOWER_COUNT
 		     , (
 		     	SELECT COUNT(FOLLOWER_ID) 
-		     	  FROM FOLLOW 
+		     	  FROM FOLLOW AS FLW
+		    INNER JOIN USER AS USR
+		            ON FLW.FOLLOWING_ID = USR.USER_ID
 		     	 WHERE FOLLOWER_ID = #{userId}
+		     	   AND USR.STATUS = #{statusUserActive}
 		     ) 				   AS FOLLOWING_COUNT
 		     
 		 FROM USER 			    AS U
@@ -134,6 +148,7 @@
             ON F1.FOLLOWER_ID = F2.FOLLOWING_ID
            AND F1.FOLLOWING_ID = F2.FOLLOWER_ID
     	 WHERE F1.FOLLOWING_ID = #{userId}
+    	   AND U.STATUS = #{statusUserActive}
 	</select>
 	
 	<!-- 팔로잉 정보 조회 -->
@@ -145,6 +160,7 @@
     	  JOIN USER AS U 
     	    ON F.FOLLOWING_ID = U.USER_ID
     	 WHERE F.FOLLOWER_ID = #{userId}
+    	   AND U.STATUS = #{statusUserActive}
 	</select>
 	
 	<!-- 유저 존재 여부 -->
@@ -230,9 +246,8 @@
 	       ON R.WRITER_ID = U.USER_ID 
 	      AND R.STATUS = #{statusRecipePublic}
 		WHERE F.FOLLOWER_ID = #{userId} 
+		  AND U.STATUS = #{statusUserActive}
 	 GROUP BY U.USER_ID
-	 		, U.NICKNAME
-	 		, U.PROFILE_IMAGE
 	 ORDER BY MAX(R.CREATE_AT) DESC;
 	</select>
 	
@@ -318,11 +333,13 @@
 		SELECT RPT.REPORT_TYPE 		  AS REPORT_TYPE
 			 , RPT.CREATE_AT 		  AS REPORT_CREATE_AT
 			 , RPT.STATUS 			  AS REPORT_STATUS
-			 , U.NICKNAME 			  AS REPORTED_NICKNAME
+			 , RPD.NICKNAME 	      AS REPORTED_NICKNAME
 			 , CRR.TYPE 			  AS REPORT_REASON
 		  FROM REPORT 				  AS RPT
 	INNER JOIN USER 				  AS U
 		    ON RPT.REPORTER_ID = U.USER_ID
+    INNER JOIN USER					  AS RPD
+            ON RPT.REPORTED_ID = RPD.USER_ID
     INNER JOIN CATEGORY_REPORT_REASON AS CRR
     		ON CRR.CATEGORY_REPORT_REASON_ID = RPT.CATEGORY_REPORT_REASON_ID
     	 WHERE RPT.REPORTER_ID = #{userId}
@@ -405,12 +422,15 @@
       		   </if>
 		  FROM USER U
 	 LEFT JOIN (
-		    	SELECT FOLLOWER_ID
-		    	     , COUNT(FOLLOWER_ID) 						AS FOLLOWER_COUNT
-		    	  FROM FOLLOW
-		       GROUP BY FOLLOWER_ID
+		    	SELECT FOLLOWING_ID
+		    	     , COUNT(FOLLOWING_ID) 						AS FOLLOWER_COUNT
+		    	  FROM FOLLOW 									AS FLW
+		    INNER JOIN USER   									AS SUSR
+		            ON FLW.FOLLOWER_ID = SUSR.USER_ID
+		           AND SUSR.STATUS = #{statusUserActive}
+		       GROUP BY FOLLOWING_ID
 		  	   ) 												AS FOLLOW_CNT 
-			ON FOLLOW_CNT.FOLLOWER_ID = U.USER_ID
+			ON FOLLOW_CNT.FOLLOWING_ID = U.USER_ID
      LEFT JOIN (
 		    	SELECT WRITER_ID
 		    	   	 , COUNT(WRITER_ID) 						AS RECIPE_COUNT
@@ -425,6 +445,9 @@
 		    	  FROM RECIPE_LIKE 								AS RL
 		    INNER JOIN RECIPE 									AS R 
 		       		ON RL.RECIPE_ID = R.RECIPE_ID
+		    INNER JOIN USER AS SUSR
+		            ON RL.USER_ID = SUSR.USER_ID
+		           AND SUSR.STATUS = #{statusUserActive}
 		      GROUP BY R.WRITER_ID
 		  	   )												AS LIKE_CNT	
 		  	ON LIKE_CNT.WRITER_ID = U.USER_ID  					
@@ -434,6 +457,9 @@
 		    	  FROM RECIPE_BOOKMARK 							AS RB
 		    INNER JOIN RECIPE 									AS R 
 		       		ON RB.RECIPE_ID = R.RECIPE_ID
+       		INNER JOIN USER AS SUSR
+		            ON RB.USER_ID = SUSR.USER_ID
+		           AND SUSR.STATUS = #{statusUserActive}
 		      GROUP BY R.WRITER_ID
 		  	   )  												AS BOOKMARK_CNT 
 		    ON BOOKMARK_CNT.WRITER_ID = U.USER_ID

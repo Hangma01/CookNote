@@ -38,6 +38,7 @@ import com.cooknote.backend.domain.recipe.entity.Recipe;
 import com.cooknote.backend.domain.recipe.enums.ConditionalType;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
 import com.cooknote.backend.domain.recipe.service.RecipeService;
+import com.cooknote.backend.domain.user.enums.UserStatus;
 import com.cooknote.backend.global.config.AsyncConfig;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
@@ -430,8 +431,8 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public Page<RecipeLikeResponseDTO> getLikeRecipe(Long userId, int page, int size) {
 		int offset = page * size;
-		List<RecipeLikeResponseDTO> recipesLiked = recipeMapper.getRecipeLike(userId, size, offset);
-		int total = recipeMapper.recipeLikeCount(userId);
+		List<RecipeLikeResponseDTO> recipesLiked = recipeMapper.getRecipeLike(userId, size, offset, RecipeStatus.PUBLIC);
+		int total = recipeMapper.recipeLikeCount(userId, RecipeStatus.PUBLIC);
 		
 		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
 	}
@@ -440,8 +441,8 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public Page<RecipeBookmarkResponseDTO> getBookmarkRecipe(Long userId, int page, int size) {
 		int offset = page * size;
-		List<RecipeBookmarkResponseDTO> recipesBookmarked = recipeMapper.getRecipeBookmark(userId, size, offset);
-		int total = recipeMapper.recipeBookmarkCount(userId);
+		List<RecipeBookmarkResponseDTO> recipesBookmarked = recipeMapper.getRecipeBookmark(userId, size, offset, RecipeStatus.PUBLIC);
+		int total = recipeMapper.recipeBookmarkCount(userId, RecipeStatus.PUBLIC);
 		
 		return new PageImpl<>(recipesBookmarked, PageRequest.of(page, size), total);
 	}
@@ -468,7 +469,9 @@ public class RecipeServiceImpl implements RecipeService {
 																		   , conditionalType
 																		   , ConditionalType.POPULAR
 																		   , ConditionalType.LATEST
-																		   , CommentStatus.PUBLIC);
+																		   , CommentStatus.PUBLIC
+																		   , CommentStatus.PRIVATE_ADMIN
+																		   , UserStatus.ACTIVE);
 		
 		int total = recipeMapper.getRecipeSearchCount(keywords, categoryCuisineId, categoryPurposeId, RecipeStatus.PUBLIC);
 		
@@ -497,7 +500,8 @@ public class RecipeServiceImpl implements RecipeService {
 																			   , conditionalType
 																			   , ConditionalType.POPULAR
 																			   , ConditionalType.LATEST
-																			   , CommentStatus.PUBLIC);
+																			   , CommentStatus.PUBLIC
+																			   , UserStatus.ACTIVE);
 	
 		int total = recipeMapper.getIngredientSearchCount(ingredients, ingredientCount, RecipeStatus.PUBLIC);
 		
@@ -510,7 +514,8 @@ public class RecipeServiceImpl implements RecipeService {
 	public List<RecipeRecommnetResponseDTO> getRecommentRecipe() {
 		List<RecipeRecommnetResponseDTO> recommentRecipeList = recipeMapper.getRecommentRecipe(RecipeStatus.PUBLIC
 																						     , Constans.GET_RECIPE_LIMIT
-																						     , CommentStatus.PUBLIC);
+																						     , CommentStatus.PUBLIC
+																						     , UserStatus.ACTIVE);
 		int resultSize = Math.min(recommentRecipeList.size(), Constans.RECOMMENT_RECIPE_MIN_VALUE);
 		Collections.shuffle(recommentRecipeList);
 		
@@ -522,7 +527,8 @@ public class RecipeServiceImpl implements RecipeService {
 	public List<RecipeCardResponseDTO> getBestRecipe() {
 		List<RecipeCardResponseDTO> bestRecipeList = recipeMapper.getBestRecipe(RecipeStatus.PUBLIC
 																			  , Constans.BEST_RECIPE_MIN_VALUE
-																			  , CommentStatus.PUBLIC);
+																			  , CommentStatus.PUBLIC
+																			  , UserStatus.ACTIVE);
 		
 		return bestRecipeList;
 	}
@@ -533,7 +539,8 @@ public class RecipeServiceImpl implements RecipeService {
 		List<RecipeRecommnetResponseDTO> soloRecitList = recipeMapper.getSoloRecipe(RecipeStatus.PUBLIC
 																				  , CategoryPurposeEnum.SOLO_MEAL.getCode()
 																				  , Constans.GET_RECIPE_LIMIT
-																				  , CommentStatus.PUBLIC);
+																				  , CommentStatus.PUBLIC
+																				  , UserStatus.ACTIVE);
 		
 		int resultSize = Math.min(soloRecitList.size() ,Constans.SOLO_RECIPE_MIN_VALUE);
 		Collections.shuffle(soloRecitList);
@@ -546,7 +553,8 @@ public class RecipeServiceImpl implements RecipeService {
 	public List<RecipeCardResponseDTO> getRecentRecipe() {
 		List<RecipeCardResponseDTO> recentRecipeList = recipeMapper.getRecentRecipe(RecipeStatus.PUBLIC
 																				  , Constans.RECENT_RECIPE_MIN_VALUE
-																				  , CommentStatus.PUBLIC);
+																				  , CommentStatus.PUBLIC
+																				  , UserStatus.ACTIVE);
 
 		return recentRecipeList;
 	}
@@ -556,7 +564,7 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public Page<RecipeSearchResponseDTO> getRecipesOfFollowingUsers(Long userId, int page, int size) {
 		int offset = page * size;
-		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesOfFollowingUsers(userId, size, offset, RecipeStatus.PUBLIC, CommentStatus.PUBLIC);
+		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesOfFollowingUsers(userId, size, offset, RecipeStatus.PUBLIC, CommentStatus.PUBLIC, UserStatus.ACTIVE);
 		int total = recipeMapper.getRecipesOfFollowingUsersCount(userId, RecipeStatus.PUBLIC);
 		
 		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
@@ -567,7 +575,7 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public Page<RecipeSearchResponseDTO> getRecipesByFollowingUser(Long userId, Long followingId, int page, int size) {
 		int offset = page * size;
-		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesByFollowingUser(userId, followingId, size, offset, RecipeStatus.PUBLIC, CommentStatus.PUBLIC);
+		List<RecipeSearchResponseDTO> recipesLiked = recipeMapper.getRecipesByFollowingUser(userId, followingId, size, offset, RecipeStatus.PUBLIC, CommentStatus.PUBLIC, UserStatus.ACTIVE);
 		int total = recipeMapper.getRecipesByFollowingUserCount(userId, followingId, RecipeStatus.PUBLIC);
 		
 		return new PageImpl<>(recipesLiked, PageRequest.of(page, size), total);
@@ -579,7 +587,7 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public Integer getRecipeLikeCount(Long recipeId) {
 		
-		return recipeMapper.getRecipeLikeCount(recipeId);
+		return recipeMapper.getRecipeLikeCount(recipeId, UserStatus.ACTIVE);
 	}
 
 	

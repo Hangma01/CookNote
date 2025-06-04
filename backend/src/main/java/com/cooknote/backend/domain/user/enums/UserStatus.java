@@ -7,4 +7,5 @@ public enum UserStatus {
 	ACTIVE,
 	SUSPEND,
 	DELETE,
+
 }

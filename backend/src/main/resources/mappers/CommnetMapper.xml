@@ -17,9 +17,10 @@
 		   ON C.WRITER_ID = U.USER_ID
 	LEFT JOIN COMMENT 				AS CC
 		   ON C.COMMENT_ID = CC.PARENT_COMMENT_ID
+		  AND CC.STATUS = #{statusCommentPublic}
 	 	WHERE C.RECIPE_ID = #{recipeId}
 		  AND C.PARENT_COMMENT_ID IS NULL
-		  AND C.STATUS = #{statusPublic}
+		  AND C.STATUS = #{statusCommentPublic}
 	 GROUP BY C.COMMENT_ID
 	 		, C.WRITER_ID
 	 		, C.CONTENT
@@ -37,7 +38,7 @@
 		  FROM COMMENT
 		 WHERE RECIPE_ID = #{recipeId}
 		   AND PARENT_COMMENT_ID IS NULL
-		   AND STATUS = #{statusPublic}
+		   AND STATUS = #{statusCommentPublic}
 	</select>
 	
 	<!-- 리플 페이징 -->
@@ -49,10 +50,13 @@
 			 , U.NICKNAME 	   AS NICKNAME		<!-- 작성자 닉네임 -->
 			 , U.PROFILE_IMAGE AS PROFILE_IMAGE	<!-- 작성자 프로필 이미지 -->
 		 FROM COMMENT 		   AS C
-		 JOIN USER 			   AS U
+   INNER JOIN USER 			   AS U
 		   ON C.WRITER_ID = U.USER_ID
-	 	WHERE PARENT_COMMENT_ID = #{parentCommentId}
-	 	  AND C.STATUS = #{statusPublic}
+   INNER JOIN COMMENT 		   AS PC
+	  	   ON C.PARENT_COMMENT_ID = PC.COMMENT_ID
+	 	WHERE C.PARENT_COMMENT_ID = #{parentCommentId}
+	 	  AND C.STATUS = #{statusCommentPublic}   
+	 	  AND PC.STATUS = #{statusCommentPublic}  
 	 ORDER BY C.CREATE_AT DESC
 	    LIMIT #{size} 
 	   OFFSET #{offset}
@@ -60,10 +64,13 @@
 
 	<!-- 리플 토탈 갯수 -->
 	<select id="commentRepliesCount" resultType="int">
-		SELECT COUNT(COMMENT_ID)
-		  FROM COMMENT
-		 WHERE PARENT_COMMENT_ID = #{parentCommentId}
-		   AND STATUS = #{statusPublic}
+		SELECT COUNT(C.COMMENT_ID)
+		  FROM COMMENT AS C
+    INNER JOIN COMMENT AS PC
+		    ON C.PARENT_COMMENT_ID = PC.COMMENT_ID
+		 WHERE C.PARENT_COMMENT_ID = #{parentCommentId}
+		   AND C.STATUS = #{statusCommentPublic} 
+	 	   AND PC.STATUS = #{statusCommentPublic}  
 	</select>
 
 	<!-- 댓글 추가 - 부모 댓글 조회 -->
@@ -72,7 +79,7 @@
 			 , PARENT_COMMENT_ID 	AS PARENT_COMMENT_ID
 		  FROM COMMENT
 		 WHERE COMMENT_ID = #{parentCommentId}
-		   AND STATUS = #{statusPublic}
+		   AND STATUS = #{statusCommentPublic}
 	</select>   
 	
 	
@@ -95,7 +102,7 @@
 	<!-- 댓글 삭제 -->
 	<update id="commentDelete">
 		UPDATE COMMENT
-		   SET STATUS = #{statusDelete}
+		   SET STATUS = #{statusCommentDelete}
 		 WHERE COMMENT_ID = #{commentId}
 		    OR PARENT_COMMENT_ID = #{commentId}
 	</update>
@@ -112,7 +119,7 @@
 		SELECT WRITER_ID AS WRITER_ID
 		  FROM COMMENT
 		 WHERE COMMENT_ID = #{commentId}
-		   AND STATUS = #{statusPublic}
+		   AND STATUS = #{statusCommentPublic}
 	</select>
 	
 	<!-- 댓글 수정 -->
@@ -133,10 +140,17 @@
 			 , C.CONTENT 	 AS COMMENT_CONTENT 		<!-- 댓글 컨텐츠 -->
 			 , C.CREATE_AT   AS COMMENT_CREATE_AT		<!-- 댓글 작성일 -->
 		 FROM COMMENT 		 AS C
-		 JOIN RECIPE 		 AS R
-		   ON C.RECIPE_ID = R.RECIPE_ID
+   INNER JOIN RECIPE 		 AS R
+		   ON C.RECIPE_ID = R.RECIPE_ID 
 	 	WHERE C.WRITER_ID = #{userId}
-	 	  AND C.STATUS = #{statusPublic}
+	 	  AND C.STATUS = #{statusCommentPublic}
+	 	  AND (C.PARENT_COMMENT_ID IS NULL
+  								OR EXISTS (SELECT 1
+  			  							     FROM COMMENT AS PC
+  			 							    WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+  			   								  AND PC.STATUS != #{statusCommentPrivate}
+  										   )
+  		      )
 	 ORDER BY C.CREATE_AT DESC
 	    LIMIT #{size} 
 	   OFFSET #{offset}
@@ -144,18 +158,28 @@
 	
 	<!-- 유저가 작성한 댓글 조회 -->
 	<select id="getCommentUserWriteCount" resultType="int">
-		SELECT COUNT(COMMENT_ID)
-		  FROM COMMENT
-		 WHERE WRITER_ID = #{userId}
-	 	   AND STATUS = #{statusPublic}
+		SELECT COUNT(C.COMMENT_ID)
+		  FROM COMMENT AS C
+		 WHERE C.WRITER_ID = #{userId}
+	 	   AND C.STATUS = #{statusCommentPublic}
+   	 	   AND (C.PARENT_COMMENT_ID IS NULL
+							OR EXISTS (SELECT 1
+		  							     FROM COMMENT AS PC
+		 							    WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+		   								  AND PC.STATUS != #{statusCommentPrivate}
+									   )
+	           )
 	</select>
 	
 	<!-- 리플총 갯수 조회 -->
 	<select id="getRepliesCount" resultType="int">
-		SELECT COUNT(COMMENT_ID)
-		  FROM COMMENT
-		 WHERE RECIPE_ID = #{recipeId}
-		   AND PARENT_COMMENT_ID IS NOT NULL
-		   AND STATUS = #{statusPublic}
+		SELECT COUNT(C.COMMENT_ID)
+		  FROM COMMENT AS C
+    INNER JOIN COMMENT AS PC
+		    ON C.PARENT_COMMENT_ID = PC.COMMENT_ID
+		 WHERE C.RECIPE_ID = #{recipeId}
+		   AND C.PARENT_COMMENT_ID IS NOT NULL
+		   AND C.STATUS = #{statusCommentPublic}
+	 	   AND PC.STATUS = #{statusCommentPublic}  
 	</select>
 </mapper>

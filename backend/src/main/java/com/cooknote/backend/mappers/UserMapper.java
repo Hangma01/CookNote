@@ -37,18 +37,22 @@ public interface UserMapper {
 	UserHostProfileResponseDTO getHostProfile(@Param("userId") Long userId
 											, @Param("hostId") Long hostId
 											, @Param("statusRecipePublic") RecipeStatus statusRecipePublic
-											, @Param("statusRecipePrivate") RecipeStatus statusRecipePrivate);
+											, @Param("statusRecipePrivate") RecipeStatus statusRecipePrivate
+											, @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 유저 본인 프로필 정보 가져오기	
 	UserProfileResponseDTO getProfile(@Param("userId") Long userId
 									, @Param("statusRecipePublic") RecipeStatus statusRecipePublic
-									, @Param("statusRecipePrivate") RecipeStatus statusRecipePrivate);
+									, @Param("statusRecipePrivate") RecipeStatus statusRecipePrivate
+									, @Param("statusUserActive") UserStatus statusUserActive);
 
-	// 팔로워한 유저 정보 가졍괴	
-	List<Follow> getFollower(@Param("userId") Long userId);
+	// 팔로워한 유저 정보 가져오기
+	List<Follow> getFollower(@Param("userId") Long userId
+						   , @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 팔로잉한 유저 정보 가져오기	
-	List<Follow> getFollowing(@Param("userId") Long userId);
+	List<Follow> getFollowing(@Param("userId") Long userId
+						    , @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 유저 존재 확인	
 	boolean existsUser(@Param("userId") Long userId);
@@ -80,7 +84,8 @@ public interface UserMapper {
 
 	// 팔로잉한 유저중 레시피 작성 최신순으로 정보 가져오기
 	List<UserProfileEditInfoResponseDTO> getFollowingLatestForRecipe(@Param("userId") Long userId
-							   	   								   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
+							   	   								   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic
+							   	   								   , @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 신고 생성
 	void reportInsert(@Param("userId") Long userId

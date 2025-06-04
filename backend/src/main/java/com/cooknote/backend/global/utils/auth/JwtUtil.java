@@ -27,7 +27,7 @@ public class JwtUtil {
     }
     
     // 토큰에서 userId 가져오기
-    public long getUserId(String token) {
+    public Long getUserId(String token) {
         Claims claims = getClaims(token);
         return claims.get(Constans.USER_ID_NAME_TEXT, Long.class);
     }    

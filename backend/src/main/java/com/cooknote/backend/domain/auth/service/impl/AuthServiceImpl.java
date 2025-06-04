@@ -22,7 +22,6 @@ import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
 import com.cooknote.backend.global.infra.mail.service.MailService;
-import com.cooknote.backend.global.infra.mail.service.impl.MailServiceImpl;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
 import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;

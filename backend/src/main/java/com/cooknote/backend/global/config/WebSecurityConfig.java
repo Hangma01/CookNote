@@ -7,11 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -20,6 +22,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.cooknote.backend.global.auth.JwtFilter;
+import com.cooknote.backend.global.auth.CustomDaoAuthenticationProvider;
 import com.cooknote.backend.global.auth.CustomLoginFilter;
 import com.cooknote.backend.global.auth.CustomLogoutFilter;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
@@ -49,6 +52,18 @@ public class WebSecurityConfig {
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+	
+	
+	// 예외처리 우회
+    @Bean
+    public CustomDaoAuthenticationProvider customDaoAuthenticationProvider(UserDetailsService userDetailsService, BCryptPasswordEncoder passwordEncoder) {
+        CustomDaoAuthenticationProvider provider = new CustomDaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+	
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
@@ -110,7 +125,7 @@ public class WebSecurityConfig {
 		
 		// 로그인 필터 전 JWTFilter 등록
 	    http
-           .addFilterBefore(new JwtFilter(jwtUtil), CustomLoginFilter.class);
+           .addFilterBefore(new JwtFilter(jwtUtil, redisUtil), CustomLoginFilter.class);
 	    
 	    
 		// 필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager()는 직접 new로 만들 수 없어서 authenticationConfiguration가 필요함)

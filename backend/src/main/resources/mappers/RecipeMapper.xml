@@ -332,8 +332,9 @@
 	<select id="recipeLikeCount" resultType="int">
 		SELECT COUNT(RL.RECIPE_ID)
 		  FROM RECIPE_LIKE AS RL
-   		  JOIN RECIPE      AS R
+   	INNER JOIN RECIPE      AS R
 		    ON RL.RECIPE_ID = R.RECIPE_ID
+		   AND R.STATUS = #{statusRecipePublic}
 		 WHERE RL.USER_ID = #{userId}
 	</select>
 	
@@ -343,6 +344,7 @@
 		  FROM RECIPE_BOOKMARK AS RB
 		  JOIN RECIPE   	   AS R
 		    ON RB.RECIPE_ID = R.RECIPE_ID
+		   AND R.STATUS = #{statusRecipePublic}
 		 WHERE RB.USER_ID = #{userId}
 	</select>
 	
@@ -357,6 +359,7 @@
 		  FROM RECIPE_LIKE   AS RL
 		  JOIN RECIPE 		 AS R
 		    ON RL.RECIPE_ID = R.RECIPE_ID
+		   AND R.STATUS = #{statusRecipePublic}
 		 WHERE RL.USER_ID = #{userId}
 		 ORDER BY RL.CREATE_AT DESC
 		 LIMIT #{size}
@@ -372,8 +375,9 @@
 			 , R.CREATE_AT	   AS CREATE_AT
 			 , R.STATUS		   AS STATUS
 		  FROM RECIPE_BOOKMARK AS RB
-		  JOIN RECIPE 		   AS R
+	INNER JOIN RECIPE 		   AS R
 		    ON RB.RECIPE_ID = R.RECIPE_ID
+		   AND R.STATUS = #{statusRecipePublic}
 		 WHERE RB.USER_ID = #{userId}
 	  ORDER BY RB.CREATE_AT DESC
 		 LIMIT #{size}
@@ -404,9 +408,22 @@
 			ON R.WRITER_ID = U.USER_ID
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+	 	   AND (C.PARENT_COMMENT_ID IS NULL
+	 	                         OR EXISTS (SELECT 1
+	 	                                      FROM COMMENT AS PC
+	 	                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+	 	                         		   )
+	 	       )
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	       <if test="keywords != null and keywords.size() > 0">
 	       AND (
@@ -485,9 +502,22 @@
 		 	ON R.WRITER_ID = U.USER_ID
 	 LEFT JOIN RECIPE_LIKE 								AS RL 						<!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )
 	 LEFT JOIN COMMENT 									AS C 						<!-- 레시피 댓글 테이블 -->
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+   	 	   AND (C.PARENT_COMMENT_ID IS NULL
+                                 OR EXISTS (SELECT 1
+                                              FROM COMMENT AS PC
+                                             WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+                         		            )
+               )
 		 WHERE R.STATUS = #{statusRecipePublic}
 		   <if test="!ingredients.isEmpty()">
 		   AND R.RECIPE_ID IN (
@@ -551,8 +581,21 @@
 	 LEFT JOIN COMMENT 							 AS C 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+	 	   AND (C.PARENT_COMMENT_ID IS NULL
+                                 OR EXISTS (SELECT 1
+                                              FROM COMMENT AS PC
+                                             WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+                                            )
+               )
 	 LEFT JOIN RECIPE_LIKE 						 AS RL 
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )
 		 WHERE F.FOLLOWER_ID = #{userId}                               
 	  	   AND R.STATUS = #{statusRecipePublic}                                  
 	  GROUP BY R.RECIPE_ID
@@ -592,8 +635,21 @@
 	 LEFT JOIN COMMENT 							 AS C 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+   	 	   AND (C.PARENT_COMMENT_ID IS NULL
+		                         OR EXISTS (SELECT 1
+		                                      FROM COMMENT AS PC
+		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+		                                    )
+               )
 	 LEFT JOIN RECIPE_LIKE 						 AS RL 
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )
 		 WHERE F.FOLLOWER_ID = #{userId}                                    
 	  	   AND R.STATUS = #{statusRecipePublic}                                   
 	  	   AND F.FOLLOWING_ID= #{followingId}
@@ -619,8 +675,11 @@
  	<!-- 레시피 좋아요한 카운트 가져오기 -->
 	<select id="getRecipeLikeCount" resultType="int">
 		SELECT COUNT(RECIPE_LIKE_ID)
-		  FROM RECIPE_LIKE
+		  FROM RECIPE_LIKE AS RL
+    INNER JOIN USER 	   AS USR
+            ON RL.USER_ID = USR.USER_ID
 		 WHERE RECIPE_ID = #{recipeId}
+		   AND USR.STATUS = #{statusUserActive}
 	</select>
 	
 	<!-- 회원 탈퇴 시 레시피 삭제 -->
@@ -649,10 +708,23 @@
 	INNER JOIN USER 							 	AS U 						<!-- 유저 테이블 -->
 			ON R.WRITER_ID = U.USER_ID
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
-	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 		ON R.RECIPE_ID = RL.RECIPE_ID
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )	
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+   	 	   AND (C.PARENT_COMMENT_ID IS NULL
+		                         OR EXISTS (SELECT 1
+		                                      FROM COMMENT AS PC
+		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+		                                    )
+               )
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	  GROUP BY R.RECIPE_ID
       ORDER BY (
@@ -678,10 +750,23 @@
 	INNER JOIN USER 							 	AS U 						<!-- 유저 테이블 -->
 			ON R.WRITER_ID = U.USER_ID
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
-	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 		ON R.RECIPE_ID = RL.RECIPE_ID
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+   	 	   AND (C.PARENT_COMMENT_ID IS NULL
+		                         OR EXISTS (SELECT 1
+		                                      FROM COMMENT AS PC
+		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+		                                    )
+               )
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	  GROUP BY R.RECIPE_ID
       ORDER BY (
@@ -700,10 +785,23 @@
 	INNER JOIN USER 							 	AS U 						<!-- 유저 테이블 -->
 			ON R.WRITER_ID = U.USER_ID
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
-	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 		ON R.RECIPE_ID = RL.RECIPE_ID
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER 					AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )		
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+   	 	   AND (C.PARENT_COMMENT_ID IS NULL
+		                         OR EXISTS (SELECT 1
+		                                      FROM COMMENT AS PC
+		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+		                                    )
+               )
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	       AND R.CATEGORY_PURPOSE_ID = #{categoryPurposeSoloMeal}
 	  GROUP BY R.RECIPE_ID
@@ -730,9 +828,22 @@
 			ON R.WRITER_ID = U.USER_ID
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID		
+	 	   AND (EXISTS (SELECT 1 
+	 	                FROM USER AS SUSR
+	 	                WHERE RL.USER_ID = SUSR.USER_ID
+	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	               )
+	 	       )
 	 LEFT JOIN COMMENT 							 	AS C						<!-- 댓글 테이블 --> 
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
+   	 	   AND (C.PARENT_COMMENT_ID IS NULL
+		                         OR EXISTS (SELECT 1
+		                                      FROM COMMENT AS PC
+		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+	 	                                       AND PC.STATUS = #{statusCommentPublic}
+		                                    )
+               )
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	  GROUP BY R.RECIPE_ID
       ORDER BY R.CREATE_AT DESC

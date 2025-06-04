@@ -21,6 +21,7 @@ import com.cooknote.backend.domain.recipe.dto.response.RecipeSearchResponseDTO;
 import com.cooknote.backend.domain.recipe.entity.Recipe;
 import com.cooknote.backend.domain.recipe.enums.ConditionalType;
 import com.cooknote.backend.domain.recipe.enums.RecipeStatus;
+import com.cooknote.backend.domain.user.enums.UserStatus;
 
 
 @Mapper
@@ -97,12 +98,14 @@ public interface RecipeMapper {
 	// 좋아요한 레시피 조회
 	List<RecipeLikeResponseDTO> getRecipeLike(@Param("userId") Long userId
 											, @Param("size") int size
-											, @Param("offset") int offset);
+											, @Param("offset") int offset
+											, @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
 
 	// 북마크한 레시피 조회
 	List<RecipeBookmarkResponseDTO> getRecipeBookmark(@Param("userId") Long userId
 													, @Param("size") int size
-													, @Param("offset") int offset);
+													, @Param("offset") int offset
+													, @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
 
 	
 	// 공개 레시피 토탈 갯수
@@ -118,10 +121,12 @@ public interface RecipeMapper {
 						  , @Param("statusPrivateAdmin") RecipeStatus statusPrivateAdmin);
 
 	// 좋아요한 레시피 토탈 갯수
-	int recipeLikeCount(@Param("userId") Long userId);
+	int recipeLikeCount(@Param("userId") Long userId
+					  , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
 	
 	// 북마크한 레시피 토탈 갯수 
-	int recipeBookmarkCount(@Param("userId") Long userId);
+	int recipeBookmarkCount(@Param("userId") Long userId
+						  , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
 
 	// 삭제할 이미지 가져오기
 	LocalDateTime getRecipeCreateAt(@Param("userId") Long userId
@@ -137,7 +142,9 @@ public interface RecipeMapper {
 												, @Param("conditionalType") ConditionalType conditionalType
 												, @Param("conditionalPopular") ConditionalType popular
 												, @Param("conditionalLatest") ConditionalType latest
-												, @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+												, @Param("statusCommentPublic") CommentStatus statusCommentPublic
+												, @Param("statusCommentPrivateAdmin") CommentStatus statusCommentPrivateAdmin
+												, @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 레시피 검색 토탈 갯수
 	int getRecipeSearchCount(@Param("keywords") List keywords
@@ -154,7 +161,8 @@ public interface RecipeMapper {
 													, @Param("conditionalType") ConditionalType conditionalType
 													, @Param("conditionalPopular") ConditionalType popular
 													, @Param("conditionalLatest") ConditionalType latest
-													, @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+													, @Param("statusCommentPublic") CommentStatus statusCommentPublic
+													, @Param("statusUserActive") UserStatus statusUserActive);
 	// 레시피 재료 검색 토탈 갯수
 	int getIngredientSearchCount(@Param("ingredients") List<String> ingredients
 						   	   , @Param("ingredientCount") int ingredientCount
@@ -165,7 +173,8 @@ public interface RecipeMapper {
 														   , @Param("size") int size
 														   , @Param("offset") int offset
 														   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic
-														   , @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+														   , @Param("statusCommentPublic") CommentStatus statusCommentPublic
+														   , @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 유저가 팔로우한 유저들의 레시피 토탈 갯수
 	int getRecipesOfFollowingUsersCount(@Param("userId") Long userId
@@ -177,7 +186,8 @@ public interface RecipeMapper {
 														   , @Param("size") int size
 														   , @Param("offset") int offset
 														   , @Param("statusRecipePublic") RecipeStatus statusRecipePublic
-														   , @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+														   , @Param("statusCommentPublic") CommentStatus statusCommentPublic
+														   , @Param("statusUserActive") UserStatus statusUserActive); 
 
 	// 유저가 팔로우한 유저의 특정 레시피 토탈 갯수
 	int getRecipesByFollowingUserCount(@Param("userId") Long userId
@@ -185,7 +195,8 @@ public interface RecipeMapper {
 									 , @Param("statusRecipePublic") RecipeStatus statusRecipePublic);
 
 	// 레시피 좋아요한 카운트 가져오기
-	int getRecipeLikeCount(@Param("recipeId") Long recipeId);
+	int getRecipeLikeCount(@Param("recipeId") Long recipeId
+						 , @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 회원 탈퇴 시 레시피 삭제
 	void recipeDeleteByUserId(@Param("userId")Long userId
@@ -198,22 +209,26 @@ public interface RecipeMapper {
 	// 추천 레시피 가져오기
 	List<RecipeRecommnetResponseDTO> getRecommentRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic
 													  , @Param("size") int getRecommentRecipeLimit
-													  , @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+													  , @Param("statusCommentPublic") CommentStatus statusCommentPublic
+													  , @Param("statusUserActive") UserStatus statusUserActive);
 
 	// 혼밥 레시피 가져오기
 	List<RecipeRecommnetResponseDTO> getSoloRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic
 											, @Param("categoryPurposeSoloMeal") int categoryPurposeSoloMeal
 											, @Param("size") int getSoloRecipeLimit
-											, @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+											, @Param("statusCommentPublic") CommentStatus statusCommentPublic
+											, @Param("statusUserActive") UserStatus statusUserActive);
 	// 베스트 레시피 가져오기	
 	List<RecipeCardResponseDTO> getBestRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic
 											, @Param("size") int bestRecipeMinValue
-											, @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+											, @Param("statusCommentPublic") CommentStatus statusCommentPublic
+											, @Param("statusUserActive") UserStatus statusUserActive);
 	
 	// 최신 레시피 가져오기	
 	List<RecipeCardResponseDTO> getRecentRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic
-											   , @Param("size") int recentRecipeMinValue
-											   , @Param("statusCommentPublic") CommentStatus statusCommentPublic);
+											  , @Param("size") int recentRecipeMinValue
+											  , @Param("statusCommentPublic") CommentStatus statusCommentPublic
+											  , @Param("statusUserActive") UserStatus statusUserActive);
 
 
 }

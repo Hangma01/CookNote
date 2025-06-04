@@ -7,11 +7,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.cooknote.backend.domain.auth.dto.request.UserLoginRequestDTO;
 import com.cooknote.backend.global.constants.Constans;
+import com.cooknote.backend.global.error.exceptionCode.UserErrorCode;
+import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.utils.auth.JwtUtil;
+import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.common.ResponseUtil;
 import com.cooknote.backend.global.utils.cookie.CookieUtil;
 import com.cooknote.backend.global.utils.redis.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,6 +81,10 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 		String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId; 
 		redisUtil.setDataExpire(refreshTokenRedisKey, refreshToKen, refreshTokenSecond);
 		
+		// 블랙 리스트 삭제
+		String delBlacklist = Constans.BLACKLIST_PREFIX + userId;
+		redisUtil.deleteData(delBlacklist);
+		
 		// 쿠키 생성 및 응답 반환
 		response.addHeader(Constans.AUTHORIZATION_HEADER, Constans.BEARER_PREFIX + accessToken);
 		response.addCookie(CookieUtil.createCookie(Constans.REFRESH_TOKEN_NAME, refreshToKen, refreshTokenSecond));
@@ -84,7 +93,18 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 	
 	// 로그인 실패 시 실행하는 메서드
 	@Override
-	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-		response.setStatus(HttpStatus.UNAUTHORIZED.value());
+	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
+
+		
+		String message = failed.getMessage();
+		
+		if(CommonFunctionUtil.match(message, ErrorMessage.SUSPEND_USER_EXCEPTION.getMessage())) {
+			ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,  failed.getMessage());
+		} else {
+			ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,  ErrorMessage.LOGIN_FAIL_MESSAGE.getMessage());
+		}
+	
+		
+//		response.setStatus(HttpStatus.UNAUTHORIZED.value());
 	}
 }

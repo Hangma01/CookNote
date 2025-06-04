@@ -2,6 +2,7 @@ export const errorMessages = {
     LOGIN_ERROR: '아이디 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.',
     BADREQUEST: '잘못된 요청입니다. 잠시후 다시 시도해주세요.',
     ACCESS_TOKEN_EXPIRED_MESSAGE: 'AccessToken Expired',
+    BALACKLIST_EXCEPTION_MESSAGE: 'Blacklist',
     MAIL_AUTH_TIME_OVER_MESSAGE: '메일인증 시간이 초과했습니다. 재전송 해주세요.',
     ID_DUPLICATE_CHECK_ERROR_MESSAGE: '아이디 중복 검사를 해주세요.',
     NICKNAME_DUPLICATE_CHECK_ERROR_MESSAGE: '닉넴이 중복 검사를 해주세요',

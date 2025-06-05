@@ -32,42 +32,48 @@ onMounted(async () => {
 </script>
 
 <template>
-    <ul class="home-menu-list">
-        <li v-for="menu in menus" :key="menu.name">
-            <router-link :to="{ name: menu.name }" :class="['menu-btn', { selected: isActive(menu.name) }]">
-                <font-awesome-icon :icon="menu.icon" />
-                <span>{{ menu.label }}</span>
-            </router-link>
-        </li>
-    </ul>
+    <div class="porfile-container">
+        <ul class="home-menu-list">
+            <li v-for="menu in menus" :key="menu.name">
+                <router-link :to="{ name: menu.name }" :class="['menu-btn', { selected: isActive(menu.name) }]">
+                    <font-awesome-icon :icon="menu.icon" />
+                    <span>{{ menu.label }}</span>
+                </router-link>
+            </li>
+        </ul>
 
-    <RouterView />
+        <RouterView />
+    </div>
 </template>
 
 
 <style lang="scss" scoped>
-.home-menu-list {
-    display: flex;
-    justify-content: space-between;
+.porfile-container {
+    margin-bottom: 10rem;
 
-    .menu-btn {
-        width: 8.7rem;
-        height: 4rem;
-        font-size: 1.1rem;
+    .home-menu-list {
         display: flex;
-        gap: 1rem;
-        border: 1px solid rgb(200, 200, 200);
-        border-radius: 0.5rem;
-        align-items: center;
-        justify-content: center;
-        color: #777777;
-        background-color: rgb(244, 240, 239);
-    }
+        justify-content: space-between;
 
-    .menu-btn.selected {
-        background-color: #c09370;
-        border: 1px solid #a57954;
-        color: white;
+        .menu-btn {
+            width: 8.7rem;
+            height: 4rem;
+            font-size: 1.1rem;
+            display: flex;
+            gap: 1rem;
+            border: 1px solid rgb(200, 200, 200);
+            border-radius: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            color: #777777;
+            background-color: rgb(244, 240, 239);
+        }
+
+        .menu-btn.selected {
+            background-color: #c09370;
+            border: 1px solid #a57954;
+            color: white;
+        }
     }
 }
 </style>

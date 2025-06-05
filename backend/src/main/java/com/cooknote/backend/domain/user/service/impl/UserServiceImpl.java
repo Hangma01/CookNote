@@ -201,7 +201,6 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void userDelete(Long userId) {
 		
-		
 		recipeMapper.recipeDeleteByUserId(userId, RecipeStatus.DELETE);
 		recipeMapper.recipeSeqDeleteByUserId(userId);
 		userMapper.userDelete(userId, UserStatus.DELETE);

@@ -125,6 +125,8 @@ watch(
 
 <style lang="scss" scoped>
 .profile-pw-edit-container {
+    margin-bottom: 8rem;
+
     .pw-edit-form {
         margin-top: 2rem;
         height: 24rem;

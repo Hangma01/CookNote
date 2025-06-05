@@ -116,83 +116,89 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="recipe-title">
-        <p>공개 레시피 수 {{ profile?.recipePublicCount }}</p>
-    </div>
-    <div class="line"></div>
-    <div>
-        <ul>
-            <li class="recipe-content" v-for="(item, index) in hostRecipePublicData?.content" :key="index">
-                <ProfileRecipeCard :recipeData="item" />
-            </li>
-        </ul>
+    <div class="profile-host-container">
+        <div class="recipe-title">
+            <p>공개 레시피 수 {{ profile?.recipePublicCount }}</p>
+        </div>
+        <div class="line"></div>
+        <div>
+            <ul>
+                <li class="recipe-content" v-for="(item, index) in hostRecipePublicData?.content" :key="index">
+                    <ProfileRecipeCard :recipeData="item" />
+                </li>
+            </ul>
 
-        <div class="pagination" v-if="hostRecipePublicData?.page?.totalPages > 1">
-            <!-- 이전 10개 페이지 그룹 버튼 -->
-            <button v-if="hostRecipePublicData.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
+            <div class="pagination" v-if="hostRecipePublicData?.page?.totalPages > 1">
+                <!-- 이전 10개 페이지 그룹 버튼 -->
+                <button v-if="hostRecipePublicData.page.totalPages > 10 && currentPageGroup > 0" @click="prevPageGroup">&lt;&lt;</button>
 
-            <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
-            <button
-                v-for="n in pageGroupEnd() - pageGroupStart()"
-                :key="n + pageGroupStart()"
-                :class="{ active: hostRecipePublicData.page.number === n + pageGroupStart() - 1 }"
-                @click="goToPage(n + pageGroupStart() - 1)"
-            >
-                {{ n + pageGroupStart() }}
-            </button>
+                <!-- 현재 페이지 그룹에 해당하는 페이지 버튼들 -->
+                <button
+                    v-for="n in pageGroupEnd() - pageGroupStart()"
+                    :key="n + pageGroupStart()"
+                    :class="{ active: hostRecipePublicData.page.number === n + pageGroupStart() - 1 }"
+                    @click="goToPage(n + pageGroupStart() - 1)"
+                >
+                    {{ n + pageGroupStart() }}
+                </button>
 
-            <!-- 다음 10개 페이지 그룹 버튼 -->
-            <button
-                v-if="hostRecipePublicData.page.totalPages > 10 && (currentPageGroup + 1) * 10 < hostRecipePublicData.page.totalPages"
-                @click="nextPageGroup"
-            >
-                &gt;&gt;
-            </button>
+                <!-- 다음 10개 페이지 그룹 버튼 -->
+                <button
+                    v-if="hostRecipePublicData.page.totalPages > 10 && (currentPageGroup + 1) * 10 < hostRecipePublicData.page.totalPages"
+                    @click="nextPageGroup"
+                >
+                    &gt;&gt;
+                </button>
+            </div>
         </div>
     </div>
 </template>
 
 
 <style lang="scss" scoped>
-.recipe-title {
-    font-weight: 500;
-    margin-bottom: 1rem;
-    padding-left: 0.2rem;
-}
+.profile-host-container {
+    margin-bottom: 10rem;
 
-.line {
-    border-bottom: 2px solid;
-    color: #c09370;
-}
+    .recipe-title {
+        font-weight: 500;
+        margin-bottom: 1rem;
+        padding-left: 0.2rem;
+    }
 
-.recipe-content {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid rgb(224, 224, 224);
-}
+    .line {
+        border-bottom: 2px solid;
+        color: #c09370;
+    }
 
-.pagination {
-    margin-top: 3rem;
-    text-align: center;
+    .recipe-content {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid rgb(224, 224, 224);
+    }
 
-    button {
-        margin: 0 0.25rem;
-        padding: 0.3rem 0.6rem;
-        border: 1px solid #ccc;
-        background-color: white;
-        cursor: pointer;
+    .pagination {
+        margin-top: 3rem;
+        text-align: center;
 
-        &.active {
-            background-color: #a89d94;
-            color: white;
-            font-weight: bold;
-        }
+        button {
+            margin: 0 0.25rem;
+            padding: 0.3rem 0.6rem;
+            border: 1px solid #ccc;
+            background-color: white;
+            cursor: pointer;
 
-        &:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
+            &.active {
+                background-color: #a89d94;
+                color: white;
+                font-weight: bold;
+            }
+
+            &:disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+            }
         }
     }
 }

@@ -209,6 +209,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     gap: 4rem;
+    margin-bottom: 10rem;
 
     .title {
         font-size: 1.4rem;
@@ -236,20 +237,20 @@ onMounted(async () => {
         .write-btn {
             width: 8rem;
             height: 3.5rem;
-            border: 1px solid;
             border-radius: 1rem;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
 
         .delete-btn {
             background-color: red;
+            font-weight: bold;
             color: white;
         }
 
         .save-btn {
-            background-color: #c09370;
-            border: 1px solid #a57954;
+            background-color: #03c75a;
             color: white;
+            font-weight: bold;
             margin-right: 1.5rem;
         }
     }

@@ -75,7 +75,7 @@ const onFileChange = async (files) => {
 
             emit('update:modelValue', imageUrl.value);
         } else {
-            alert(errorMessages.NOT_IMAGE_FILE_ERROR_MESSAGE);
+            alert(errorMessages.IMAGE_FILE_EXTENSION_ERROR_MESSAGE);
             if (fileInput.value) {
                 fileInput.value.value = null;
             }

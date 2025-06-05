@@ -78,7 +78,11 @@ onUnmounted(() => {
                 </div>
 
                 <div class="user-sub-info-count">
-                    <span>{{ userProfile?.recipePublicCount + userProfile?.recipePrivateCount || 0 }}</span>
+                    <span>{{
+                        userProfile?.isHostProfile
+                            ? userProfile?.recipePublicCount || 0
+                            : userProfile?.recipePublicCount + userProfile?.recipePrivateCount || 0
+                    }}</span>
                 </div>
             </div>
 

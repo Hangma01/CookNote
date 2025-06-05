@@ -213,7 +213,6 @@
 			 , EMAIL
 			 , NICKNAME
 			 , CREATE_AT
-			 , UPDATE_AT
 		  FROM USER
 		 WHERE USER_ID = #{userId}
 	</select>

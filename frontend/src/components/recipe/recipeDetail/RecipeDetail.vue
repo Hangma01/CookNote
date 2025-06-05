@@ -192,7 +192,7 @@ const refreshLike = async () => {
 .recipe-detail-container {
     width: 45rem;
     margin: auto;
-    margin-bottom: 6rem;
+    margin-bottom: 10rem;
     margin-top: 3rem;
 }
 </style>

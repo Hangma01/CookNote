@@ -231,7 +231,7 @@ onMounted(() => {
                 </div>
 
                 <div class="timer" v-if="isAuthCodeRequest">
-                    <span>{{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
+                    <span>인증시간 : {{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
                 </div>
             </div>
         </div>

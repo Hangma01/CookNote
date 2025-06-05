@@ -86,7 +86,6 @@ onMounted(async () => {
 .edit-menu-list {
     display: flex;
     justify-content: space-between;
-
     .menu-btn {
         width: 14rem;
         height: 4rem;

@@ -168,6 +168,7 @@ onMounted(() => {
     margin: 0 auto;
     padding-top: 4rem;
     padding-bottom: 4rem;
+    margin-bottom: 10rem;
 
     .search-bar-wrap {
         text-align: center;

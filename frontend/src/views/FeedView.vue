@@ -172,6 +172,7 @@ onMounted(async () => {
     margin: 0 auto;
     padding-top: 4rem;
     padding-bottom: 4rem;
+    margin-bottom: 10rem;
 
     .following-user-section {
         .following-user-wrap {

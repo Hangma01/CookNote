@@ -133,13 +133,6 @@ watch(nickname, () => {
                 <span>{{ userEditInfo?.createAt }}</span>
             </div>
         </div>
-
-        <div class="form-group">
-            <label>최근 수정일</label>
-            <div class="readonly-field">
-                {{ userEditInfo?.updateAt }}
-            </div>
-        </div>
     </div>
 
     <div class="button-wrap">
@@ -151,7 +144,7 @@ watch(nickname, () => {
 <style lang="scss" scoped>
 .profile-edit-container {
     margin-top: 2rem;
-    height: 47rem;
+    height: 42rem;
     border: 1px solid rgb(200, 200, 200);
     border-radius: 0.5rem;
     display: flex;
@@ -225,6 +218,7 @@ watch(nickname, () => {
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 1rem;
+    margin-bottom: 8rem;
 
     .save-btn {
         padding: 0.6rem 1.2rem;

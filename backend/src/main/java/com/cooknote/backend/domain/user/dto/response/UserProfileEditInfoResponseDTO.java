@@ -17,6 +17,6 @@ public class UserProfileEditInfoResponseDTO {
 	private String nickname;
 	private String name;
 	private String email;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
 	private LocalDateTime createAt;
-	private LocalDateTime updateAt;
 }

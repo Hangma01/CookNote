@@ -44,15 +44,19 @@ const visibleSlides = computed(() => {
 
 <template>
     <div class="simple-carousel">
-        <button @click="prevSlide" class="arrow prev" :disabled="currentIndex === 0">‹</button>
+        <button @click="prevSlide" class="arrow prev" :disabled="currentIndex === 0">
+            <font-awesome-icon :icon="['fas', 'angle-left']" />
+        </button>
 
         <div class="slides-wrapper">
             <div v-for="(item, idx) in visibleSlides" :key="idx" class="slide-wrapper">
-                <slot name="slide" :item="item" />
+                <slot name="slide" :item="item"></slot>
             </div>
         </div>
 
-        <button @click="nextSlide" class="arrow next" :disabled="currentIndex >= totalSlides - visibleCount">›</button>
+        <button @click="nextSlide" class="arrow next" :disabled="currentIndex >= totalSlides - visibleCount">
+            <font-awesome-icon :icon="['fas', 'angle-right']" />
+        </button>
     </div>
 </template>
 
@@ -79,7 +83,7 @@ const visibleSlides = computed(() => {
     }
 
     .arrow {
-        font-size: 5rem;
+        font-size: 3rem;
         background: none;
         border: none;
         cursor: pointer;

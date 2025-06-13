@@ -34,8 +34,12 @@ export const getCommentReplies = async (parentCommentId, page, size) => {
 };
 
 // 유저가 작성한 댓글 가져오기
-export const getCommentUser = async () => {
-    return await privateAPI.get(`/comment/user`);
+export const getCommentUser = async (page) => {
+    return await privateAPI.get(`/comment/user`, {
+        params: {
+            page: page,
+        },
+    });
 };
 
 // 리플 총 갯수 가져요기

@@ -51,6 +51,9 @@ public interface CommentMapper {
 	void commentDelete(@Param("commentId") Long commentId
 					 , @Param("statusCommentDelete") CommentStatus statusCommentDelete);
 	
+	// 레시피 삭제로 인한 댓글 삭제
+	void commentDeleteRecipe(@Param("recipeId") Long RecipeId
+			               , @Param("statusCommentDelete") CommentStatus statusCommentDelete);
 
 	// 댓글 삭제 - 기존 정보 조회
 	Comment findDeleteComment(@Param("commentId") Long commentId);

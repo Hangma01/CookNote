@@ -35,6 +35,9 @@ const youtubeThumbnail = ref(null);
 // url 선언
 const url = ref('');
 
+// 동영상 썸네일 loading
+const isVideoThumbnailLoading = ref(false);
+
 // 레시피 수정 시 데이터가 바뀐것을 감지해야햠
 watch(
     () => props.originalRecipeData,
@@ -53,6 +56,10 @@ watch(
 
             imageFile.value = newVal.thumbnail || null;
             url.value = newVal.videoId ? `https://www.youtube.com/watch?v=${newVal.videoId}` : '';
+
+            if (newVal.videoId) {
+                handleGetVideoId();
+            }
         }
     }
 );
@@ -93,6 +100,7 @@ const handleGetVideoId = debounce(async () => {
 
     if (videoId !== null) {
         try {
+            isVideoThumbnailLoading.value = true;
             const res = await getYoutubeThumbnail(videoId);
             formValues.videoId = videoId;
             console.log(res);
@@ -100,6 +108,8 @@ const handleGetVideoId = debounce(async () => {
         } catch (e) {
             formValues.videoId = null;
             youtubeThumbnail.value = null;
+        } finally {
+            isVideoThumbnailLoading.value = false;
         }
     } else {
         formValues.videoId = null;
@@ -135,7 +145,7 @@ defineExpose({
 
     <div class="section-group">
         <div class="section-group-first">
-            <div class="label-title">
+            <div class="label-title required">
                 <p>레시피 제목</p>
             </div>
 
@@ -151,7 +161,7 @@ defineExpose({
                 />
             </div>
 
-            <div class="label-title">
+            <div class="label-title required">
                 <p>레시피 소개</p>
             </div>
 
@@ -189,7 +199,7 @@ defineExpose({
 
         <div class="section-group-second">
             <div class="image-preview-wrap">
-                <div class="label-title">
+                <div class="label-title required">
                     <p>썸네일</p>
                 </div>
 
@@ -203,7 +213,10 @@ defineExpose({
 
                 <div class="video-thumnail-wrap">
                     <div v-if="formValues.videoId" class="video-thumnail-box">
-                        <img class="video-thumnail" :src="youtubeThumbnail" alt="Youtube 동영상 썸네일" />
+                        <div v-if="isVideoThumbnailLoading" class="loading-overlay">
+                            <v-progress-circular indeterminate color="primary" :size="70" :width="6" />
+                        </div>
+                        <img v-else class="video-thumnail" :src="youtubeThumbnail" alt="Youtube 동영상 썸네일" />
                     </div>
 
                     <div v-else>
@@ -215,7 +228,7 @@ defineExpose({
     </div>
 
     <div>
-        <div class="label-title">
+        <div class="label-title required">
             <p>카테고리</p>
         </div>
 
@@ -327,6 +340,13 @@ defineExpose({
                 width: 100%;
                 height: 100%;
                 border-radius: 1rem;
+
+                .loading-overlay {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                }
             }
         }
     }

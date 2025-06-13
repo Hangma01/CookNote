@@ -68,7 +68,6 @@ const handleSearch = async (page = 0, isReplace = true) => {
             page
         );
 
-        console.log(searchData.value);
         searchData.value = res.data;
         serchedFlag.value = true;
         serchedKeyword.value = keyword.value;
@@ -119,6 +118,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     handleSearch(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -126,6 +126,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         handleSearch(newPage);
+        window.scrollTo(0, 0);
     }
 };
 // 다음 10페이지 그룹
@@ -133,6 +134,7 @@ const nextPageGroup = () => {
     if (searchData.value && (currentPageGroup.value + 1) * 10 < searchData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         handleSearch(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -153,7 +155,6 @@ watch(
 watch(
     () => route.query,
     (newQuery, oldQuery) => {
-        // 쿼리 변경 시 검색 조건 초기화 또는 검색 실행
         initCategoryFromQuery();
     }
 );
@@ -221,7 +222,7 @@ onMounted(async () => {
 
             <div class="conditional-box">
                 <div>
-                    총 <span class="recipe-count">{{ searchData?.content.length }}</span
+                    총 <span class="recipe-count">{{ searchData?.page.totalElements }}</span
                     >개의 결과
                 </div>
                 <div>

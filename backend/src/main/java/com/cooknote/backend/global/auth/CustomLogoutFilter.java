@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.cooknote.backend.global.constants.Constans;
-import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.common.ResponseUtil;
-import com.cooknote.backend.global.utils.cookie.CookieUtil;
-import com.cooknote.backend.global.utils.redis.RedisUtil;
+import com.cooknote.backend.global.utils.CookieUtil;
+import com.cooknote.backend.global.utils.JwtUtil;
+import com.cooknote.backend.global.utils.RedisUtil;
+import com.cooknote.backend.global.utils.ResponseUtil;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

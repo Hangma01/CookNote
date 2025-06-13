@@ -135,12 +135,13 @@ const userId = userStore.getUserId;
                     }
                 }
                 .writer-nickname {
-                    width: 7.5rem;
+                    width: 5.5rem;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     font-size: 0.9rem;
                     color: rgb(55, 55, 55);
                     letter-spacing: 0.05rem;
+                    white-space: nowrap;
                 }
             }
 

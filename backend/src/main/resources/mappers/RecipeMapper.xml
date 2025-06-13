@@ -5,6 +5,7 @@
 <mapper namespace="com.cooknote.backend.mappers.RecipeMapper">
 
 	<resultMap id="RecipeEditResultMap" type="RecipeEditResponseDTO">
+	    <id property="writerId" column="WRITER_ID" />                               <!-- 레시피 작성자 -->
 	    <result property="title" column="TITLE"/>									<!-- 레시피 제목 -->
 	    <result property="description" column="DESCRIPTION"/>						<!-- 레시피 소개 -->
 	    <result property="thumbnail" column="THUMBNAIL"/>							<!-- 레시피 썸네일 -->
@@ -16,41 +17,33 @@
 	    <result property="status" column="STATUS"/>									<!-- 레시피 상태 -->
 	    <result property="categoryCuisineId" column="CATEGORY_CUISINE_ID"/>
 	    <result property="categoryPurposeId" column="CATEGORY_PURPOSE_ID"/>
-	    <result property="writerId" column="WRITER_ID" />
 	    <!-- 중첩된 재료 리스트 -->
 	    <collection property="recipeIngredients" ofType="RecipeIngredientResponseDTO">
-	    	<result property="ingredientId" column="INGREDIENT_ID"/>
-	        <result property="name" column="NAME"/>
-	        <result property="quantity" column="QUANTITY"/>
-	        <result property="remark" column="REMARK"/>
+	    	<result property="ingredientId" column="INGREDIENT_ID"/>                <!-- 재료 PK -->
+	        <result property="name" column="NAME"/>                                 <!-- 재료 이름 -->
+	        <result property="quantity" column="QUANTITY"/>                         <!-- 재료 수량 -->
+	        <result property="remark" column="REMARK"/>                             <!-- 재료 비고 -->
 	    </collection>
-	    <!-- 중첩된 시퀀스 리스트 -->
+	    <!-- 중첩된 요리순서 리스트 -->
 	    <collection property="recipeSeqs" ofType="RecipeSeqResponseDTO">
-	        <result property="step" column="RECIPE_SEQ_ID"/>
-	        <result property="description" column="SEQ_DESCRIPTION"/>
-	        <result property="image" column="IMAGE"/>
+	        <result property="step" column="RECIPE_SEQ_ID"/>                        <!-- 요리 순서 -->
+	        <result property="description" column="SEQ_DESCRIPTION"/>               <!-- 요리 순서별 설명 -->
+	        <result property="image" column="IMAGE"/>                               <!-- 요리 순서별 이미지 -->
 	    </collection>
 	</resultMap>
 
 	<resultMap id="RecipeDetailResultMap" type="RecipeDetailResponseDTO" extends="RecipeEditResultMap">
-	    <result property="createAt" column="CREATE_AT"/> 							
-	    <!-- 작성자 정보 -->
-	    <result property="writerNickname" column="WRITER_NICKNAME"/>
-	    <result property="writerProfileImage" column="WRITER_PROFILE_IMAGE"/>
+	    <result property="createAt" column="CREATE_AT"/>                             <!-- 레시피 작성일 --> 							
+	    <!-- 작성자 정보 --> 
+	    <result property="writerNickname" column="WRITER_NICKNAME"/>                 <!-- 레시피 작성자 닉네임 -->
+	    <result property="writerProfileImage" column="WRITER_PROFILE_IMAGE"/>        <!-- 레시피 작성자 이미지 -->
 	    
 	    <!-- 좋아요 북마크 여부 -->
-	    <result property="isLiked" column="IS_LIKED"/>
-	    <result property="isBookmarked" column="IS_BOOKMARKED"/>
+	    <result property="isLiked" column="IS_LIKED"/>                               <!-- 좋아요 여부 -->
+	    <result property="isBookmarked" column="IS_BOOKMARKED"/>                     <!-- 북마크 여부 -->
 	</resultMap>
 	
-	
-	<resultMap id="deleteRecipeImages" type="Recipe">
-	    <result property="thumbnail" column="THUMBNAIL"/>							
-	    <!-- 중첩된 시퀀스 리스트 -->
-	    <collection property="recipeSeqs" ofType="RecipeSeq">
-	        <result property="image" column="IMAGE"/>
-	    </collection>
-	</resultMap>
+
 	
 	<!-- 레시피 상세 조회 -->
 	<select id="getRecipeDetail" resultMap="RecipeDetailResultMap">
@@ -76,7 +69,7 @@
         	 , S.IMAGE							AS IMAGE					<!-- 요리 순서별 이미지 -->
         	 , U.NICKNAME 						AS WRITER_NICKNAME			<!-- 작성자 닉네임 -->
         	 , U.PROFILE_IMAGE 					AS WRITER_PROFILE_IMAGE		<!-- 작성자 프로필 이미지 -->
-			<if test="userId != null">
+			 <if test="userId != null">
 			 , CASE WHEN RL.USER_ID IS NOT NULL 
 			   		THEN TRUE
 			   		ELSE FALSE
@@ -85,17 +78,17 @@
 		       		THEN TRUE
 		       		ELSE FALSE
 		        	 END 						AS IS_BOOKMARKED			<!-- 레시피 북마크 여부 (로그인) -->
-			</if>
-			<if test="userId == null">
+			 </if>
+			 <if test="userId == null">
 			  , FALSE 							AS iS_LIKED					<!-- 레시피 좋아요 여부 (로그아웃) -->
 			  , FALSE 							AS iS_BOOKMARKED			<!-- 레시피 북마크 여부 (로그아웃) -->
-			</if>
+			 </if>
 		   FROM RECIPE 							AS R						<!-- 레시피 테이블 -->
-      LEFT JOIN RECIPE_INGREDIENT 				AS I 						<!-- 레시피 재료 테이블 -->
+     INNER JOIN RECIPE_INGREDIENT 				AS I 						<!-- 레시피 재료 테이블 -->
       		 ON R.RECIPE_ID = I.RECIPE_ID
-      LEFT JOIN RECIPE_SEQ 						AS S 						<!-- 레시피 순서 테이블 -->
+     INNER JOIN RECIPE_SEQ 						AS S 						<!-- 레시피 순서 테이블 -->
       		 ON R.RECIPE_ID = S.RECIPE_ID								
-      LEFT JOIN USER 							AS U						<!-- 유저 테이블 -->
+     INNER JOIN USER 							AS U						<!-- 유저 테이블 -->
       		 ON R.WRITER_ID = U.USER_ID
       <if test="userId != null">
       LEFT JOIN RECIPE_LIKE 					AS RL						<!-- 레시피 좋아요 테이블 -->
@@ -282,12 +275,12 @@
 
 	<!-- 공개한 게시글 요악 정보 가져오기 -->
 	<select id="getRecipePublic" resultType="RecipePublicResponseDTO">
-		SELECT RECIPE_ID
-			 , TITLE
-			 , DESCRIPTION
-			 , THUMBNAIL
-			 , CREATE_AT
-		  FROM RECIPE
+		SELECT RECIPE_ID                        <!-- 레시피 PK -->
+			 , TITLE                            <!-- 레시피 제목 -->
+			 , DESCRIPTION                      <!-- 레시피 소개 -->
+			 , THUMBNAIL                        <!-- 레시피 썸네일 -->
+			 , CREATE_AT                        <!-- 레시피 작성일 -->
+		  FROM RECIPE                           <!-- 레시피 테이블 -->
 		 WHERE WRITER_ID = #{accountId}
 		   AND STATUS = #{statusPublic}
 	  ORDER BY CREATE_AT DESC
@@ -297,12 +290,12 @@
 	
 	<!-- 비공개한 게시글 요약 정보 가져오기 -->
 	<select id="getRecipePrivate" resultType="RecipePrivateResponseDTO">
-		SELECT RECIPE_ID
-			 , TITLE
-			 , DESCRIPTION
-			 , THUMBNAIL
-			 , CREATE_AT
-		  FROM RECIPE
+		SELECT RECIPE_ID                         <!-- 레시피 PK -->
+			 , TITLE                             <!-- 레시피 제목 -->
+			 , DESCRIPTION                       <!-- 레시피 소개 -->
+			 , THUMBNAIL                         <!-- 레시피 썸네일 -->
+			 , CREATE_AT                         <!-- 레시피 작성일 -->
+		  FROM RECIPE                            <!-- 레시피 테이블 -->
 		 WHERE WRITER_ID = #{userId}
 		   AND STATUS = #{statusPrivate}
 	  ORDER BY CREATE_AT DESC
@@ -313,7 +306,7 @@
 	
 	<!-- 공개한 레시피 요약 정보 토탈 갯수 가져오기 -->
 	<select id="recipesPublicCount" resultType="int">
-		SELECT COUNT(RECIPE_ID)
+		SELECT COUNT(RECIPE_ID)         
 		  FROM RECIPE
 		 WHERE WRITER_ID = #{accountId}
 		   AND STATUS = #{statusPublic} 
@@ -350,14 +343,14 @@
 	
 	<!-- 좋아요한 레시피 요약 정보 가져오기 -->
 	<select id="getRecipeLike" resultType="RecipeLikeResponseDTO">
-		SELECT R.RECIPE_ID	 AS RECIPE_ID
-			 , R.TITLE		 AS TITLE
-			 , R.DESCRIPTION AS DESCRIPTION
-			 , R.THUMBNAIL	 AS THUMBNAIL
-			 , R.CREATE_AT	 AS CREATE_AT
-			 , R.STATUS		 AS IS_STATUS
-		  FROM RECIPE_LIKE   AS RL
-		  JOIN RECIPE 		 AS R
+		SELECT R.RECIPE_ID	 AS RECIPE_ID            <!-- 레시피 PK -->
+			 , R.TITLE		 AS TITLE                <!-- 레시피 제목 -->
+			 , R.DESCRIPTION AS DESCRIPTION          <!-- 레시피 소개 -->
+			 , R.THUMBNAIL	 AS THUMBNAIL            <!-- 레시피 썸네일 -->
+			 , R.CREATE_AT	 AS CREATE_AT            <!-- 레시피 작성일 -->
+			 , R.STATUS		 AS IS_STATUS            <!-- 레시피 상태 -->
+		  FROM RECIPE_LIKE   AS RL                   <!-- 레시피 좋아요 테이블 -->
+		  JOIN RECIPE 		 AS R                    <!-- 레시피 테이블 -->
 		    ON RL.RECIPE_ID = R.RECIPE_ID
 		   AND R.STATUS = #{statusRecipePublic}
 		 WHERE RL.USER_ID = #{userId}
@@ -368,14 +361,14 @@
 	
 	<!-- 북마크한 레시피 요약 정보 가져오기 -->
 	<select id="getRecipeBookmark" resultType="RecipeBookmarkResponseDTO">
-		SELECT R.RECIPE_ID	   AS RECIPE_ID
-			 , R.TITLE		   AS TITLE
-			 , R.DESCRIPTION   AS DESCRIPTION
-			 , R.THUMBNAIL	   AS THUMBNAIL
-			 , R.CREATE_AT	   AS CREATE_AT
-			 , R.STATUS		   AS STATUS
-		  FROM RECIPE_BOOKMARK AS RB
-	INNER JOIN RECIPE 		   AS R
+		SELECT R.RECIPE_ID	   AS RECIPE_ID          <!-- 레시피 PK -->
+			 , R.TITLE		   AS TITLE              <!-- 레시피 제목 -->
+			 , R.DESCRIPTION   AS DESCRIPTION        <!-- 레시피 소개 -->
+			 , R.THUMBNAIL	   AS THUMBNAIL          <!-- 레시피 썸네일 -->
+			 , R.CREATE_AT	   AS CREATE_AT          <!-- 레시피 작성일 -->
+			 , R.STATUS		   AS STATUS             <!-- 레시피 상태 -->
+		  FROM RECIPE_BOOKMARK AS RB                 <!-- 레시피 북마크 테이블 -->
+	INNER JOIN RECIPE 		   AS R                  <!-- 레시피 테이블 -->
 		    ON RB.RECIPE_ID = R.RECIPE_ID
 		   AND R.STATUS = #{statusRecipePublic}
 		 WHERE RB.USER_ID = #{userId}
@@ -384,7 +377,7 @@
 		OFFSET #{offset}
 	</select>
 	
-	<!-- 레시피 작성일 -->
+	<!-- 삭제할 이미지 가져오기 -->
 	<select id="getRecipeCreateAt" resultType="java.time.LocalDateTime">
 		SELECT CREATE_AT
 		  FROM RECIPE
@@ -448,8 +441,8 @@
 	  GROUP BY R.RECIPE_ID
 	  <if test="conditionalType == conditionalPopular">
       ORDER BY (
-			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
-			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
+			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * #{recipeLikeWeight}
+			    + COUNT(DISTINCT C.COMMENT_ID) * #{recipeCommentWeight}
       			) DESC
   	  </if>	    
   	  <if test="conditionalType == conditionalLatest">
@@ -533,8 +526,8 @@
 	  GROUP BY R.RECIPE_ID
 	  <if test="conditionalType == conditionalPopular">
       ORDER BY (
-			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
-			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
+			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * #{recipeLikeWeight}
+			    + COUNT(DISTINCT C.COMMENT_ID) * #{recipeCommentWeight}
       			) DESC
   	  </if>	    
   	  <if test="conditionalType == conditionalLatest">
@@ -565,35 +558,36 @@
 	
 	<!-- 유저가 팔로우한 유저들의 게시글 -->
 	<select id="getRecipesOfFollowingUsers" resultType="RecipeSearchResponseDTO">
-		SELECT R.THUMBNAIL               		 AS RECIPE_THUMBNAIL		
-	   		 , R.RECIPE_ID               		 AS RECIPE_ID
-	   		 , R.TITLE                  		 AS RECIPE_TITLE
-	   		 , R.WRITER_ID              		 AS WRITER_ID
-	   		 , U.NICKNAME              			 AS WRITER_NICKNAME
-	   		 , U.PROFILE_IMAGE          		 AS WRITER_PROFILE_IMAGE
-	   		 , COUNT(DISTINCT C.COMMENT_ID)      AS RECIPE_COMMENT_COUNT
-	   		 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) AS RECIPE_LIKE_COUNT
-		  FROM FOLLOW 							 AS F
-	INNER JOIN USER 							 AS U 
+		SELECT R.RECIPE_ID               		 AS RECIPE_ID	          <!-- 레시피 PK -->	
+	   		 , R.THUMBNAIL               		 AS RECIPE_THUMBNAIL      <!-- 레시피 썸네일 -->
+	   		 , R.TITLE                  		 AS RECIPE_TITLE          <!-- 레시피 제목 -->
+	   		 , R.CREATE_AT                       AS CREATE_AT             <!-- 레시피 작성일 -->
+	   		 , R.WRITER_ID              		 AS WRITER_ID             <!-- 레시피 작성자 FK -->
+	   		 , U.NICKNAME              			 AS WRITER_NICKNAME       <!-- 레시피 작성자 닉네임 -->
+	   		 , U.PROFILE_IMAGE          		 AS WRITER_PROFILE_IMAGE  <!-- 레시피 작성자 프로파일 이미지 -->
+	   		 , COUNT(DISTINCT C.COMMENT_ID)      AS RECIPE_COMMENT_COUNT  <!-- 레시피 댓글 수 -->
+	   		 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) AS RECIPE_LIKE_COUNT     <!-- 레시피 좋아요 수 -->
+		  FROM FOLLOW 							 AS F                     <!-- 팔로우 테이블 -->
+	INNER JOIN USER 							 AS U                     <!-- 유저 테이블 -->
 			ON F.FOLLOWING_ID = U.USER_ID      
-	INNER JOIN RECIPE 							 AS R 
+	INNER JOIN RECIPE 							 AS R                     <!-- 레시피 테이블 -->
 			ON R.WRITER_ID = U.USER_ID        
-	 LEFT JOIN COMMENT 							 AS C 
+	 LEFT JOIN COMMENT 							 AS C                     <!-- 댓글 테이블 -->
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
 	 	   AND (C.PARENT_COMMENT_ID IS NULL
                                  OR EXISTS (SELECT 1
-                                              FROM COMMENT AS PC
+                                              FROM COMMENT AS PC          <!-- 부모 댓글 테이블 -->
                                              WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
 	 	                                       AND PC.STATUS = #{statusCommentPublic}
                                             )
                )
-	 LEFT JOIN RECIPE_LIKE 						 AS RL 
+	 LEFT JOIN RECIPE_LIKE 						 AS RL                     <!-- 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 	 	   AND (EXISTS (SELECT 1 
-	 	                FROM USER AS SUSR
-	 	                WHERE RL.USER_ID = SUSR.USER_ID
-	 	                  AND SUSR.STATUS = #{statusUserActive}
+	 	                  FROM USER              AS SUSR                   <!-- 서브 유저 테이블 -->
+	 	                 WHERE RL.USER_ID = SUSR.USER_ID
+	 	                   AND SUSR.STATUS = #{statusUserActive}
 	 	               )
 	 	       )
 		 WHERE F.FOLLOWER_ID = #{userId}                               
@@ -619,33 +613,34 @@
 	
 	<!-- 유저가 팔로우한 유저의 특정 게시글 -->
 	<select id="getRecipesByFollowingUser" resultType="RecipeSearchResponseDTO">
-		SELECT R.THUMBNAIL               		 AS RECIPE_THUMBNAIL
-			 , R.RECIPE_ID               		 AS RECIPE_ID
-			 , R.TITLE                  		 AS RECIPE_TITLE
-			 , R.WRITER_ID              		 AS WRITER_ID
-			 , U.NICKNAME               		 AS WRITER_NICKNAME
-			 , U.PROFILE_IMAGE          		 AS WRITER_PROFILE_IMAGE
-			 , COUNT(DISTINCT C.COMMENT_ID)      AS RECIPE_COMMENT_COUNT
-			 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) AS RECIPE_LIKE_COUNT
-		  FROM FOLLOW 							 AS F
-	INNER JOIN USER 							 AS U 
+		SELECT R.RECIPE_ID               		 AS RECIPE_ID                <!-- 레시피 PK -->
+			 , R.THUMBNAIL               		 AS RECIPE_THUMBNAIL         <!-- 레시피 썸네일 -->
+			 , R.TITLE                  		 AS RECIPE_TITLE             <!-- 레시피 제목 -->
+	   		 , R.CREATE_AT                       AS CREATE_AT                <!-- 레시피 작성일 -->
+			 , R.WRITER_ID              		 AS WRITER_ID                <!-- 레시피 작성자 FK -->
+			 , U.NICKNAME               		 AS WRITER_NICKNAME          <!-- 레시피 작성자 닉네임 -->
+			 , U.PROFILE_IMAGE          		 AS WRITER_PROFILE_IMAGE     <!-- 레시피 작성자 프로파일 이미지 -->
+			 , COUNT(DISTINCT C.COMMENT_ID)      AS RECIPE_COMMENT_COUNT     <!-- 레시피 댓글 수 -->
+			 , COUNT(DISTINCT RL.RECIPE_LIKE_ID) AS RECIPE_LIKE_COUNT        <!-- 레시피 좋아요 수 -->
+		  FROM FOLLOW 							 AS F                        <!-- 플로우 테이블 -->
+	INNER JOIN USER 							 AS U                        <!-- 유저 테이블 -->
 			ON F.FOLLOWING_ID = U.USER_ID 
-	INNER JOIN RECIPE 							 AS R 
+	INNER JOIN RECIPE 							 AS R                        <!-- 레시피 테이블 -->
 			ON R.WRITER_ID = U.USER_ID
-	 LEFT JOIN COMMENT 							 AS C 
+	 LEFT JOIN COMMENT 							 AS C                        <!-- 댓글 테이블 -->
 	 		ON R.RECIPE_ID = C.RECIPE_ID
 	 	   AND C.STATUS = #{statusCommentPublic}
    	 	   AND (C.PARENT_COMMENT_ID IS NULL
 		                         OR EXISTS (SELECT 1
-		                                      FROM COMMENT AS PC
+		                                      FROM COMMENT AS PC             <!-- 부모 댓글 테이블 -->
 		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
 	 	                                       AND PC.STATUS = #{statusCommentPublic}
 		                                    )
                )
-	 LEFT JOIN RECIPE_LIKE 						 AS RL 
+	 LEFT JOIN RECIPE_LIKE 						 AS RL                       <!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 	 	   AND (EXISTS (SELECT 1 
-	 	                FROM USER AS SUSR
+	 	                FROM USER                AS SUSR                     <!-- 서브 유저 테이블 -->
 	 	                WHERE RL.USER_ID = SUSR.USER_ID
 	 	                  AND SUSR.STATUS = #{statusUserActive}
 	 	               )
@@ -710,7 +705,7 @@
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 	 	   AND (EXISTS (SELECT 1 
-	 	                FROM USER AS SUSR
+	 	                FROM USER                   AS SUSR                     <!-- 서브 유저 테이블 -->
 	 	                WHERE RL.USER_ID = SUSR.USER_ID
 	 	                  AND SUSR.STATUS = #{statusUserActive}
 	 	               )
@@ -720,7 +715,7 @@
 	 	   AND C.STATUS = #{statusCommentPublic}
    	 	   AND (C.PARENT_COMMENT_ID IS NULL
 		                         OR EXISTS (SELECT 1
-		                                      FROM COMMENT AS PC
+		                                      FROM COMMENT AS PC                <!-- 부모 댓글 테이블 -->
 		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
 	 	                                       AND PC.STATUS = #{statusCommentPublic}
 		                                    )
@@ -728,8 +723,8 @@
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	  GROUP BY R.RECIPE_ID
       ORDER BY (
-			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
-			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
+			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * #{recipeLikeWeight}
+			    + COUNT(DISTINCT C.COMMENT_ID) * #{recipeCommentWeight}
       			) DESC
 	 	 LIMIT #{size}
 	</select>
@@ -752,7 +747,7 @@
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 	 	   AND (EXISTS (SELECT 1 
-	 	                FROM USER AS SUSR
+	 	                FROM USER                   AS SUSR                     <!-- 서브 유저 테이블 -->
 	 	                WHERE RL.USER_ID = SUSR.USER_ID
 	 	                  AND SUSR.STATUS = #{statusUserActive}
 	 	               )
@@ -762,7 +757,7 @@
 	 	   AND C.STATUS = #{statusCommentPublic}
    	 	   AND (C.PARENT_COMMENT_ID IS NULL
 		                         OR EXISTS (SELECT 1
-		                                      FROM COMMENT AS PC
+		                                      FROM COMMENT AS PC                <!-- 부모 댓글 테이블 -->
 		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
 	 	                                       AND PC.STATUS = #{statusCommentPublic}
 		                                    )
@@ -770,8 +765,8 @@
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	  GROUP BY R.RECIPE_ID
       ORDER BY (
-			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
-			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
+			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * #{recipeLikeWeight}
+			    + COUNT(DISTINCT C.COMMENT_ID) * #{recipeCommentWeight}
       			) DESC
 		 LIMIT #{size}
 	</select>
@@ -787,7 +782,7 @@
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID
 	 	   AND (EXISTS (SELECT 1 
-	 	                FROM USER 					AS SUSR
+	 	                FROM USER 					AS SUSR                     <!-- 서브 유저 테이블 -->
 	 	                WHERE RL.USER_ID = SUSR.USER_ID
 	 	                  AND SUSR.STATUS = #{statusUserActive}
 	 	               )
@@ -797,7 +792,7 @@
 	 	   AND C.STATUS = #{statusCommentPublic}
    	 	   AND (C.PARENT_COMMENT_ID IS NULL
 		                         OR EXISTS (SELECT 1
-		                                      FROM COMMENT AS PC
+		                                      FROM COMMENT AS PC                <!-- 부모 댓글 테이블 -->
 		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
 	 	                                       AND PC.STATUS = #{statusCommentPublic}
 		                                    )
@@ -805,9 +800,9 @@
 	     WHERE R.STATUS = #{statusRecipePublic} 
 	       AND R.CATEGORY_PURPOSE_ID = #{categoryPurposeSoloMeal}
 	  GROUP BY R.RECIPE_ID
-      ORDER BY (
-			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * 0.7 
-			    + COUNT(DISTINCT C.COMMENT_ID) * 0.3
+      ORDER BY ( 
+			    COUNT(DISTINCT RL.RECIPE_LIKE_ID) * #{recipeLikeWeight} 
+			    + COUNT(DISTINCT C.COMMENT_ID) * #{recipeCommentWeight}
       			) DESC
 	 	 LIMIT #{size}
 	</select>
@@ -829,7 +824,7 @@
 	 LEFT JOIN RECIPE_LIKE 						 	AS RL 						<!-- 레시피 좋아요 테이블 -->
 	 		ON R.RECIPE_ID = RL.RECIPE_ID		
 	 	   AND (EXISTS (SELECT 1 
-	 	                FROM USER AS SUSR
+	 	                FROM USER                   AS SUSR                     <!-- 서브 유저 테이블 -->
 	 	                WHERE RL.USER_ID = SUSR.USER_ID
 	 	                  AND SUSR.STATUS = #{statusUserActive}
 	 	               )
@@ -839,7 +834,7 @@
 	 	   AND C.STATUS = #{statusCommentPublic}
    	 	   AND (C.PARENT_COMMENT_ID IS NULL
 		                         OR EXISTS (SELECT 1
-		                                      FROM COMMENT AS PC
+		                                      FROM COMMENT AS PC                <!-- 부모 댓글 테이블 -->
 		                                     WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
 	 	                                       AND PC.STATUS = #{statusCommentPublic}
 		                                    )

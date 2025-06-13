@@ -13,7 +13,7 @@ const currentPageGroup = ref(0);
 const loadReports = async (page = 0) => {
     try {
         const res = await getReports(page);
-        console.log(res.data);
+
         reportsData.value = res.data;
         currentPage.value = page;
         currentPageGroup.value = Math.floor(page / 10);
@@ -40,6 +40,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     loadReports(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -47,6 +48,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         loadReports(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -55,6 +57,7 @@ const nextPageGroup = () => {
     if (reportsData.value && (currentPageGroup.value + 1) * 10 < reportsData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         loadReports(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -84,7 +87,7 @@ onMounted(async () => {
                 <tbody>
                     <tr v-for="(item, index) in reportsData.content" :key="index">
                         <td>
-                            {{ item.reportType === 'RECIPE' ? '레시피' : '댓글' }}
+                            {{ item.reportType }}
                         </td>
                         <td>{{ item.reportedNickname }}</td>
                         <td>{{ item.reportReason }}</td>

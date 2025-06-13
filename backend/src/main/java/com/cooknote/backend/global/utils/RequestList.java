@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.utils.pageable;
+package com.cooknote.backend.global.utils;
 
 
 

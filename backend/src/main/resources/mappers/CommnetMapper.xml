@@ -107,6 +107,13 @@
 		    OR PARENT_COMMENT_ID = #{commentId}
 	</update>
 	
+	<!-- 레시피 삭제로 인한 댓글 삭제 -->
+	<update id="commentDeleteRecipe">
+		UPDATE COMMENT
+		   SET STATUS = #{statusCommentDelete}
+		 WHERE RECIPE_ID = #{recipeId}
+	</update>
+	
 	<!-- 댓글 삭제 - 기존 정보 조회 -->
 	<select id="findDeleteComment">
 		SELECT WRITER_ID AS WRITER_ID
@@ -139,6 +146,11 @@
 			 , C.COMMENT_ID  AS COMMENT_ID				<!-- 댓글 아이디 -->
 			 , C.CONTENT 	 AS COMMENT_CONTENT 		<!-- 댓글 컨텐츠 -->
 			 , C.CREATE_AT   AS COMMENT_CREATE_AT		<!-- 댓글 작성일 -->
+			 , CASE 
+			   WHEN C.PARENT_COMMENT_ID IS NULL
+			   THEN TRUE
+			   ELSE FALSE
+			   END           AS IS_PARENT_COMMENT         <!-- 댓글 종류 -->
 		 FROM COMMENT 		 AS C
    INNER JOIN RECIPE 		 AS R
 		   ON C.RECIPE_ID = R.RECIPE_ID 
@@ -156,18 +168,18 @@
 	   OFFSET #{offset}
 	</select>
 	
-	<!-- 유저가 작성한 댓글 조회 -->
+	<!-- 유저가 작성한 댓글 수 조회 -->
 	<select id="getCommentUserWriteCount" resultType="int">
 		SELECT COUNT(C.COMMENT_ID)
 		  FROM COMMENT AS C
 		 WHERE C.WRITER_ID = #{userId}
 	 	   AND C.STATUS = #{statusCommentPublic}
    	 	   AND (C.PARENT_COMMENT_ID IS NULL
-							OR EXISTS (SELECT 1
-		  							     FROM COMMENT AS PC
-		 							    WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
-		   								  AND PC.STATUS != #{statusCommentPrivate}
-									   )
+							     OR EXISTS (SELECT 1
+		  							          FROM COMMENT AS PC
+		 							         WHERE PC.COMMENT_ID = C.PARENT_COMMENT_ID
+		   								       AND PC.STATUS != #{statusCommentPrivate}
+									        )
 	           )
 	</select>
 	

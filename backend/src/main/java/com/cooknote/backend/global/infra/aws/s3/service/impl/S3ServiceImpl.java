@@ -90,7 +90,7 @@ public class S3ServiceImpl implements S3Service {
 		String extention = originalFilename.substring(originalFilename.lastIndexOf(".") + 1); 
 
 		// 변경된 파일 명
-		String s3FileName = Constans.S3_TEMP_IMAGES_PATH + UUID.randomUUID().toString().substring(0, 10) + originalFilename; 
+		String s3FileName = Constans.S3_TEMP_IMAGES_PATH + UUID.randomUUID().toString() + originalFilename; 
 
 		InputStream fileInputStream  = image.getInputStream();
 		// 이미지를 byte[]로 변환

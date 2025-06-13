@@ -2,6 +2,7 @@ package com.cooknote.backend.domain.recipe.service.impl;
 
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +47,8 @@ import com.cooknote.backend.global.error.exceptionCode.RecipeErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomRecipeException;
 import com.cooknote.backend.global.infra.aws.s3.service.S3Service;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
+import com.cooknote.backend.mappers.CommentMapper;
 import com.cooknote.backend.mappers.RecipeIngredientMapper;
 import com.cooknote.backend.mappers.RecipeMapper;
 import com.cooknote.backend.mappers.RecipeSeqMapper;
@@ -63,6 +65,7 @@ public class RecipeServiceImpl implements RecipeService {
 	private final RecipeIngredientMapper recipeIngredientMapper;
 	private final RecipeSeqMapper recipeSeqMapper;
 	private final S3Service s3Service;
+	private final CommentMapper commentMapper;
 
 
 	// 레시피 상세 조회
@@ -79,11 +82,11 @@ public class RecipeServiceImpl implements RecipeService {
 		Long writerId = recipeDetailResponseDTO.getWriterId();
 		
 		// 레시피 상태 코드 체크
-		if(recipeStatus == RecipeStatus.PRIVATE && userId != writerId) {
+		if(recipeStatus == RecipeStatus.PRIVATE && !userId.equals(writerId)) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
-		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && userId == writerId) {
+		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && userId.equals(writerId)) {
 			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE_ADMIN);
-		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && userId != writerId) {
+		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && !userId.equals(writerId)) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 	
@@ -117,8 +120,9 @@ public class RecipeServiceImpl implements RecipeService {
 		String thumbnail =  recipeSaveRequestDTO.getThumbnail();        
 
 		// 썸네일 Temp -> Recip 폴더로 이동
-		LocalDateTime now = LocalDateTime.now();
-		String formatNow = CommonFunctionUtil.dateFormat(now);
+		LocalDateTime nowTime = LocalDateTime.now().withNano(0);
+		String formatNow = CommonFunctionUtil.dateFormat(nowTime);
+
 		String moveThumbnailUrl = s3Service.moveImage(thumbnail, userId, Constans.S3_MOVE_RECIPE_PATH, formatNow);
 		moveImageUrls.add(moveThumbnailUrl);
 
@@ -146,7 +150,7 @@ public class RecipeServiceImpl implements RecipeService {
 					.status(recipeSaveRequestDTO.getStatus())
 					.categoryCuisineId(recipeSaveRequestDTO.getCategoryCuisineId())
 					.categoryPurposeId(recipeSaveRequestDTO.getCategoryPurposeId())
-					.createAt(now)
+					.createAt(nowTime)
 					.writerId(userId)
 					.build();
 	        
@@ -183,7 +187,6 @@ public class RecipeServiceImpl implements RecipeService {
 	@Override
 	public RecipeEditResponseDTO getRecipeForEdit(Long userId, Long recipeId) {
 		
-
 		// 레시피 존재 여부 및 본인 확인
 		checkSelfRecipeExists(userId, recipeId);
 
@@ -191,18 +194,17 @@ public class RecipeServiceImpl implements RecipeService {
 		RecipeEditResponseDTO recipeEditResponseDTO = recipeMapper.getRecipeForEdit(userId, recipeId, RecipeStatus.DELETE);
 
 		if (recipeEditResponseDTO == null) {
-
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
-		
+
 		RecipeStatus recipeStatus = recipeEditResponseDTO.getStatus();
 		Long writerId = recipeEditResponseDTO.getWriterId();
-		
-		if(recipeStatus == RecipeStatus.PRIVATE && userId != writerId) {
+
+		if(recipeStatus == RecipeStatus.PRIVATE && !userId.equals(writerId)) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
-		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && userId == writerId) {
+		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && userId.equals(writerId)) {
 			throw new CustomRecipeException(RecipeErrorCode.RECIPE_IS_PRIVATE_ADMIN);
-		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && userId != writerId) {
+		} else if(recipeStatus == RecipeStatus.PRIVATE_ADMIN && userId.equals(writerId)) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 		
@@ -222,11 +224,9 @@ public class RecipeServiceImpl implements RecipeService {
 		String newThumbnail = recipeUpdateRequestDTO.getThumbnail();
 		String originalThumbnail = recipeUpdateRequestDTO.getOriginalThumbnail();
         
-        // 이전 이미지들
-	    List<String> oldImageUrls = new ArrayList<>();
+        // 오리지널 이미지들
+	    List<String> originalImageUrls = new ArrayList<>();
         
-	    // 이동할 이미지들
-        Map<String, Object> moveImages = new HashMap<>();
         
         // 이동한 이미지 url들
         List<String> moveImageUrls = new ArrayList<>();
@@ -241,7 +241,7 @@ public class RecipeServiceImpl implements RecipeService {
         if(isTempImage(newThumbnail)) {
         	moveThumbnailUrl = s3Service.moveImage(newThumbnail, userId, Constans.S3_MOVE_RECIPE_PATH, formatCreateAt);
     		moveImageUrls.add(moveThumbnailUrl);
-    		oldImageUrls.add(originalThumbnail);
+    		originalImageUrls.add(originalThumbnail);
         } else {
         	moveThumbnailUrl = originalThumbnail;
         }
@@ -332,31 +332,36 @@ public class RecipeServiceImpl implements RecipeService {
 			String oldRecipeSeqImage = oldRecipeSeq.getImage();
 			
 			if(!keepOldRecipeSeqImages.contains(oldRecipeSeqImage)) {
-				oldImageUrls.add(oldRecipeSeqImage);
+				originalImageUrls.add(oldRecipeSeqImage);
 			}
 		}
 	    
-		s3Service.deleteImagesFromS3(oldImageUrls);
+		s3Service.deleteImagesFromS3(originalImageUrls);
 	}
 	
 	// 레시피 삭제
 	@Override
 	@Transactional
 	public void recipeDelete(Long userId, Long recipeId) {
-		
-	
+
 		LocalDateTime createAt = recipeMapper.getRecipeCreateAt(userId, recipeId);		
 		if(createAt == null) {
 			throw new CustomCommonException(CommonErrorCode.NOT_FOUND_EXCEPTION);
 		}
 
-		// 삭제 처리
+		// 논리 삭제 처리
 		recipeMapper.recipeDelete(userId, recipeId, RecipeStatus.DELETE);
 		recipeMapper.recipeSeqDelete(recipeId);
-		
+		commentMapper.commentDeleteRecipe(recipeId, CommentStatus.DELETE);
+
+		recipeMapper.recipeLikeDelete(userId, recipeId);
+
+		recipeMapper.recipeBookmarkDelete(userId, recipeId);
+
 		// s3 삭제
 		String formatCreateAt = CommonFunctionUtil.dateFormat(createAt);
 		String folderPrefix = Constans.S3_MOVE_RECIPE_PATH + userId + "/" + formatCreateAt;
+
 		s3Service.deleteFolderFromS3(folderPrefix);
 	}
 	
@@ -471,7 +476,9 @@ public class RecipeServiceImpl implements RecipeService {
 																		   , ConditionalType.LATEST
 																		   , CommentStatus.PUBLIC
 																		   , CommentStatus.PRIVATE_ADMIN
-																		   , UserStatus.ACTIVE);
+																		   , UserStatus.ACTIVE
+																		   , Constans.RECIPE_LIKE_WEIGHT
+																		   , Constans.RECIPE_COMMENT_WEIGHT);
 		
 		int total = recipeMapper.getRecipeSearchCount(keywords, categoryCuisineId, categoryPurposeId, RecipeStatus.PUBLIC);
 		
@@ -501,7 +508,9 @@ public class RecipeServiceImpl implements RecipeService {
 																			   , ConditionalType.POPULAR
 																			   , ConditionalType.LATEST
 																			   , CommentStatus.PUBLIC
-																			   , UserStatus.ACTIVE);
+																			   , UserStatus.ACTIVE
+																			   , Constans.RECIPE_LIKE_WEIGHT
+																			   , Constans.RECIPE_COMMENT_WEIGHT);
 	
 		int total = recipeMapper.getIngredientSearchCount(ingredients, ingredientCount, RecipeStatus.PUBLIC);
 		
@@ -515,7 +524,9 @@ public class RecipeServiceImpl implements RecipeService {
 		List<RecipeRecommnetResponseDTO> recommentRecipeList = recipeMapper.getRecommentRecipe(RecipeStatus.PUBLIC
 																						     , Constans.GET_RECIPE_LIMIT
 																						     , CommentStatus.PUBLIC
-																						     , UserStatus.ACTIVE);
+																						     , UserStatus.ACTIVE
+																						     , Constans.RECIPE_LIKE_WEIGHT
+																						     , Constans.RECIPE_COMMENT_WEIGHT);
 		int resultSize = Math.min(recommentRecipeList.size(), Constans.RECOMMENT_RECIPE_MIN_VALUE);
 		Collections.shuffle(recommentRecipeList);
 		
@@ -528,7 +539,9 @@ public class RecipeServiceImpl implements RecipeService {
 		List<RecipeCardResponseDTO> bestRecipeList = recipeMapper.getBestRecipe(RecipeStatus.PUBLIC
 																			  , Constans.BEST_RECIPE_MIN_VALUE
 																			  , CommentStatus.PUBLIC
-																			  , UserStatus.ACTIVE);
+																			  , UserStatus.ACTIVE
+																			  , Constans.RECIPE_LIKE_WEIGHT
+																	          , Constans.RECIPE_COMMENT_WEIGHT);
 		
 		return bestRecipeList;
 	}
@@ -540,7 +553,9 @@ public class RecipeServiceImpl implements RecipeService {
 																				  , CategoryPurposeEnum.SOLO_MEAL.getCode()
 																				  , Constans.GET_RECIPE_LIMIT
 																				  , CommentStatus.PUBLIC
-																				  , UserStatus.ACTIVE);
+																				  , UserStatus.ACTIVE
+																				  , Constans.RECIPE_LIKE_WEIGHT
+																				  , Constans.RECIPE_COMMENT_WEIGHT);
 		
 		int resultSize = Math.min(soloRecitList.size() ,Constans.SOLO_RECIPE_MIN_VALUE);
 		Collections.shuffle(soloRecitList);

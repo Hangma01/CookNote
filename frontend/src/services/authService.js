@@ -20,17 +20,17 @@ export const logout = async () => {
 
 // 아이디 중복 체크
 export const existsId = async (id) => {
-    return await publicAPI.get(`/auth/existsId?id=${id}`);
+    return await publicAPI.post(`/auth/existsId`, { id });
 };
 
 // 닉네임 중복 체크
 export const existsNickname = async (nickname) => {
-    return await publicAPI.get(`/auth/existsNickname?nickname=${nickname}`);
+    return await publicAPI.post(`/auth/existsNickname`, { nickname });
 };
 
 // 이메일 중복 체크
 export const existsEmail = async (email) => {
-    return await publicAPI.get(`/auth/existsEmail?email=${email}`);
+    return await publicAPI.post(`/auth/existsEmail`, { email });
 };
 
 // 회원 가입

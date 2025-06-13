@@ -37,7 +37,7 @@ import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -110,7 +110,7 @@ public class RecipeController {
 	// 레시피 생성
 	@PostMapping("")
 	public ResponseEntity<Void> recipeSave(@AuthenticationPrincipal CustomUserDetails customUserDetails 
-										 , @Valid @RequestBody RecipeSaveRequestDTO saveRecipeRequestDTO
+										 , @Valid @RequestBody RecipeSaveRequestDTO recipeSaveRequestDTO
 										 , BindingResult bindingResult) {
 		
 		// 유효성 검사 확인
@@ -118,7 +118,7 @@ public class RecipeController {
 			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
 		
-		recipeService.recipeSave(customUserDetails.getUserId(), saveRecipeRequestDTO);
+		recipeService.recipeSave(customUserDetails.getUserId(), recipeSaveRequestDTO);
 		
 		return ResponseEntity.ok().build();
 	}
@@ -159,7 +159,7 @@ public class RecipeController {
 	
 	// 레시피 삭제
 	@DeleteMapping("")
-	public ResponseEntity<Void> recipeUpdate(@AuthenticationPrincipal CustomUserDetails customUserDetails 
+	public ResponseEntity<Void> recipeDelete(@AuthenticationPrincipal CustomUserDetails customUserDetails 
 			   							   , @RequestParam("recipeId") Long recipeId) {
 		
 

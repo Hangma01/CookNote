@@ -13,4 +13,5 @@ export const errorMessages = {
     IMAGE_FILE_EXTENSION_ERROR_MESSAGE: 'jpg, jpeg, png, webp 형식의 이미지 파일만 업로드 가능합니다.',
     MAX_IMAGE_SIZE_ERROR_MESSAGE: '이미지 크기는 2MB 이하로 업로드 해주세요. jpg, jpeg, png, webp 형식의 이미지 파일만 업로드 가능합니다.',
     MAX_IMAGE_SIZE_OR_NETWORK_ERROR_MESSAGE: '요청에 문제를 발견했습니다. 미지 크기가 2MB 이하인지 확인해주세요.',
+    RECIPE_SELF_LIKE_ERROR_MESSAGE: '본인 레시피에는 좋아요를 할 수 없습니다.',
 };

@@ -157,7 +157,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .profile-host-container {
-    margin-bottom: 10rem;
+    margin-bottom: 20rem;
 
     .recipe-title {
         font-weight: 500;

@@ -18,6 +18,8 @@ const imageUrl = ref(props.modelValue || null);
 
 const fileInput = ref(null);
 
+const isUploading = ref(false);
+
 // 이미지 변경
 const onFileChange = async (files) => {
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
@@ -53,6 +55,7 @@ const onFileChange = async (files) => {
 
             // s3 업로드
             try {
+                isUploading.value = true;
                 const res = await s3Upload(formData);
 
                 // 이미지 url 저장
@@ -71,6 +74,8 @@ const onFileChange = async (files) => {
                 }
 
                 return;
+            } finally {
+                isUploading.value = false;
             }
 
             emit('update:modelValue', imageUrl.value);
@@ -102,7 +107,10 @@ watch(
         <input type="file" ref="fileInput" accept="image/*" hidden @change="onFileChange($event.target.files)" />
 
         <div v-if="imageUrl" class="preview-img-wrap">
-            <img :src="imageUrl" alt="preview" class="preview-img" />
+            <div v-if="isUploading" class="loading-overlay">
+                <v-progress-circular indeterminate color="primary" :size="70" :width="6" />
+            </div>
+            <img v-else :src="imageUrl" alt="preview" class="preview-img" />
         </div>
 
         <div v-else>
@@ -144,6 +152,13 @@ watch(
 .preview-img {
     width: 100%;
     height: 100%;
+
+    .loading-overlay {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
 }
 
 .placeholder.recipeInfo {

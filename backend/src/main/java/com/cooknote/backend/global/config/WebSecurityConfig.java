@@ -25,8 +25,8 @@ import com.cooknote.backend.global.auth.JwtFilter;
 import com.cooknote.backend.global.auth.CustomDaoAuthenticationProvider;
 import com.cooknote.backend.global.auth.CustomLoginFilter;
 import com.cooknote.backend.global.auth.CustomLogoutFilter;
-import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.redis.RedisUtil;
+import com.cooknote.backend.global.utils.JwtUtil;
+import com.cooknote.backend.global.utils.RedisUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

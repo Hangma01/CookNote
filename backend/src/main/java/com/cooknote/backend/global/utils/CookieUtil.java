@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.utils.cookie;
+package com.cooknote.backend.global.utils;
 
 import jakarta.servlet.http.Cookie;
 

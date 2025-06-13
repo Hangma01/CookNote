@@ -10,7 +10,7 @@ const props = defineProps({
     <section>
         <div class="section-tag solo-recipe-container">
             <div class="section-title">
-                <h1>SOLO RECIPE</h1>
+                <h1>SOLO RECIPES</h1>
                 <h2>혼먹 자취생들을 위한 추천 레시피</h2>
             </div>
 

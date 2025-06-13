@@ -144,7 +144,9 @@ public interface RecipeMapper {
 												, @Param("conditionalLatest") ConditionalType latest
 												, @Param("statusCommentPublic") CommentStatus statusCommentPublic
 												, @Param("statusCommentPrivateAdmin") CommentStatus statusCommentPrivateAdmin
-												, @Param("statusUserActive") UserStatus statusUserActive);
+												, @Param("statusUserActive") UserStatus statusUserActive
+												, @Param("recipeLikeWeight") double recipeLikeWeight
+												, @Param("recipeCommentWeight") double recipeCommentWeight);
 
 	// 레시피 검색 토탈 갯수
 	int getRecipeSearchCount(@Param("keywords") List keywords
@@ -162,7 +164,9 @@ public interface RecipeMapper {
 													, @Param("conditionalPopular") ConditionalType popular
 													, @Param("conditionalLatest") ConditionalType latest
 													, @Param("statusCommentPublic") CommentStatus statusCommentPublic
-													, @Param("statusUserActive") UserStatus statusUserActive);
+													, @Param("statusUserActive") UserStatus statusUserActive
+													, @Param("recipeLikeWeight") double recipeLikeWeight
+													, @Param("recipeCommentWeight") double recipeCommentWeight);
 	// 레시피 재료 검색 토탈 갯수
 	int getIngredientSearchCount(@Param("ingredients") List<String> ingredients
 						   	   , @Param("ingredientCount") int ingredientCount
@@ -210,19 +214,25 @@ public interface RecipeMapper {
 	List<RecipeRecommnetResponseDTO> getRecommentRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic
 													  , @Param("size") int getRecommentRecipeLimit
 													  , @Param("statusCommentPublic") CommentStatus statusCommentPublic
-													  , @Param("statusUserActive") UserStatus statusUserActive);
+													  , @Param("statusUserActive") UserStatus statusUserActive
+													  , @Param("recipeLikeWeight") double recipeLikeWeight
+													  , @Param("recipeCommentWeight") double recipeCommentWeight);
 
 	// 혼밥 레시피 가져오기
 	List<RecipeRecommnetResponseDTO> getSoloRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic
 											, @Param("categoryPurposeSoloMeal") int categoryPurposeSoloMeal
 											, @Param("size") int getSoloRecipeLimit
 											, @Param("statusCommentPublic") CommentStatus statusCommentPublic
-											, @Param("statusUserActive") UserStatus statusUserActive);
+											, @Param("statusUserActive") UserStatus statusUserActive
+										    , @Param("recipeLikeWeight") double recipeLikeWeight
+											, @Param("recipeCommentWeight") double recipeCommentWeight);
 	// 베스트 레시피 가져오기	
 	List<RecipeCardResponseDTO> getBestRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic
 											, @Param("size") int bestRecipeMinValue
 											, @Param("statusCommentPublic") CommentStatus statusCommentPublic
-											, @Param("statusUserActive") UserStatus statusUserActive);
+											, @Param("statusUserActive") UserStatus statusUserActive
+											, @Param("recipeLikeWeight") double recipeLikeWeight
+											, @Param("recipeCommentWeight") double recipeCommentWeight);
 	
 	// 최신 레시피 가져오기	
 	List<RecipeCardResponseDTO> getRecentRecipe(@Param("statusRecipePublic") RecipeStatus statusRecipePublic

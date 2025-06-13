@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.utils.common;
+package com.cooknote.backend.global.utils;
 
 import java.io.IOException;
 

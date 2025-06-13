@@ -51,7 +51,7 @@
                         </div>
                     </address>
                     <div class="logo">
-                        <p class="copyright-notice">© 2024 by Culturehero. All rights are reserved.</p>
+                        <p class="copyright-notice">© CookNote Crop. All rights are reserved.</p>
                     </div>
                 </div>
             </div>
@@ -62,7 +62,7 @@
 
 <style lang="scss" scoped>
 .footer-container {
-    border: 1px solid rgb(158, 158, 158);
+    border-top: 1px solid rgb(158, 158, 158);
 
     .contents {
         .customer-center {

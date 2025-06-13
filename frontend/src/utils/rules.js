@@ -58,7 +58,7 @@ export const defaultNameRule = (v) => {
 export const nameRule = (v) => {
     if (!v) return '이름은 필수 입력 정보입니다.';
 
-    if (!checkNameReg.test(v)) return '한글, 영문 대/소문자를 사용해주세요. (공백 사용 불가)';
+    if (!checkNameReg.test(v)) return '1~20자의 한글, 영문 대/소문자를 사용해주세요. (공백 불가)';
 
     return true;
 };
@@ -82,7 +82,7 @@ export const emailRule = (v) => {
 export const authCodeRule = (v) => {
     if (!v) return '인증번호는 필수 입력 정보입니다.';
 
-    if (!checkAuthCodeReg.test(v)) return '인증번호 6자리를 입력해주세요.';
+    if (!checkAuthCodeReg.test(v)) return '인증번호 숫자 6자리를 입력해주세요.';
 
     return true;
 };

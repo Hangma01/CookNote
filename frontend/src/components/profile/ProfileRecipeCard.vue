@@ -1,6 +1,5 @@
 <script setup>
 import { commonValues } from '@/utils/commonValues';
-import dayjs from '@/plugin/dayjs';
 
 const props = defineProps({
     recipeData: {
@@ -12,10 +11,6 @@ const props = defineProps({
         default: commonValues.PUBLIC_TEXT,
     },
 });
-
-function relativeTime(date) {
-    return dayjs(date).fromNow();
-}
 </script>
 
 <template>
@@ -36,7 +31,7 @@ function relativeTime(date) {
         </div>
 
         <div class="recipe-date">
-            <span>{{ relativeTime(props.recipeData?.createAt) }}</span>
+            <span>{{ props.recipeData?.createAt }}</span>
         </div>
     </div>
 </template>

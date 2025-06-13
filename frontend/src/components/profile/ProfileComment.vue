@@ -5,7 +5,6 @@ import { onMounted, ref } from 'vue';
 import { reactive } from 'vue';
 import { errorMessages } from 'vue/compiler-sfc';
 import ProfileRecipeCard from './ProfileRecipeCard.vue';
-import dayjs from '@/plugin/dayjs';
 
 const activeCommentMenuMap = reactive({}); // 게시글 메뉴 활성화
 const commentItemRefs = ref({}); // 외부 클릭 시 게시글 메뉴 닫히기
@@ -16,10 +15,6 @@ const commentData = ref(null);
 // 페이징
 const currentPage = ref(0);
 const currentPageGroup = ref(0);
-
-function relativeTime(date) {
-    return dayjs(date).fromNow();
-}
 
 // 메뉴 토글
 const toggleCommentMenu = (event, commentId) => {
@@ -49,7 +44,7 @@ const setCommentMenuRef = (el, commentId) => {
 
 // 댓글 삭제하기
 const handleCommentDelete = async (commentId) => {
-    const proceed = confirm('댓글을 정말 삭제하시겠습니까?');
+    const proceed = confirm('정말 삭제하시겠습니까?');
 
     if (proceed) {
         try {
@@ -57,7 +52,7 @@ const handleCommentDelete = async (commentId) => {
 
             // 현재 페이지와 탭 정보 저장
             const currentPageValue = currentPage.value;
-            const res = loadCommentUser(currentPageValue);
+            const res = await loadCommentUser(currentPageValue);
 
             const content = res.data?.content || [];
 
@@ -70,7 +65,7 @@ const handleCommentDelete = async (commentId) => {
                 currentPageGroup.value = Math.floor(currentPageValue / 10);
             }
         } catch (e) {
-            alert('댓글을 삭제하지 못했습니다.');
+            alert('삭제에 실패했습니다.');
         }
     } else {
         activeCommentMenuMap[commentId] = !activeCommentMenuMap[commentId];
@@ -85,6 +80,8 @@ const loadCommentUser = async (page = 0) => {
         commentData.value = res.data;
         currentPage.value = page;
         currentPageGroup.value = Math.floor(page / 10);
+
+        return res;
     } catch (e) {
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message);
@@ -108,6 +105,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     loadCommentUser(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -115,6 +113,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         loadCommentUser(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -123,6 +122,7 @@ const nextPageGroup = () => {
     if (commentData.value && (currentPageGroup.value + 1) * 10 < commentData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         loadCommentUser(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -172,11 +172,14 @@ onBeforeUnmount(() => {
 
                 <div class="comment-content">
                     <div class="content">
-                        <p>{{ item.privateAdmin ? '관리자에 의해 삭제되었습니다.' : item.commentContent }}</p>
+                        <p>
+                            {{ item.parentComment ? '[댓글]' : '[답글] ' }}
+                            {{ item.privateAdmin ? '관리자에 의해 삭제되었습니다.' : item.commentContent }}
+                        </p>
                     </div>
 
                     <div class="content-date">
-                        <span>{{ relativeTime(item.commentCreateAt) }}</span>
+                        <span>{{ item.commentCreateAt }}</span>
                     </div>
                 </div>
             </li>

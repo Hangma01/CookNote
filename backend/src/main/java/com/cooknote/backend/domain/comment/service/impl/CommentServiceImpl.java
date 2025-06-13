@@ -19,7 +19,7 @@ import com.cooknote.backend.domain.comment.service.CommentService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.utils.pageable.RequestList;
+import com.cooknote.backend.global.utils.RequestList;
 import com.cooknote.backend.mappers.CommentMapper;
 
 import lombok.RequiredArgsConstructor;

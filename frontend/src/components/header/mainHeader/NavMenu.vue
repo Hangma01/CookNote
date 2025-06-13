@@ -38,7 +38,7 @@
         <li class="nav-menu-item">
             <router-link :to="{ name: 'followFeed' }">
                 <div class="menu-item">
-                    <span>팔로워 레시피</span>
+                    <span>팔로우 레시피</span>
                 </div>
             </router-link>
         </li>

@@ -30,7 +30,7 @@ import com.cooknote.backend.domain.user.service.UserService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -235,7 +235,7 @@ public class UserController {
 	public ResponseEntity<Page<UserSearchChefResponseDTO>> getSearchChefList(@AuthenticationPrincipal CustomUserDetails customUserDetails
 																		   , @RequestParam(value = "keyword", required = false) String keyword
 																		   , @RequestParam(value = "page", defaultValue = "0") int page
-																		   , @RequestParam(value = "size", defaultValue = "30") int size){
+																		   , @RequestParam(value = "size", defaultValue = "10") int size){
 
 		Long userId = null;
 		

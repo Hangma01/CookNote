@@ -1,6 +1,7 @@
 <script setup>
 import ImageUploader from '@/components/ui/ImageUploader.vue';
 import { commonInputHangle, generateId } from '@/utils/commonFunction';
+import { commonValues } from '@/utils/commonValues';
 import { reactive, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -37,7 +38,7 @@ watch(
 );
 
 const addRecipeSeq = () => {
-    if (recipeSeq.length < 20) {
+    if (recipeSeq.length < commonValues.SEQ_INPUT_MAX) {
         recipeSeq.push({
             id: generateId(),
             step: recipeSeq.length + 1,
@@ -48,7 +49,7 @@ const addRecipeSeq = () => {
 };
 
 const removeRecipeSeq = (index) => {
-    if (recipeSeq.length > 1) {
+    if (recipeSeq.length > commonValues.SEQ_INPUT_MIN) {
         recipeSeq.splice(index, 1);
         recipeSeq.forEach((item, i) => (item.step = i + 1));
     }
@@ -88,7 +89,7 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => (recipeTip.va
 </script>
 
 <template>
-    <h2 class="sub-title">
+    <h2 class="sub-title required">
         <span>요리순서</span>
 
         <p class="required">ⓘ 요리 순서, 이미지는 필수 입력 항목입니다.</p>
@@ -151,6 +152,7 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => (recipeTip.va
 
 <style lang="scss" scoped>
 .sub-title {
+    position: relative;
     font-size: 1.2rem;
     color: #c09370;
     padding-bottom: 1.5rem;
@@ -160,6 +162,15 @@ const handleTipInput = (e) => commonInputHangle(e, 400, (value) => (recipeTip.va
         color: #777;
         font-weight: 400;
     }
+}
+
+.sub-title.required::before {
+    position: absolute;
+    content: '*';
+    color: red;
+    margin-right: 0.25rem;
+    font-weight: bold;
+    left: -0.7rem;
 }
 
 .seq-list {

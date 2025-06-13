@@ -74,6 +74,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     handleSearch(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -81,6 +82,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         handleSearch(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -89,6 +91,7 @@ const nextPageGroup = () => {
     if (reportsData.value && (currentPageGroup.value + 1) * 10 < reportsData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         handleSearch(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -122,8 +125,8 @@ onMounted(() => {
         <section class="search-chef-list" v-if="searchData?.content.length > 0">
             <div>
                 <ul>
-                    <li v-for="(item, index) in searchData?.content" :key="index" class="chef-card-wrap">
-                        <ChefCard :chefData="item" :index="index + currentPage * 30" />
+                    <li v-for="(item, index) in searchData?.content" :key="item.userId" class="chef-card-wrap">
+                        <ChefCard :chefData="item" :index="index + currentPage * 10" />
                     </li>
                 </ul>
             </div>

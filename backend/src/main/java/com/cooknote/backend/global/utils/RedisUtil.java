@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.utils.redis;
+package com.cooknote.backend.global.utils;
 
 import java.time.Duration;
 

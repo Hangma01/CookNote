@@ -140,16 +140,19 @@ const handleCommentEditCancle = async (commentId) => {
 
 // 댓글 삭제
 const handleCommentEditDelete = async (commentId) => {
-    try {
-        await commentDelete(commentId);
-        emit('refreshComments');
-        emit('refreshReply');
-        activeEditCommentMap[commentId] = false;
-    } catch (e) {
-        if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message);
-        } else {
-            alert(errorMessages.BADREQUEST);
+    const proceed = confirm('댓글을 정말 삭제하시겠습니까?');
+    if (proceed) {
+        try {
+            await commentDelete(commentId);
+            emit('refreshComments');
+            emit('refreshReply');
+            activeEditCommentMap[commentId] = false;
+        } catch (e) {
+            if (e.response && e.response?.data?.message) {
+                alert(e.response.data.message);
+            } else {
+                alert(errorMessages.BADREQUEST);
+            }
         }
     }
 };
@@ -266,16 +269,19 @@ const handleReplyEditCancle = async (commentId) => {
 
 // 답글 삭제
 const handleReplyEditDelete = async (commentId, parentCommentId) => {
-    try {
-        await commentDelete(commentId);
-        loadReplies(parentCommentId, replyPageMap[parentCommentId]);
-        activeEditReplyMap[commentId] = false;
-        emit('refreshReply');
-    } catch (e) {
-        if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message);
-        } else {
-            alert(errorMessages.BADREQUEST);
+    const proceed = confirm('답글을 정말 삭제하시겠습니까?');
+    if (proceed) {
+        try {
+            await commentDelete(commentId);
+            loadReplies(parentCommentId, replyPageMap[parentCommentId]);
+            activeEditReplyMap[commentId] = false;
+            emit('refreshReply');
+        } catch (e) {
+            if (e.response && e.response?.data?.message) {
+                alert(e.response.data.message);
+            } else {
+                alert(errorMessages.BADREQUEST);
+            }
         }
     }
 };
@@ -313,7 +319,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                 <v-textarea
                     v-model="formValues.content"
                     @input="handleContentInput"
-                    :placeholder="isLoggedIn ? '답글은 250자 이내로 작성해주세요.' : '로그인 후 답글 작성이 가능합니다.'"
+                    :placeholder="isLoggedIn ? '댓글은 250자 이내로 작성해주세요.' : '로그인 후 답글 작성이 가능합니다.'"
                     rows="4"
                     no-resize
                     variant="outlined"
@@ -640,6 +646,7 @@ const handleEditReplyInput = (e, commentId) => commonInputHangle(e, 250, (value)
                 padding-left: 0.3rem;
                 font-size: 0.83rem;
                 white-space: pre-wrap;
+                padding-right: 0.5rem;
             }
 
             .edit-wrap {

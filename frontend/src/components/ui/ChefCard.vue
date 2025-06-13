@@ -1,6 +1,6 @@
 <script setup>
 import { useUserStore } from '@/stores/user';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { userAddFollow, userCancleFollow } from '../../services/userService';
 
 const props = defineProps({
@@ -13,7 +13,7 @@ const userStore = useUserStore();
 const isLoggedIn = userStore.getIsLoggedIn;
 const userId = userStore.getUserId;
 
-const isFollowing = ref(props.chefData.following);
+const isFollowing = ref(props.chefData?.following ?? false);
 
 const toggleFollow = async (userId) => {
     try {
@@ -28,6 +28,13 @@ const toggleFollow = async (userId) => {
         alert('잠시 후 다시 시도해주세요.');
     }
 };
+
+watch(
+    () => props.chefData?.following,
+    (newVal) => {
+        isFollowing.value = newVal;
+    }
+);
 </script>
 
 <template>

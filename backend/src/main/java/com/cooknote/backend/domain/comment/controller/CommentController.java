@@ -22,7 +22,7 @@ import com.cooknote.backend.domain.comment.service.CommentService;
 import com.cooknote.backend.global.auth.CustomUserDetails;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -99,7 +99,7 @@ public class CommentController {
 		if (CommonFunctionUtil.nullCheck(commentId)) {
 			throw new CustomCommonException(CommonErrorCode.VALIDATION_EXCEPTION);
 		}
-		log.info(commentId.toString());
+		
 		commentService.commentDelete(customUserDetails.getUserId(), commentId);
 		
 		return ResponseEntity.ok().build();

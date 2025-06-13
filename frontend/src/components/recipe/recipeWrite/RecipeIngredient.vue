@@ -1,5 +1,6 @@
 <script setup>
 import { commonInputHangle, generateId } from '@/utils/commonFunction';
+import { commonValues } from '@/utils/commonValues';
 import { reactive, watch } from 'vue';
 
 const props = defineProps({
@@ -32,13 +33,14 @@ watch(
 );
 
 const addIngredient = () => {
-    if (ingredients.length < 40) {
+    if (ingredients.length < commonValues.INGREDIENT_INPUT_MAX) {
         ingredients.push({ name: '', quantity: '' });
     }
 };
 
+// 재료 삭제
 const removeIngredient = (index) => {
-    if (ingredients.length > 1) {
+    if (ingredients.length > commonValues.INGREDIENT_INPUT_MIN) {
         ingredients.splice(index, 1);
     }
 };
@@ -91,7 +93,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => (
     <ul class="ingredient-list">
         <li v-for="(item, index) in ingredients" :key="item.id" class="ingredient-item-wrap">
             <div class="ingredient-item-box">
-                <div class="ingredient-item-filed">
+                <div class="ingredient-item-filed required">
                     <span class="ingredient-item-title">재료</span>
                     <v-text-field
                         v-model="item.name"
@@ -101,10 +103,11 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => (
                         variant="outlined"
                         density="compact"
                         hide-details="true"
+                        autocomplete="off"
                     />
                 </div>
 
-                <div class="ingredient-item-filed">
+                <div class="ingredient-item-filed required">
                     <span class="ingredient-item-title">수량</span>
                     <v-text-field
                         v-model="item.quantity"
@@ -114,6 +117,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => (
                         variant="outlined"
                         density="compact"
                         hide-details="true"
+                        autocomplete="off"
                     />
                 </div>
 
@@ -127,6 +131,7 @@ const handleItemRemarkInput = (e, item) => commonInputHangle(e, 20, (value) => (
                         variant="outlined"
                         density="compact"
                         hide-details="true"
+                        autocomplete="off"
                     />
                 </div>
             </div>

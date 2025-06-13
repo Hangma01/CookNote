@@ -74,7 +74,7 @@ export const generateId = () => crypto.randomUUID();
 // 프로필 로드
 export const loadProfile = async (isHostProfileStatus) => {
     const res = await getUserProfile();
-    console.log(res);
+
     userStore.setProfile({
         ...res.data,
         isHostProfile: isHostProfileStatus,

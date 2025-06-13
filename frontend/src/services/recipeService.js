@@ -105,7 +105,7 @@ export const getRecipeSearchIngredient = async (keyword, conditionalType, page) 
     });
 };
 
-// 팔로잉항 사용자들의 피드 검색
+// 팔로잉한 사용자들의 피드 검색
 export const getRecipesOfFollowingUsers = async (page) => {
     return await privateAPI.get(`/recipe/following?page=${page}`);
 };

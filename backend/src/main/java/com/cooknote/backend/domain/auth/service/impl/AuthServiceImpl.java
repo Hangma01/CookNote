@@ -22,10 +22,10 @@ import com.cooknote.backend.global.error.excption.CustomAuthException;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomJwtException;
 import com.cooknote.backend.global.infra.mail.service.MailService;
-import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
-import com.cooknote.backend.global.utils.cookie.CookieUtil;
-import com.cooknote.backend.global.utils.redis.RedisUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CookieUtil;
+import com.cooknote.backend.global.utils.JwtUtil;
+import com.cooknote.backend.global.utils.RedisUtil;
 import com.cooknote.backend.mappers.AuthMapper;
 
 import jakarta.servlet.http.Cookie;
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService{
 	@Override
 	public void userJoin(UserJoinRequestDTO userJoinRequestDTO) {
 		
-		log.info(userJoinRequestDTO.toString());
+
 		// 비밀번호 일치 확인
 		if(!userJoinRequestDTO.getPw().equals(userJoinRequestDTO.getPwConfirm())) {
 			throw new CustomCommonException(CommonErrorCode.INVALID_STATE_EXCEPTION);
@@ -145,7 +145,6 @@ public class AuthServiceImpl implements AuthService{
 				   						  , userFindPwAuthRequestDTO.getEmail()
 				   						  , UserStatus.DELETE);
 		
-		System.out.println(rspUser);
 		
 		if(rspUser == null) {
 			throw new CustomAuthException(AuthErrorCode.NOT_FOUND_USER_EXCEPTION);
@@ -200,13 +199,12 @@ public class AuthServiceImpl implements AuthService{
 	// AccessToken 재발급
 	@Override
 	public void reissue(HttpServletRequest request, HttpServletResponse response) {
-		
+
 		String refreshToken = null;
         
         Cookie[] cookies = request.getCookies();
 
-        if (cookies == null) {
-
+        if (cookies == null) {	
         	throw new CustomJwtException(JwtErrorCode.REFRESH_TOKEN_UNAUTHORIZED_EXCEPTION);
         }
         
@@ -225,8 +223,6 @@ public class AuthServiceImpl implements AuthService{
     			String id = jwtUtil.getId(refreshToken);
     			long userId = jwtUtil.getUserId(refreshToken);
     			
-    			
-
             	String refreshTokenRedisKey = Constans.REFRESH_TOKEN_PREFIX + userId;
     			String refreshTokenReidsValue = redisUtil.getData(refreshTokenRedisKey);
     			

@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.infra.mail;
+package com.cooknote.backend.global.infra.mail.service.impl;
 
 
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +7,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.cooknote.backend.global.constants.Constans;
+import com.cooknote.backend.global.utils.RedisUtil;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -18,11 +20,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MailSender {
 
-	private final JavaMailSender javaMailSender;
-
     @Value("${spring.mail.username}")
     private String from;
-	
+    
+
+    @Value("${spring.mail.properties.mail.smtp.auth-code-expire}")
+	private long authCodeExpire;
+
+	private final JavaMailSender javaMailSender;
+    private final RedisUtil redisUtil;
+
+    
     
     // 메시지 셋팅
     private MimeMessage createMessage(String email, String subject, String content) throws MessagingException {
@@ -47,6 +55,12 @@ public class MailSender {
     		MimeMessage message = createMessage(email, "CookNote 이메일인증", content);	// 메시지 셋팅
         	
         	javaMailSender.send(message);												// 메시지 발송	
+        	
+
+    		String mailAuthRedisKey = Constans.MAIL_AUTH_PREFIX + email;
+    		
+        	// 레디스에 인증번호 저장
+        	redisUtil.setDataExpire(mailAuthRedisKey, authCode, authCodeExpire);
     	} catch (MessagingException e) {
     		log.error("메일 발송 실패: {}", e.getMessage());
 		}

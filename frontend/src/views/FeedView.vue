@@ -61,6 +61,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     handleUserClick(selectedFollowingId.value, page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -68,6 +69,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         handleUserClick(selectedFollowingId.value, newPage);
+        window.scrollTo(0, 0);
     }
 };
 // 다음 10페이지 그룹
@@ -75,6 +77,7 @@ const nextPageGroup = () => {
     if (recipesData.value && (currentPageGroup.value + 1) * 10 < recipesData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         handleUserClick(selectedFollowingId.value, newPage);
+        window.scrollTo(0, 0);
     }
 };
 

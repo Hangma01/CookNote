@@ -13,6 +13,8 @@ import RecipeTip from './RecipeTip.vue';
 import { getCategoryReportReason } from '@/services/categoryService';
 import ReportModal from '@/components/ui/ReportModal.vue';
 import { HttpStatusCode } from 'axios';
+import { ReportType } from '@/constans/reportType';
+import { userReportDuplicationCheck } from '@/services/userService';
 
 // 화면 전환
 const router = useRouter();
@@ -38,11 +40,28 @@ const targetId = ref(null);
 const reportedId = ref(null);
 
 // 모달 열기 함수
-const openReportModal = (type, id, reported) => {
-    reportType.value = type;
-    targetId.value = id;
-    reportedId.value = reported;
-    showReportModal.value = true;
+const openReportModal = async (type, id, reported) => {
+    try {
+        // type에 따라 ID 분리
+        const recipe = type === ReportType.RECIPE ? id : null;
+        const comment = type === ReportType.COMMENT ? id : null;
+
+        // 중복 확인
+        await userReportDuplicationCheck(type, recipe, comment);
+
+        // 통과되면 모달 열기
+        reportType.value = type;
+        targetId.value = id;
+        reportedId.value = reported;
+        showReportModal.value = true;
+    } catch (e) {
+        // 중복인 경우 or 기타 에러
+        if (e.response && e.response?.data?.message) {
+            alert(e.response.data.message);
+        } else {
+            alert(errorMessages.BADREQUEST);
+        }
+    }
 };
 
 // 모달 닫기 함수
@@ -116,22 +135,6 @@ const refreshReply = async () => {
         router.push({ name: 'mainPage' });
     }
 };
-
-// 좋아요 클릭 시 새로고침
-const refreshLike = async () => {
-    try {
-        const res = await getRecipeLikeCount(recipeId);
-        recipeLikeCount.value = res.data;
-    } catch (e) {
-        if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message);
-        } else {
-            alert(errorMessages.BADREQUEST);
-        }
-
-        router.push({ name: 'mainPage' });
-    }
-};
 </script>
 
 <template>
@@ -141,7 +144,6 @@ const refreshLike = async () => {
                 :recipeDetailData="recipeDetailData"
                 :recipeId="recipeId"
                 :recipeLikeCount="recipeLikeCount"
-                @refreshLike="refreshLike"
                 @openReportModal="openReportModal"
             />
         </section>

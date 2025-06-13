@@ -13,10 +13,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.cooknote.backend.domain.user.entity.User;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.message.ErrorMessage;
-import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
-import com.cooknote.backend.global.utils.common.ResponseUtil;
-import com.cooknote.backend.global.utils.redis.RedisUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.JwtUtil;
+import com.cooknote.backend.global.utils.RedisUtil;
+import com.cooknote.backend.global.utils.ResponseUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -41,32 +41,32 @@ public class JwtFilter extends OncePerRequestFilter {
 		// 필터 패스 조건		
 	    String accessToken= resolveToken(request);
 	    if (accessToken == null) {
+
 	    	filterChain.doFilter(request, response);
 				
             return;
 	    }
-	    
-	    // 블랙 리스트 체크
-	    Long userId =  jwtUtil.getUserId(accessToken);
-	    if(userId == null) {
-	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	    	return;
-	    }
-	    
-	    String blacklistKey = Constans.BLACKLIST_PREFIX + userId;
-	    String blacklistValue = redisUtil.getData(blacklistKey);
-	    if(CommonFunctionUtil.match(userId.toString(), blacklistValue)) {
-	    	ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.BALACKLIST_EXCEPTION.getMessage());
-	    	return;
-	    }
-	    
-	    
 
 	    // accessToken 유효성 검사
         try {
         	if(jwtUtil.isValidToken(accessToken)){
         		
         		String id = jwtUtil.getId(accessToken);
+        		Long userId =  jwtUtil.getUserId(accessToken);
+        		
+        		
+        	    // 블랙 리스트 체크
+        	    if(userId == null) {
+        	    	response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        	    	return;
+        	    }
+        	    
+        	    String blacklistKey = Constans.BLACKLIST_PREFIX + userId;
+        	    String blacklistValue = redisUtil.getData(blacklistKey);
+        	    if(CommonFunctionUtil.match(userId.toString(), blacklistValue)) {
+        	    	ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.BALACKLIST_EXCEPTION.getMessage());
+        	    	return;
+        	    }
             	
             	User user = User.builder()
             						.userId(userId)

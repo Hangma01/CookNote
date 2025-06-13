@@ -29,6 +29,7 @@ const isSuccessAuthCode = ref(false); // 메일 인증 코드 성공 메시지
 const isAuthCodeRequest = ref(false); // 메일 인증 요청 토글
 const authCodeValue = ref(''); // 메일 인증 input-field
 const isAtuhCodetimer = ref(false); // 메일 인증 시간 제한
+const toastTimeout = ref(commonValues.TOAST_TIMEOUT); // 토스트 타임아웃 시간
 
 // input-field
 const formValues = reactive({
@@ -102,7 +103,7 @@ const handleSendMailAuthCodeRetry = async () => {
         resetTimer();
         startTimer();
         isAtuhCodetimer.value = true;
-
+        errorMsgAuthCode.value = '';
         isSuccessAuthCode.value = false;
         authCodeValue.value = '';
         alert(successMessage.AUTH_MAIL_RETRY_SUCCESS_MESSAGE);
@@ -231,7 +232,7 @@ onMounted(() => {
                 </div>
 
                 <div class="timer" v-if="isAuthCodeRequest">
-                    <span>인증시간 : {{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
+                    <span>인증 시간 : {{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
                 </div>
             </div>
         </div>
@@ -241,7 +242,7 @@ onMounted(() => {
         <v-btn type="submit" class="find-id-btn" v-if="isAuthCodeRequest" :disabled="!isAtuhCodetimer"> 인증 후 아이디 찾기 </v-btn>
     </v-form>
 
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="bottom">
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="toastTimeout" location="top">
         {{ snackbar.message }}
     </v-snackbar>
 </template>

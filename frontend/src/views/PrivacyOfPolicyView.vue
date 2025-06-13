@@ -3,28 +3,28 @@
 
 <template>
     <div class="privacy-of-policy">
-        <header>우리의식탁 서비스 개인정보처리방침</header>
+        <header>쿡노트 서비스 개인정보처리방침</header>
         <br /><br />
         <section>
             <p>
-                컬쳐히어로 (이하 “회사”)가 제공하는 우리의식탁 서비스(이하 “서비스”)는 개인정보보호법에 따라 이용자의 개인정보 보호 및 권익을 보호하고
+                컬쳐히어로 (이하 “회사”)가 제공하는 쿡노트 서비스(이하 “서비스”)는 개인정보보호법에 따라 이용자의 개인정보 보호 및 권익을 보호하고
                 개인정보와 관련한 이용자의 고충을 원활하게 처리할 수 있도록 다음과 같은 처리방침을 두고 있습니다.
             </p>
             <br /><br />
             <p>
                 본 보호정책은 정보통신부에서 지정한 개인정보 보호지침 제7조에 의거하여 작성되었으며, 수시로 내용이 변경될 수 있으므로 정기적으로
-                방문(마이페이지 &gt; 우리의식탁 서비스 정보 &gt; 개인정보처리방침/footer 영역)하셔서 확인하는 것을 권장합니다.
+                방문(마이페이지 &gt; 쿡노트 서비스 정보 &gt; 개인정보처리방침/footer 영역)하셔서 확인하는 것을 권장합니다.
             </p>
             <br /><br />
             <p>회사는 정통부 시행 개인정보보호지침(제22조 1항)에 의거 관리책임자를 아래와 같이 지정합니다.</p>
             <br /><br />
             <p>직 위: 개인정보 보호책임자</p>
             <br /><br />
-            <p>이 름: 장호진</p>
+            <p>이 름: 안효준</p>
             <br /><br />
-            <p>전 화: <a href="tel: 1833-8307">1833-8307</a></p>
+            <p>전 화: <a href="tel: 010-9920-2102">010-9920-2102</a></p>
             <br /><br />
-            <p>email:<a href="mailto:contact@culturehero.net">contact@culturehero.net</a></p>
+            <p>email:<a href="mailto:hyojun.ahn@ta9.co.kr">hyojun.ahn@ta9.co.kr</a></p>
             <br /><br />
             <p>
                 개인정보 관리 책임자는 서비스 회원 여러분의 개인정보를 보호하고, 유출을 방지하는 책임자로서 회원들이 안심하고 서비스를 이용할 수
@@ -223,12 +223,14 @@
                 <br />
                 <table class="table">
                     <thead>
-                        <th>이전받는 자</th>
-                        <th>이전 국가</th>
-                        <th>이전되는 항목</th>
-                        <th>이전 목적</th>
-                        <th>보유ᆞ이용기간 및 이전일시 및 방법</th>
-                        <th>연락처</th>
+                        <tr>
+                            <th>이전받는 자</th>
+                            <th>이전 국가</th>
+                            <th>이전되는 항목</th>
+                            <th>이전 목적</th>
+                            <th>보유ᆞ이용기간 및 이전일시 및 방법</th>
+                            <th>연락처</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr>
@@ -301,7 +303,7 @@
                 </p>
                 <br />
                 <p>
-                    2) 직접 요청하는 방법 <br />우리의식탁 카카오톡 1:1 문의하기로 상담을 요청하시거나, 고객센터(1833-8307)로 전화를 통해 개인정보
+                    2) 직접 요청하는 방법 <br />쿡노트 카카오톡 1:1 문의하기로 상담을 요청하시거나, 고객센터(1833-8307)로 전화를 통해 개인정보
                     열람,수정,수집.이용에 대한 동의철회, 회원탈퇴 등을 요청하실 수 있습니다.
                 </p>
                 <br />
@@ -405,13 +407,6 @@
             <p>나. 시행일자 : 2023년 11월 25일</p>
         </section>
         <br /><br />
-        <div class="privacy__Button-sc-31icmk-4 irnOwA">
-            <a target="_blank" href="https://docs.google.com/document/d/1jAqF3tSQozboGtarDqbayndSGOZXJIlLJ--UdVibYTY/edit" rel="noreferrer"
-                >이전 개인정보처리방침(23.09.20)</a
-            ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 19 18">
-                <path stroke="#000" d="m14.953 6.469-5.07 5.062L4.828 6.47"></path>
-            </svg>
-        </div>
     </div>
 </template>
 

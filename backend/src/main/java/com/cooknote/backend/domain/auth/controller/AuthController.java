@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cooknote.backend.domain.auth.dto.request.UserExistsEmailRequestDTO;
+import com.cooknote.backend.domain.auth.dto.request.UserExistsIdRequestDTO;
+import com.cooknote.backend.domain.auth.dto.request.UserExistsNicknameRequestDTO;
 import com.cooknote.backend.domain.auth.dto.request.UserFindIdAuthRequestDTO;
 import com.cooknote.backend.domain.auth.dto.request.UserFindPwAuthRequestDTO;
 import com.cooknote.backend.domain.auth.dto.request.UserFindPwResetRequestDTO;
@@ -20,7 +23,7 @@ import com.cooknote.backend.domain.auth.dto.response.UserFindPwResponseDTO;
 import com.cooknote.backend.domain.auth.service.AuthService;
 import com.cooknote.backend.global.error.exceptionCode.CommonErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,28 +40,28 @@ public class AuthController {
 	private final AuthService authService;
 	
 	// 아이디 중복 체크
-	@GetMapping("/existsId")
-	public ResponseEntity<Void> getExistsId(@RequestParam("id") String id) {
+	@PostMapping("/existsId")
+	public ResponseEntity<Void> getExistsId(@RequestBody UserExistsIdRequestDTO userExistsIdRequestDTO) {
 
-		authService.getExistsId(id);
+		authService.getExistsId(userExistsIdRequestDTO.getId());
 
 		return ResponseEntity.ok().build();
 	}
 
 	// 닉네임 중복 체크
-	@GetMapping("/existsNickname")
-	public ResponseEntity<Void> getExistsNickname(@RequestParam("nickname") String nickname) {
+	@PostMapping("/existsNickname")
+	public ResponseEntity<Void> getExistsNickname(@RequestBody UserExistsNicknameRequestDTO userExistsNicknameRequestDTO) {
 
-		authService.getExistsNickname(nickname);
+		authService.getExistsNickname(userExistsNicknameRequestDTO.getNickname());
 
 		return ResponseEntity.ok().build();
 	}
 
 	// 이메일 중복 체크
-	@GetMapping("/existsEmail")
-	public ResponseEntity<Void> getExistsEmail(@RequestParam("email") String email) {
+	@PostMapping("/existsEmail")
+	public ResponseEntity<Void> getExistsEmail(@RequestBody UserExistsEmailRequestDTO userExistsEmailRequestDTO) {
 
-		authService.getExistsEmail(email);
+		authService.getExistsEmail(userExistsEmailRequestDTO.getEmail());
 
 		return ResponseEntity.ok().build();
 	}

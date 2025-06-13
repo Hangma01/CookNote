@@ -6,14 +6,13 @@ import org.springframework.stereotype.Service;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.AuthErrorCode;
 import com.cooknote.backend.global.error.excption.CustomAuthException;
-import com.cooknote.backend.global.infra.mail.MailSender;
 import com.cooknote.backend.global.infra.mail.dto.response.VerifyAuthCodeResponseDTO;
 import com.cooknote.backend.global.infra.mail.service.MailService;
 import com.cooknote.backend.global.message.ErrorMessage;
 import com.cooknote.backend.global.message.SuccessMessage;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
-import com.cooknote.backend.global.utils.content.MailContent;
-import com.cooknote.backend.global.utils.redis.RedisUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.MailContentUtil;
+import com.cooknote.backend.global.utils.RedisUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,25 +22,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MailServiceImpl implements MailService {
 
-    @Value("${spring.mail.properties.mail.smtp.auth-code-expire}")
-	private long authCodeExpire;
     
     private final MailSender mailSender;
     private final RedisUtil redisUtil;
 	
     @Override
 	public void sendAuthCode(String email) {
-    	long start = System.currentTimeMillis();
     	
     	
 		String authCode = CommonFunctionUtil.createMailAuthCode();
-		String content = MailContent.createAuthCodeContent(authCode);
-		String mailAuthRedisKey = Constans.MAIL_AUTH_PREFIX + email;
+		String content = MailContentUtil.createAuthCodeContent(authCode);
 
 		mailSender.sendAuthCode(email, authCode, content);
-
-		// 레디스에 인증번호 저장
-    	redisUtil.setDataExpire(mailAuthRedisKey, authCode, authCodeExpire);
     }
 	
     

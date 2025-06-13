@@ -33,6 +33,9 @@ const route = useRoute();
 const recipeId = route.params.recipeId || null;
 const isEditMode = ref(!!recipeId);
 
+// 저장 시 overlay
+const isSaving = ref(false);
+
 // 레시피 저장
 const handleRecipeSave = debounce(async () => {
     // 유효성 검사
@@ -72,7 +75,7 @@ const handleRecipeSave = debounce(async () => {
             status: recipeSet.data.toUpperCase(),
         };
 
-        // 수정 시 원본 이미지 데이터 넣기기
+        // 수정 시 원본 이미지 데이터 넣기
         if (isEditMode.value) {
             formValues.recipeId = recipeId;
             formValues.originalThumbnail = originalRecipeData.value.thumbnail;
@@ -81,6 +84,9 @@ const handleRecipeSave = debounce(async () => {
 
         //서버에 전송
         try {
+            if (isSaving.value) return;
+            isSaving.value = true;
+
             if (isEditMode.value) {
                 await editRecipe(formValues);
             } else {
@@ -94,20 +100,20 @@ const handleRecipeSave = debounce(async () => {
             } else {
                 alert(errorMessages.BADREQUEST);
             }
-
-            router.push({ name: 'mainPage' });
+        } finally {
+            isSaving.value = false;
         }
     }
 }, commonValues.DEFALUT_DEBOUNCE);
 
 // 레시피 삭제
 const handleRecipeDelete = debounce(async () => {
-    const proceed = confirm('레시피를 정말 삭제하시겠습니까?');
+    const proceed = confirm('삭제 시 복구 불가능합니다. 레시피를 정말 삭제하시겠습니까?');
     if (proceed) {
         try {
             await deleteRecipe(recipeId);
-
-            router.replace({ name: 'mainPage' });
+            const recipeSet = recipeSetRef.value.getData();
+            router.replace({ name: 'profileRecipe', query: { tab: recipeSet.selectedStatus } });
         } catch (e) {
             if (e.response && e.response?.data?.message) {
                 alert(e.response.data.message);
@@ -201,6 +207,13 @@ onMounted(async () => {
             </div>
         </div>
     </v-form>
+
+    <v-overlay :model-value="isSaving" persistent class="fullscreen-loading">
+        <div class="overlay-content">
+            <v-progress-circular color="primary" indeterminate :size="80" :width="8"></v-progress-circular>
+            <p class="saving-text">레시피를 저장 중입니다...</p>
+        </div>
+    </v-overlay>
 </template>
 
 
@@ -252,6 +265,25 @@ onMounted(async () => {
             color: white;
             font-weight: bold;
             margin-right: 1.5rem;
+        }
+    }
+}
+
+.fullscreen-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    .overlay-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        .saving-text {
+            margin-top: 1rem;
+            font-weight: bold;
+            font-size: 1.5rem;
         }
     }
 }

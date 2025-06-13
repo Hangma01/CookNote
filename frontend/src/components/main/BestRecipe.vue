@@ -15,7 +15,7 @@ const props = defineProps({
                 <h1>BEST RECIPES</h1>
             </div>
 
-            <Carousel :items="bestRecipeData" :visibleCount="4" class="carousel">
+            <Carousel :items="bestRecipeData || []" :visibleCount="4" class="carousel">
                 <template #slide="{ item }">
                     <div class="slide-item">
                         <RecipeCard :recipeData="item" />

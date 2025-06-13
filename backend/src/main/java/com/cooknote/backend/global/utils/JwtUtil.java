@@ -1,4 +1,4 @@
-package com.cooknote.backend.global.utils.auth;
+package com.cooknote.backend.global.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;

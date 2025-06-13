@@ -48,6 +48,8 @@ const loadRecipLike = async (page = 0) => {
         recipeData.value = res.data;
         currentPage.value = page;
         currentPageGroup.value = Math.floor(page / 10);
+
+        return res;
     } catch (e) {
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message);
@@ -69,7 +71,7 @@ const handleLikeDelete = async (recipeId) => {
 
             // 현재 페이지와 탭 정보 저장
             const currentPageValue = currentPage.value;
-            const res = loadRecipLike(currentPageValue);
+            const res = await loadRecipLike(currentPageValue);
 
             const content = res.data?.content || [];
 
@@ -101,6 +103,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     loadRecipLike(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -108,6 +111,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         loadRecipLike(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -116,6 +120,7 @@ const nextPageGroup = () => {
     if (recipeData.value && (currentPageGroup.value + 1) * 10 < recipeData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         loadRecipLike(newPage);
+        window.scrollTo(0, 0);
     }
 };
 

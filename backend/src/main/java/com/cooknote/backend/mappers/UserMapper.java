@@ -118,12 +118,20 @@ public interface UserMapper {
 													, @Param("size") int size
 													, @Param("offset") int offset
 													, @Param("statusRecipePublic") RecipeStatus statusRecipePublic
-													, @Param("statusUserActive") UserStatus statusUserActive);
+													, @Param("statusUserActive") UserStatus statusUserActive 
+													, @Param("chefFollowWeight") double chefFollowWeight
+													, @Param("chefRecipeWeight") double chefRecipeWeight
+													, @Param("chefLikeWeight") double chefLikeWeight
+													, @Param("chefBookmarkWeight") double chefBookmarkWeight);
 
 	// 신고 내역 가져오기
 	List<UserReportResponseDTO> getReports(@Param("userId") Long userId
 										 , @Param("size") int size
-										 , @Param("offset") int offset);
+										 , @Param("offset") int offset
+										 , @Param("reportTypeComment") ReportType reportTypeComment
+										 , @Param("reportTypeCommentText") String reportTypeCommentText
+										 , @Param("reportTypeReplyText") String reportTypeReplyText
+										 , @Param("reportTypeRecipeText") String reportTypeRecipeText);
 	
 	// 신고 내역 카운트 가져오기
 	int getReportsCount(@Param("userId") Long userId);
@@ -132,7 +140,12 @@ public interface UserMapper {
 	List<UserSacntionResponseDTO> getSanction(@Param("userId") Long userId
 											, @Param("size") int size
 											, @Param("offset") int offset
-											, @Param("statusReportApproved") ReportStatus statusReportApproved);
+											, @Param("statusReportApproved") ReportStatus statusReportApproved
+											, @Param("reportTypeRecipe") ReportType reportTypeRecipe
+											, @Param("reportTypeComment") ReportType reportTypeComment
+											, @Param("reportTypeCommentText") String reportTypeCommentText
+											, @Param("reportTypeReplyText") String reportTypeReplyText
+											, @Param("reportTypeRecipeText") String reportTypeRecipeText);
 	
 	// 제재 내역 카운트
 	int getSanctionCount(@Param("userId") Long userId

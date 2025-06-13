@@ -14,13 +14,13 @@ import {
     VRadio,
     VRadioGroup,
     VSelect,
-    VSheet,
-    VSlideGroup,
-    VSlideGroupItem,
     VSnackbar,
     VSpacer,
     VTextField,
     VTextarea,
+    VOverlay,
+    VProgressCircular,
+    VCardTitle,
 } from 'vuetify/components';
 
 export default createVuetify({
@@ -39,5 +39,8 @@ export default createVuetify({
         VSpacer,
         VDivider,
         VSnackbar,
+        VOverlay,
+        VProgressCircular,
+        VCardTitle,
     },
 });

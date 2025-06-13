@@ -31,6 +31,7 @@ const isSuccessAuthCode = ref(false); // 메일 인증 코드 성공 메시지
 // etc...
 const isAuthCodeRequest = ref(false); // 메일 인증 요청 토글
 const isAtuhCodetimer = ref(false); // 메일 인증 시간 제한
+const toastTimeout = ref(commonValues.TOAST_TIMEOUT); // 토스트 타임아웃 시간
 
 // 타이머를 3분으로 설정하고 타이머 종료시 동작
 const { timer, startTimer, stopTimer, resetTimer, isTimerRunning } = useTimer(commonValues.MAIL_AUTH_TIMER, () => {
@@ -108,7 +109,7 @@ const handleSendMailAuthCodeRetry = async () => {
         resetTimer();
         startTimer();
         isAtuhCodetimer.value = true;
-
+        errorMsgAuthCode.value = '';
         isSuccessAuthCode.value = false;
         authCodeValue.value = '';
         alert(successMessage.AUTH_MAIL_RETRY_SUCCESS_MESSAGE);
@@ -211,17 +212,17 @@ onMounted(() => {
                 </div>
 
                 <div class="timer" v-if="isAuthCodeRequest">
-                    <span>인증시간 : {{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
+                    <span>인증 시간 : {{ String(Math.floor(timer / 60)).padStart(1, '0') }}:{{ String(timer % 60).padStart(2, '0') }}</span>
                 </div>
             </div>
         </div>
 
         <v-btn type="button" class="find-pw-btn" @click="handleUserFindPwRequest" v-show="!isAuthCodeRequest"> 인증요청 </v-btn>
 
-        <v-btn type="submit" class="find-pw-btn" v-if="isAuthCodeRequest" :disabled="!isAtuhCodetimer"> 비밀번호 변경 하기 </v-btn>
+        <v-btn type="submit" class="find-pw-btn" v-if="isAuthCodeRequest" :disabled="!isAtuhCodetimer"> 비밀번호 변경하기 </v-btn>
     </v-form>
 
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" location="bottom">
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="toastTimeout" location="top">
         {{ snackbar.message }}
     </v-snackbar>
 </template>

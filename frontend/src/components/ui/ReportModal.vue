@@ -32,6 +32,11 @@ const close = () => {
 
 // 신고하기
 const submitReport = debounce(async () => {
+    if (!selectedReasonId.value) {
+        alert('신고 사유를 선택해주세요.');
+        return;
+    }
+
     try {
         await userReport(props.reportType, recipeId.value, commentId.value, selectedReasonId.value, props.reportedId);
 
@@ -54,20 +59,10 @@ watch(dialogVisible, (newVal) => {
 });
 
 onMounted(async () => {
-    try {
-        if (ReportType.RECIPE === props.reportType) {
-            recipeId.value = props.targetId;
-        } else if (ReportType.COMMENT === props.reportType) {
-            commentId.value = props.targetId;
-        }
-        await userReportDuplicationCheck(props.reportType, recipeId.value, commentId.value);
-    } catch (e) {
-        close();
-        if (e.response && e.response?.data?.message) {
-            alert(e.response.data.message);
-        } else {
-            alert(errorMessages.BADREQUEST);
-        }
+    if (ReportType.RECIPE === props.reportType) {
+        recipeId.value = props.targetId;
+    } else if (ReportType.COMMENT === props.reportType) {
+        commentId.value = props.targetId;
     }
 });
 </script>

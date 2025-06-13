@@ -78,6 +78,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     handleSearch(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -85,6 +86,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         handleSearch(newPage);
+        window.scrollTo(0, 0);
     }
 };
 // 다음 10페이지 그룹
@@ -92,6 +94,7 @@ const nextPageGroup = () => {
     if (searchData.value && (currentPageGroup.value + 1) * 10 < searchData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         handleSearch(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -131,7 +134,7 @@ onMounted(() => {
 
             <div class="conditional-box">
                 <div>
-                    총 <span class="recipe-count">{{ searchData?.content.length }}</span
+                    총 <span class="recipe-count">{{ searchData?.page.totalElements }}</span
                     >개의 결과
                 </div>
                 <div>
@@ -146,7 +149,7 @@ onMounted(() => {
                         인기순
                     </button>
                     <button
-                        class="conditional-btn"
+                        class="conditional-btn latest-btn"
                         :class="{
                             active: conditionalType === ConditonalType.LATEST,
                         }"
@@ -244,7 +247,7 @@ onMounted(() => {
             margin-top: 3rem;
             margin-bottom: 1rem;
             display: flex;
-            justify-content: end;
+            justify-content: space-between;
             margin-right: 1rem;
             gap: 2rem;
 

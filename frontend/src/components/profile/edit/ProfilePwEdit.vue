@@ -42,9 +42,8 @@ const handleEditPw = debounce(async () => {
                 alert(e.response.data.message);
             } else {
                 alert(errorMessages.BADREQUEST);
+                window.location.reload();
             }
-
-            window.location.reload();
         }
     }
 }, commonValues.DEFALUT_DEBOUNCE);

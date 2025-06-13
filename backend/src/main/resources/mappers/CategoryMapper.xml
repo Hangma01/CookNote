@@ -10,6 +10,7 @@
 		SELECT CATEGORY_CUISINE_ID AS ID		<!-- 카테고리 요리 종류 아이디 -->
 			 , TYPE				   AS TYPE		<!-- 카테고리 요리 종류 -->
 		  FROM CATEGORY_CUISINE					<!-- 카테고리 요리 종류 테이블 -->
+	  ORDER BY ID ASC
 	</select>
 	
 	<!-- 카테고리 요리 목적 가져오기  -->
@@ -17,6 +18,7 @@
 		SELECT CATEGORY_PURPOSE_ID AS ID		<!-- 카테고리 목적 아이디 -->
 			 , TYPE				   AS TYPE		<!-- 카테고리 목적 종류 -->
 		  FROM CATEGORY_PURPOSE					<!-- 카테고리 목적 테이블 -->
+	  ORDER BY ID ASC
 	</select>
 	
 	<!-- 카테고리 신고 사유 가져오기 -->
@@ -24,6 +26,7 @@
 		SELECT CATEGORY_REPORT_REASON_ID AS ID			<!-- 카테고리 신고사유 아이디 -->
 			 , TYPE				   	  	 AS TYPE		<!-- 카테고리 신고사유 종류 -->
 		  FROM CATEGORY_REPORT_REASON					<!-- 카테고리 신고사유 테이블 -->
+	  ORDER BY ID ASC
 	</select>
 </mapper>
 

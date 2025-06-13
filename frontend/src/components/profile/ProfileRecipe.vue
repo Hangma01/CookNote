@@ -94,12 +94,12 @@ const loadRecipPrivate = async (page = 0) => {
 
 // 레시피 삭제
 const handleRecipeDelete = async (recipeId) => {
-    const proceed = confirm('레시피를 정말 삭제하시겠습니까?');
+    const proceed = confirm('레시피 삭제 시 복구 불가능합니다. 정말 삭제하시겠습니까?');
     if (proceed) {
         try {
             await deleteRecipe(recipeId);
 
-            loadProfile(false);
+            await loadProfile(false);
 
             // 현재 페이지와 탭 정보 저장
             const currentPageValue = currentPage.value;
@@ -124,6 +124,7 @@ const handleRecipeDelete = async (recipeId) => {
                 currentPageGroup.value = Math.floor(currentPageValue / 10);
             }
         } catch (e) {
+            console.log(e);
             if (e.response && e.response?.data?.message) {
                 alert(e.response.data.message);
             } else {
@@ -149,8 +150,10 @@ const pageGroupEnd = () => {
 const goToPage = (page) => {
     if (activeTab.value === commonValues.PUBLIC_TEXT) {
         loadRecipPublic(page);
+        window.scrollTo(0, 0);
     } else if (activeTab.value === commonValues.PRIVATE_TEXT) {
         loadRecipPrivate(page);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -160,8 +163,10 @@ const prevPageGroup = () => {
         const newPage = (currentPageGroup.value - 1) * 10;
         if (activeTab.value === commonValues.PUBLIC_TEXT) {
             loadRecipPublic(newPage);
+            window.scrollTo(0, 0);
         } else if (activeTab.value === commonValues.PRIVATE_TEXT) {
             loadRecipPrivate(newPage);
+            window.scrollTo(0, 0);
         }
     }
 };
@@ -171,8 +176,10 @@ const nextPageGroup = () => {
         const newPage = (currentPageGroup.value + 1) * 10;
         if (activeTab.value === commonValues.PUBLIC_TEXT) {
             loadRecipPublic(newPage);
+            window.scrollTo(0, 0);
         } else if (activeTab.value === commonValues.PRIVATE_TEXT) {
             loadRecipPrivate(newPage);
+            window.scrollTo(0, 0);
         }
     }
 };

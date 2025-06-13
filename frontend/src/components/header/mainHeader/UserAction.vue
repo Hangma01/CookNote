@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
             <div class="user-menu-profile-item" v-show="showProfileItem" @click="toggleShowProfileItem" ref="profileItemRef">
                 <ul>
                     <router-link :to="{ name: 'profileRecipe' }">
-                        <li class="profile-item">홈</li>
+                        <li class="profile-item">마이페이지</li>
                     </router-link>
 
                     <router-link :to="{ name: 'profileEdit' }">

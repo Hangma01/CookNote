@@ -17,8 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSacntionResponseDTO {
-	private ReportType reportType;
-	private String reportLabel;
+	private String reportType;
 	private String targetContent;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime reportProcessedAt;

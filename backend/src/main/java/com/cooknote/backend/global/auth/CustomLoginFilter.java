@@ -14,11 +14,11 @@ import com.cooknote.backend.domain.auth.dto.request.UserLoginRequestDTO;
 import com.cooknote.backend.global.constants.Constans;
 import com.cooknote.backend.global.error.exceptionCode.UserErrorCode;
 import com.cooknote.backend.global.message.ErrorMessage;
-import com.cooknote.backend.global.utils.auth.JwtUtil;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
-import com.cooknote.backend.global.utils.common.ResponseUtil;
-import com.cooknote.backend.global.utils.cookie.CookieUtil;
-import com.cooknote.backend.global.utils.redis.RedisUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CookieUtil;
+import com.cooknote.backend.global.utils.JwtUtil;
+import com.cooknote.backend.global.utils.RedisUtil;
+import com.cooknote.backend.global.utils.ResponseUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.FilterChain;
@@ -95,7 +95,6 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
 
-		
 		String message = failed.getMessage();
 		
 		if(CommonFunctionUtil.match(message, ErrorMessage.SUSPEND_USER_EXCEPTION.getMessage())) {
@@ -103,8 +102,5 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 		} else {
 			ResponseUtil.writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,  ErrorMessage.LOGIN_FAIL_MESSAGE.getMessage());
 		}
-	
-		
-//		response.setStatus(HttpStatus.UNAUTHORIZED.value());
 	}
 }

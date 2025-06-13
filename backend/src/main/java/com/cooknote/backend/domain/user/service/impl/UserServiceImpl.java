@@ -35,7 +35,7 @@ import com.cooknote.backend.global.error.exceptionCode.UserErrorCode;
 import com.cooknote.backend.global.error.excption.CustomCommonException;
 import com.cooknote.backend.global.error.excption.CustomUserException;
 import com.cooknote.backend.global.infra.aws.s3.service.S3Service;
-import com.cooknote.backend.global.utils.common.CommonFunctionUtil;
+import com.cooknote.backend.global.utils.CommonFunctionUtil;
 import com.cooknote.backend.mappers.RecipeMapper;
 import com.cooknote.backend.mappers.UserMapper;
 
@@ -246,7 +246,13 @@ public class UserServiceImpl implements UserService {
 	public Page<UserReportResponseDTO> getReport(Long userId, int page, int size) {
 		
 		int offset = page * size;
-		List<UserReportResponseDTO> result = userMapper.getReports(userId, size, offset);
+		List<UserReportResponseDTO> result = userMapper.getReports(userId
+																 , size
+																 , offset
+												                 , ReportType.COMMENT
+												                 , Constans.REPORT_TYPE_COMMENT_TEXT
+												                 , Constans.REPORT_TYPE_REPLY_TEXT
+												                 , Constans.REPORT_TYPE_RECIPE_TEXT);
 		int total = userMapper.getReportsCount(userId);
 		
 		List<UserReportResponseDTO> reportList = result.stream()
@@ -260,12 +266,19 @@ public class UserServiceImpl implements UserService {
 	public Page<UserSacntionResponseDTO> getSanction(Long userId, int page, int size) {
 		
 		int offset = page * size;
-		List<UserSacntionResponseDTO> result = userMapper.getSanction(userId, size, offset, ReportStatus.APPROVED);
+
+		List<UserSacntionResponseDTO> sanctionList = userMapper.getSanction(userId
+				                                                          , size
+				                                                          , offset
+				                                                          , ReportStatus.APPROVED
+				                                                          , ReportType.RECIPE
+				                                                          , ReportType.COMMENT
+				                                                          , Constans.REPORT_TYPE_COMMENT_TEXT
+				                                                          , Constans.REPORT_TYPE_REPLY_TEXT
+				                                                          , Constans.REPORT_TYPE_RECIPE_TEXT);
+
 		int total = userMapper.getSanctionCount(userId, ReportStatus.APPROVED);
 		
-		List<UserSacntionResponseDTO> sanctionList = result.stream()
-			    .peek(dto -> dto.setReportLabel(dto.getReportType().getLabel()))  // 상태 라벨 설정
-			    .toList();
 		
 		return new PageImpl<>(sanctionList, PageRequest.of(page, size), total);
 	}
@@ -276,7 +289,16 @@ public class UserServiceImpl implements UserService {
 	public Page<UserSearchChefResponseDTO> getSearchChefList(Long userId, String keyword, int page, int size) {
 		
 		int offset = page * size;
-		List<UserSearchChefResponseDTO> chefList = userMapper.getSearchChefList(userId, keyword, size, offset, RecipeStatus.PUBLIC, UserStatus.ACTIVE);
+		List<UserSearchChefResponseDTO> chefList = userMapper.getSearchChefList(userId
+				                                                              , keyword
+				                                                              , size
+				                                                              , offset
+				                                                              , RecipeStatus.PUBLIC
+				                                                              , UserStatus.ACTIVE
+				                                                              , Constans.CHEF_FOLLOW_WEIGHT
+				                                                              , Constans.CHEF_RECIPE_WEIGHT
+				                                                              , Constans.CHEF_LIKE_WEIGHT
+				                                                              , Constans.CHEF_BOOKMARK_WEIGHT);
 		int total = userMapper.getSearchChefListCount(userId, keyword, RecipeStatus.PUBLIC, UserStatus.ACTIVE);
 		
 		return new PageImpl<>(chefList, PageRequest.of(page, size), total);

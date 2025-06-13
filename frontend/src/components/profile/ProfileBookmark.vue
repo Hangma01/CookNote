@@ -48,6 +48,7 @@ const loadRecipBookmark = async (page = 0) => {
         recipeData.value = res.data;
         currentPage.value = page;
         currentPageGroup.value = Math.floor(page / 10);
+        return res;
     } catch (e) {
         if (e.response && e.response?.data?.message) {
             alert(e.response.data.message);
@@ -69,9 +70,10 @@ const handleBookmarkDelete = async (recipeId) => {
 
             // 현재 페이지와 탭 정보 저장
             const currentPageValue = currentPage.value;
-            const res = loadRecipBookmark(currentPageValue);
 
-            const content = res.data?.content || [];
+            const res = await loadRecipBookmark(currentPageValue);
+
+            const content = res?.data?.content || [];
 
             if (content.length === 0 && currentPageValue > 0) {
                 // 현재 페이지에 댓글이 더 이상 없고, 이전 페이지가 있다면 이전 페이지로 이동
@@ -101,6 +103,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     loadRecipBookmark(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -108,6 +111,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         loadRecipBookmark(newPage);
+        window.scrollTo(0, 0);
     }
 };
 // 다음 10페이지 그룹
@@ -115,6 +119,7 @@ const nextPageGroup = () => {
     if (recipeData.value && (currentPageGroup.value + 1) * 10 < recipeData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         loadRecipBookmark(newPage);
+        window.scrollTo(0, 0);
     }
 };
 

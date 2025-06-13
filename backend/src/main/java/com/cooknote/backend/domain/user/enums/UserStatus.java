@@ -4,8 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum UserStatus {
-	ACTIVE,
-	SUSPEND,
-	DELETE,
-
+	ACTIVE,		// 활성화
+	SUSPEND,	// 정지
+	DELETE,		// 회원탈퇴
 }

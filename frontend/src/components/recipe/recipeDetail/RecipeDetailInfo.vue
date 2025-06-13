@@ -26,12 +26,13 @@ const userId = userStore.getUserId;
 
 // 좋아요 상태
 const isLike = ref(false);
+const likeCount = ref(0);
 
 // 북마크 상태
 const isBookmark = ref();
 
 // 부모 이벤트
-const emit = defineEmits(['openReportModal', 'refreshLike']);
+const emit = defineEmits(['openReportModal']);
 
 function relativeTime(date) {
     return dayjs(date).fromNow();
@@ -40,13 +41,18 @@ function relativeTime(date) {
 // 좋아요 클릭
 const handleRecipeLike = async () => {
     if (isLoggedIn) {
+        if (props.recipeDetailData?.writerId === userId) {
+            alert(errorMessages.RECIPE_SELF_LIKE_ERROR_MESSAGE);
+            return;
+        }
         try {
             if (isLike.value) {
-                const res = await recipeLikeDelete(props.recipeId);
+                await recipeLikeDelete(props.recipeId);
+                likeCount.value -= 1;
             } else {
-                const res = await recipeLikeInsert(props.recipeId);
+                await recipeLikeInsert(props.recipeId);
+                likeCount.value += 1;
             }
-            emit('refreshLike');
             isLike.value = !isLike.value;
         } catch (e) {
             if (e.response && e.response?.data?.message) {
@@ -94,6 +100,13 @@ const handleRecipeReport = async (recipeId) => {
 };
 
 watch(
+    () => props.recipeLikeCount,
+    (newVal) => {
+        likeCount.value = newVal ?? 0;
+    }
+);
+
+watch(
     () => props.recipeDetailData,
     (newVal) => {
         isLike.value = newVal?.liked ?? false;
@@ -132,14 +145,14 @@ watch(
                 <span class="creat-date">{{ relativeTime(props.recipeDetailData?.createAt) }}</span>
             </div>
 
-            <div class="recipe-user-aciton" v-if="!props.recipeDetailData?.author">
+            <div class="recipe-user-aciton">
                 <div :class="{ 'action like-box': true, liked: isLike }" @click="handleRecipeLike">
                     <font-awesome-icon :icon="['fas', 'heart']" v-if="isLike" class="action-icon like-icon" />
                     <font-awesome-icon :icon="['far', 'heart']" v-else class="action-icon like-icon" />
-                    <span class="like-count">{{ props?.recipeLikeCount }}</span>
+                    <span class="like-count">{{ likeCount }}</span>
                 </div>
 
-                <div>
+                <div v-if="!props.recipeDetailData?.author">
                     <div :class="{ 'action bookmark-box': true, bookmarked: isBookmark }" @click="handleRecipeBookmark">
                         <font-awesome-icon :icon="['fas', 'bookmark']" v-if="isBookmark" class="action-icon bookmark-icon" />
                         <font-awesome-icon :icon="['far', 'bookmark']" v-else class="action-icon bookmark-icon" />

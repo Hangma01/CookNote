@@ -33,18 +33,33 @@ public class Constans {
     // S3
     public static final String S3_TEMP_IMAGES_PATH = "TempImages/";
     public static final String S3_TEMP_IMAGES_FULL_PATH = "https://cooknote98.s3.ap-northeast-2.amazonaws.com/TempImages/";
+    public static final String S3_MINI_LOGO_IMAGE_PATH = "https://cooknote98.s3.ap-northeast-2.amazonaws.com/Logo/Logo_icon.png";
     public static final String S3_MOVE_RECIPE_PATH = "Recipe/";
     public static final String S3_MOVE_USER_PROFILE_PATH = "UserProfile/";
     public static final String S3_CONTENT_TYPE = "image/";
     public static final String S3_DEFAULT_START_WITH = "Default";
     
     // GET RECIPE
-    public static final int GET_RECIPE_LIMIT = 50;
+    public static final int GET_RECIPE_LIMIT = 30;
     public static final int RECOMMENT_RECIPE_MIN_VALUE = 4;
     public static final int SOLO_RECIPE_MIN_VALUE = 4;
     public static final int BEST_RECIPE_MIN_VALUE = 12;
     public static final int RECENT_RECIPE_MIN_VALUE = 12;
 
+    // WEIGHT
+    public static final double CHEF_FOLLOW_WEIGHT = 0.4;
+    public static final double CHEF_RECIPE_WEIGHT = 0.2;
+    public static final double CHEF_LIKE_WEIGHT = 0.2;
+    public static final double CHEF_BOOKMARK_WEIGHT = 0.2;
+    
+    public static final double RECIPE_LIKE_WEIGHT = 0.7;
+    public static final double RECIPE_COMMENT_WEIGHT = 0.3;
+    
+    // REPORT
+    public static final String REPORT_TYPE_COMMENT_TEXT = "댓글";
+    public static final String REPORT_TYPE_REPLY_TEXT = "답글";
+    public static final String REPORT_TYPE_RECIPE_TEXT = "레시피";
+    
     // ETC...
     public static final int SECOND_MS = 1000;
     public static final int PW_RESET_TOKEN_EXPIRE = 3600; 

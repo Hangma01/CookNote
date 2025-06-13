@@ -26,7 +26,7 @@ const showReason = (reason) => {
 const loadSanction = async (page = 0) => {
     try {
         const res = await getSanction(page);
-        console.log(res.data);
+
         sanctionData.value = res.data;
         currentPage.value = page;
         currentPageGroup.value = Math.floor(page / 10);
@@ -53,6 +53,7 @@ const pageGroupEnd = () => {
 // 페이지 이동
 const goToPage = (page) => {
     loadSanction(page);
+    window.scrollTo(0, 0);
 };
 
 // 이전 10페이지 그룹
@@ -60,6 +61,7 @@ const prevPageGroup = () => {
     if (currentPageGroup.value > 0) {
         const newPage = (currentPageGroup.value - 1) * 10;
         loadSanction(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -68,6 +70,7 @@ const nextPageGroup = () => {
     if (sanctionData.value && (currentPageGroup.value + 1) * 10 < sanctionData.value.page.totalPages) {
         const newPage = (currentPageGroup.value + 1) * 10;
         loadSanction(newPage);
+        window.scrollTo(0, 0);
     }
 };
 
@@ -95,7 +98,7 @@ onMounted(async () => {
                 </thead>
                 <tbody>
                     <tr v-for="(item, index) in sanctionData.content" :key="index">
-                        <td>{{ item.reportLabel }}</td>
+                        <td>{{ item.reportType }}</td>
                         <td>{{ (item.reportType === 'RECIPE' ? '[제목]' : '[내용]') + item.targetContent }}</td>
                         <td>{{ item.reportProcessedAt }}</td>
                         <td>

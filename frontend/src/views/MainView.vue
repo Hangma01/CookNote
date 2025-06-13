@@ -4,6 +4,7 @@ import RecentReipe from '@/components/main/RecentReipe.vue';
 import RecommnetRecipe from '@/components/main/RecommnetRecipe.vue';
 import SoloRecipe from '@/components/main/SoloRecipe.vue';
 import { getBestRecipe, getRecentRecipe, getRecommentRecipe, getSoloRecipe } from '@/services/recipeService';
+import { errorMessages } from '@/utils/messages/errorMessages';
 import { onMounted, ref } from 'vue';
 
 const recommentRecipeData = ref(null);
@@ -24,23 +25,25 @@ onMounted(async () => {
         soloRecipeData.value = soloRecipeDataRes.data;
         recentRecipeData.value = recentRecipeDataRes.data;
     } catch (e) {
-        console.log(e);
+        alert(errorMessages.BADREQUEST);
     }
 });
 </script>
 
 <template>
-    <!-- 추천 레시피-->
-    <RecommnetRecipe :recommentRecipeData="recommentRecipeData" />
+    <div class="main-view">
+        <!-- 추천 레시피-->
+        <RecommnetRecipe :recommentRecipeData="recommentRecipeData" />
 
-    <!-- 베스트 레시피 -->
-    <BestRecipe :bestRecipeData="bestRecipeData" />
+        <!-- 베스트 레시피 -->
+        <BestRecipe :bestRecipeData="bestRecipeData" />
 
-    <!-- 혼먹 레시피 -->
-    <SoloRecipe :soloRecipeData="soloRecipeData" />
+        <!-- 혼먹 레시피 -->
+        <SoloRecipe :soloRecipeData="soloRecipeData" />
 
-    <!-- 최신 레시피피 -->
-    <RecentReipe :recentRecipeData="recentRecipeData" />
+        <!-- 최신 레시피피 -->
+        <RecentReipe :recentRecipeData="recentRecipeData" />
+    </div>
 </template>
 
 <style lang="scss" scoped>

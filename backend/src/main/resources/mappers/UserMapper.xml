@@ -16,66 +16,66 @@
     
     <!-- 로그인 회원 정보 가져오기 -->
 	<select id="getLoginUser" resultType="User">
-		SELECT USER_ID
-			 , ID
-			 , PASSWORD
-			 , STATUS
-		  FROM USER
+		SELECT USER_ID         <!-- 유저 PK -->
+			 , ID              <!-- 유저 아이디 -->
+			 , PASSWORD        <!-- 유저 비밀번호 -->
+			 , STATUS          <!-- 유저 상태 -->
+		  FROM USER            <!-- 유저 테이블 -->
 	 	 WHERE ID = #{id}
 	 	   AND STATUS != #{statusUserDelete}
 	</select>   
 	
 	<!-- 회원 정보 가져오기 -->
 	<select id="getUser" resultType="User">
-		SELECT USER_ID
-			 , ID
-			 , NAME
-			 , PASSWORD
-			 , EMAIL
-			 , NICKNAME
-			 , PROFILE_IMAGE
-			 , STATUS
-			 , CREATE_AT
-			 , UPDATE_AT
-		  FROM USER
+		SELECT USER_ID          <!-- 유저 PK -->
+			 , ID               <!-- 유저 아이디 -->
+			 , NAME             <!-- 유저 이름 -->
+			 , PASSWORD         <!-- 유저 비밀번호 -->
+			 , EMAIL            <!-- 유저 이메일 -->
+			 , NICKNAME         <!-- 유저 이메일 -->
+			 , PROFILE_IMAGE    <!-- 유저 프로파일 이미지 -->
+			 , STATUS           <!-- 유저 상태 -->
+			 , CREATE_AT        <!-- 회원가입일 -->
+			 , UPDATE_AT        <!-- 수정일 -->
+		  FROM USER             <!-- 유저 테이블 -->
 	 	 WHERE USER_ID = #{userId}
 	</select>   
 	
 	<!-- 호스트 프로필 가져오기 -->
 	<select id="getHostProfile" resultType="UserHostProfileResponseDTO">
-		SELECT U.USER_ID	   AS HOST_ID
-			 , U.NICKNAME	   AS NICKNAME
-			 , U.PROFILE_IMAGE AS PROFILE_IMAGE
+		SELECT U.USER_ID	   AS HOST_ID                  <!-- 유저 PK -->
+			 , U.NICKNAME	   AS NICKNAME                 <!-- 유저 닉네임 -->
+			 , U.PROFILE_IMAGE AS PROFILE_IMAGE            <!-- 유저 프로파일 이미지 -->
 			 , SUM(
 			 	   CASE 
 			 	   WHEN R.STATUS = #{statusRecipePublic} 
 			 	   THEN 1 
 			 	   ELSE 0 
 			 	    END
-		     ) 				   AS RECIPE_PUBLIC_COUNT
+		     ) 				   AS RECIPE_PUBLIC_COUNT      <!-- 유저 공개 레시피 수 -->
 		     , SUM(
 		     	   CASE 
 		    	   WHEN R.STATUS = #{statusRecipePrivate} 
 		     	   THEN 1 
 		     	   ELSE 0 
 		     		END
-		     ) 				   AS RECIPE_PRIVATE_COUNT
+		     ) 				   AS RECIPE_PRIVATE_COUNT     <!-- 유저 비공개 레시피 수 -->
 		     , (
-		     	SELECT COUNT(FOLLOWING_ID) 
-		     	  FROM FOLLOW AS FLW 
-		    INNER JOIN USER   AS USR
+		     	SELECT COUNT(FOLLOWING_ID)                 <!-- 팔로잉 수 -->
+		     	  FROM FOLLOW AS FLW                       <!-- 팔로우 테이블 -->
+		    INNER JOIN USER   AS USR                       <!-- 유저 테이블 -->
 		            ON FLW.FOLLOWING_ID = USR.USER_ID
 		     	 WHERE FLW.FOLLOWER_ID = #{hostId}
 		     	   AND USR.STATUS = #{statusUserActive}
-		     ) 				   AS FOLLOWING_COUNT
+		     ) 				   AS FOLLOWING_COUNT          <!-- 팔로잉 수 (별명) -->
 		     , (
-		     	SELECT COUNT(FOLLOWER_ID) 
-		     	  FROM FOLLOW AS FLW
-		    INNER JOIN USER   AS USR
+		     	SELECT COUNT(FOLLOWER_ID)                  <!-- 팔로워 수 -->
+		     	  FROM FOLLOW AS FLW                       <!-- 팔로우 테이블 -->
+		    INNER JOIN USER   AS USR                       <!-- 유저 테이블 -->
 		            ON FLW.FOLLOWER_ID = USR.USER_ID
 		     	 WHERE FLW.FOLLOWING_ID = #{hostId}
 		     	   AND USR.STATUS = #{statusUserActive}
-		     ) 				   AS FOLLOWER_COUNT
+		     ) 				   AS FOLLOWER_COUNT           <!-- 팔로워 수 (별명) -->
 		     <if test="userId != null"> <!-- 본인 프로필인지 확인을 위함 -->
 		     , EXISTS (
 		  				   SELECT 1 
@@ -84,80 +84,79 @@
 		  				     AND FOLLOWING_ID = #{hostId}
 					  ) 				AS IS_FOLLOW
 		      </if>
-		 FROM USER 			    AS U
-		 LEFT JOIN RECIPE 	    AS R 
+		 FROM USER 			    AS U                        <!-- 유저 테이블 -->
+		 LEFT JOIN RECIPE 	    AS R                        <!-- 레시피 테이블 -->
 		   ON U.USER_ID = R.WRITER_ID
 		WHERE U.USER_ID = #{hostId}
 	</select>
 	
 	<!-- 본인 프로필 가져오기 -->
 	<select id="getProfile" resultType="UserProfileResponseDTO">
-		SELECT U.NICKNAME	   AS NICKNAME
-			 , U.PROFILE_IMAGE AS PROFILE_IMAGE
+		SELECT U.NICKNAME	   AS NICKNAME                  <!-- 유저 닉네임 -->
+			 , U.PROFILE_IMAGE AS PROFILE_IMAGE             <!-- 유저 프로파일 이미지 -->
 			 , SUM(
 			 	   CASE 
 			 	   WHEN R.STATUS = #{statusRecipePublic} 
 			 	   THEN 1 
 			 	   ELSE 0 
 			 	    END
-		     ) 				   AS RECIPE_PUBLIC_COUNT
+		     ) 				   AS RECIPE_PUBLIC_COUNT       <!-- 공개 레시피 수 -->
 		     , SUM(
 		     	   CASE 
 		    	   WHEN R.STATUS = #{statusRecipePrivate}
 		     	   THEN 1 
 		     	   ELSE 0 
 		     		END
-		     ) 				   AS RECIPE_PRIVATE_COUNT
+		     ) 				   AS RECIPE_PRIVATE_COUNT      <!-- 비공개 레시피 수 -->
 		     , (
-		     	SELECT COUNT(FOLLOWING_ID) 
-		     	  FROM FOLLOW AS FLW 
-		    INNER JOIN USER AS USR
+		     	SELECT COUNT(FOLLOWING_ID)                  <!-- 팔로워 수 -->
+		     	  FROM FOLLOW  AS FLW                       <!-- 팔로우 테이블 -->
+		    INNER JOIN USER    AS USR                       <!-- 유저 테이블 -->
 		            ON FLW.FOLLOWER_ID = USR.USER_ID
 		     	 WHERE FLW.FOLLOWING_ID = #{userId}
 		     	   AND USR.STATUS = #{statusUserActive}
-		     ) 				   AS FOLLOWER_COUNT
+		     ) 				   AS FOLLOWER_COUNT            <!-- 팔로워 수 (별명) -->
 		     , (
-		     	SELECT COUNT(FOLLOWER_ID) 
-		     	  FROM FOLLOW AS FLW
-		    INNER JOIN USER AS USR
+		     	SELECT COUNT(FOLLOWER_ID)                   <!-- 팔로잉 수 -->
+		     	  FROM FOLLOW  AS FLW                       <!-- 팔로우 테이블 -->
+		    INNER JOIN USER    AS USR                       <!-- 유저 테이블 -->
 		            ON FLW.FOLLOWING_ID = USR.USER_ID
 		     	 WHERE FOLLOWER_ID = #{userId}
 		     	   AND USR.STATUS = #{statusUserActive}
-		     ) 				   AS FOLLOWING_COUNT
-		     
-		 FROM USER 			    AS U
-		 LEFT JOIN RECIPE 	    AS R 
+		     ) 				   AS FOLLOWING_COUNT           <!-- 팔로잉 수 (별명) -->        
+		 FROM USER 			   AS U                         <!-- 유저 테이블 -->   
+		 LEFT JOIN RECIPE 	   AS R                         <!-- 레시피 테이블 -->
 		   ON U.USER_ID = R.WRITER_ID
 		WHERE USER_ID = #{userId}
 	</select>
 	
 	<!-- 팔로워 정보 조회 -->
 	<select id="getFollower" resultType="UserFollowerResponseDTO">
-		SELECT U.USER_ID AS FOLLOWER_ID
-		     , U.NICKNAME AS FOLLOWER_NICKNAME
-		     , U.PROFILE_IMAGE FOLLOWER_PROFILE_IMAGE
+		SELECT U.USER_ID       AS FOLLOWER_ID              <!-- 팔로워 PK -->
+		     , U.NICKNAME      AS FOLLOWER_NICKNAME        <!-- 팔로워 닉네임 -->
+		     , U.PROFILE_IMAGE AS FOLLOWER_PROFILE_IMAGE   <!-- 팔로워 프로파일 이미지 -->
  			 , CASE
- 			   WHEN F2.FOLLOWER_ID = #{userId}
+ 			   WHEN SF.FOLLOWER_ID = #{userId}
  			   THEN TRUE
  			   ELSE FALSE
- 			    END AS IS_FOLLOWING_BACK
- 	   	  FROM FOLLOW AS F1
-    	  JOIN USER AS U 
-    	    ON F1.FOLLOWER_ID = U.USER_ID
-     LEFT JOIN FOLLOW AS F2
-            ON F1.FOLLOWER_ID = F2.FOLLOWING_ID
-           AND F1.FOLLOWING_ID = F2.FOLLOWER_ID
-    	 WHERE F1.FOLLOWING_ID = #{userId}
+ 			    END            AS IS_FOLLOWING_BACK        <!-- 맞팔로우 상태 -->
+ 	   	  FROM FOLLOW          AS F                        <!-- 팔로우 테이블 -->
+    INNER JOIN USER            AS U                        <!-- 유저 테이블 --> 
+    	    ON F.FOLLOWER_ID = U.USER_ID
+     LEFT JOIN FOLLOW          AS SF                       <!-- 서브 팔로우 테이블 -->
+            ON F.FOLLOWER_ID = SF.FOLLOWING_ID
+           AND F.FOLLOWING_ID = SF.FOLLOWER_ID
+    	 WHERE F.FOLLOWING_ID = #{userId}
     	   AND U.STATUS = #{statusUserActive}
 	</select>
 	
 	<!-- 팔로잉 정보 조회 -->
 	<select id="getFollowing" resultType="UserFollowingResponseDTO">
-		SELECT U.USER_ID AS FOLLOWING_ID
-		     , U.NICKNAME AS FOLLOWING_NICKNAME
-		     , U.PROFILE_IMAGE FOLLOWING_PROFILE_IMAGE
- 	   	  FROM FOLLOW AS F
-    	  JOIN USER AS U 
+		SELECT U.USER_ID       AS FOLLOWING_ID              <!-- 팔로잉 PK -->                   
+		     , U.NICKNAME      AS FOLLOWING_NICKNAME        <!-- 팔로잉 닉네임 -->
+		     , U.PROFILE_IMAGE AS FOLLOWING_PROFILE_IMAGE   <!-- 팔로잉 프로파일 이미지 -->
+ 	   	  FROM FOLLOW          AS F                         <!-- 팔로워 테이블 -->
+    INNER JOIN USER            AS U                         <!-- 유저 테이블 -->
     	    ON F.FOLLOWING_ID = U.USER_ID
     	 WHERE F.FOLLOWER_ID = #{userId}
     	   AND U.STATUS = #{statusUserActive}
@@ -167,7 +166,7 @@
 	<select id="existsUser" resultType="boolean">
 		SELECT EXISTS (
 			   			SELECT 1 
-				 		  FROM USER 						<!-- 유저 테이블 -->
+				 		  FROM USER 				
 						 WHERE USER_ID = #{userId}		
 						)
 	</select>
@@ -208,11 +207,11 @@
 	
 	<!-- 유저 수정 정보 조회 -->
 	<select id="getUserProfileEditInfo" resultType="UserProfileEditInfoResponseDTO">
-		SELECT PROFILE_IMAGE
-			 , NAME
-			 , EMAIL
-			 , NICKNAME
-			 , CREATE_AT
+		SELECT PROFILE_IMAGE    <!-- 유저 프로파일 이미지 -->
+			 , NAME             <!-- 유저 이름 -->
+			 , EMAIL            <!-- 유저 이메일 -->
+			 , NICKNAME         <!-- 유저 닉네임 -->
+			 , CREATE_AT        <!-- 유저 회원가입일 -->
 		  FROM USER
 		 WHERE USER_ID = #{userId}
 	</select>
@@ -235,13 +234,13 @@
 	
 	<!-- 팔로잉한 유저 중 레시피 작성 최신순으로 정보 가져오기 -->
 	<select id="getFollowingLatestForRecipe" resultType="UserFollowingLatestForRecipeResponseDTO">
-		SELECT U.USER_ID AS FOLLOWING_ID
-	    	 , U.NICKNAME AS NICKNAME
-	    	 , U.PROFILE_IMAGE AS PROFILE_IMAGE
-		 FROM FOLLOW AS F
-		 JOIN USER AS U 
+		SELECT U.USER_ID       AS FOLLOWING_ID    <!-- 팔로잉 아이디 -->
+	    	 , U.NICKNAME      AS NICKNAME        <!-- 팔로잉 닉네임 -->
+	    	 , U.PROFILE_IMAGE AS PROFILE_IMAGE   <!-- 팔로잉 프로파일 이미지 -->
+		 FROM FOLLOW           AS F               <!-- 팔로우 테이블 -->
+   INNER JOIN USER             AS U               <!-- 유저 테이블 --> 
 	       ON U.USER_ID = F.FOLLOWING_ID 
-	LEFT JOIN RECIPE AS R 
+	LEFT JOIN RECIPE           AS R               <!-- 레시피 테이블 --> 
 	       ON R.WRITER_ID = U.USER_ID 
 	      AND R.STATUS = #{statusRecipePublic}
 		WHERE F.FOLLOWER_ID = #{userId} 
@@ -256,14 +255,14 @@
 		  INTO REPORT (
 		  			   REPORT_TYPE					<!-- 신고 종류 (RECIPE, COMMENT) -->
 		  			 , <if test="reportInsertReq.reportType == recipe">
-					   RECIPE_ID
+					   RECIPE_ID                    <!-- 레시피 FK -->
 					  </if>
 					  <if test="reportInsertReq.reportType == comment">
-					   COMMENT_ID
-					  </if>							<!-- 타겟 아이디 (RECIPE_ID, COMMENT_ID) -->
-		  			 , REPORTER_ID					<!-- 신고자 -->
-		  			 , REPORTED_ID
-		  			 , CATEGORY_REPORT_REASON_ID	<!-- 신고 카테고리 아이디 -->
+					   COMMENT_ID                   <!-- 댓글 FK -->
+					  </if>							 
+		  			 , REPORTER_ID					<!-- 신고자 FK -->
+		  			 , REPORTED_ID                  <!-- 피신고자 FK -->
+		  			 , CATEGORY_REPORT_REASON_ID	<!-- 신고 카테고리 FK -->
 		  			  )
 		VALUES (
 			    #{reportInsertReq.reportType}
@@ -329,18 +328,28 @@
 	
 	<!-- 신고 내역 가져오기 -->
 	<select id="getReports" resultType="UserReportResponseDTO">
-		SELECT RPT.REPORT_TYPE 		  AS REPORT_TYPE
-			 , RPT.CREATE_AT 		  AS REPORT_CREATE_AT
-			 , RPT.STATUS 			  AS REPORT_STATUS
-			 , RPD.NICKNAME 	      AS REPORTED_NICKNAME
-			 , CRR.TYPE 			  AS REPORT_REASON
-		  FROM REPORT 				  AS RPT
-	INNER JOIN USER 				  AS U
+		SELECT CASE
+	   	       WHEN RPT.REPORT_TYPE = #{reportTypeComment}
+	   	        AND C.PARENT_COMMENT_ID IS NULL
+	   	       THEN #{reportTypeCommentText}
+	   	       WHEN RPT.REPORT_TYPE = #{reportTypeComment}
+	   	        AND C.PARENT_COMMENT_ID IS NOT NULL
+	   	       THEN #{reportTypeReplyText}
+	   	       ELSE #{reportTypeRecipeText}
+	   	        END                   AS REPORT_TYPE           <!-- 신고 종류 -->
+			 , RPT.CREATE_AT 		  AS REPORT_CREATE_AT      <!-- 신고일 -->
+			 , RPT.STATUS 			  AS REPORT_STATUS         <!-- 신고 처리 상태 -->
+			 , RPD.NICKNAME 	      AS REPORTED_NICKNAME     <!-- 피신고자 닉네임 -->
+			 , CRR.TYPE 			  AS REPORT_REASON         <!-- 신고 사유 -->
+		  FROM REPORT 				  AS RPT                   <!-- 신고 테이블 -->
+	INNER JOIN USER 				  AS U                     <!-- 유저 테이블 -->
 		    ON RPT.REPORTER_ID = U.USER_ID
-    INNER JOIN USER					  AS RPD
+    INNER JOIN USER					  AS RPD                   <!-- 유저 테이블 -->
             ON RPT.REPORTED_ID = RPD.USER_ID
-    INNER JOIN CATEGORY_REPORT_REASON AS CRR
+    INNER JOIN CATEGORY_REPORT_REASON AS CRR                   <!-- 카테고리 신고 사유 테이블 -->
     		ON CRR.CATEGORY_REPORT_REASON_ID = RPT.CATEGORY_REPORT_REASON_ID
+     LEFT JOIN COMMENT                AS C                     <!-- 댓글 테이블 --> 
+	 	    ON RPT.COMMENT_ID = C.COMMENT_ID	
     	 WHERE RPT.REPORTER_ID = #{userId}
       ORDER BY RPT.CREATE_AT DESC
     	 LIMIT #{size}
@@ -356,22 +365,30 @@
 	
 	<!-- 제재 내역 가져오기 -->
 	<select id="getSanction" resultMap="UserSanctionResponseMap">
-	   	SELECT RPT.REPORT_TYPE AS REPORT_TYPE
+	   	SELECT CASE
+	   	       WHEN RPT.REPORT_TYPE = #{reportTypeComment}
+	   	        AND C.PARENT_COMMENT_ID IS NULL
+	   	       THEN #{reportTypeCommentText}
+	   	       WHEN RPT.REPORT_TYPE = #{reportTypeComment}
+	   	        AND C.PARENT_COMMENT_ID IS NOT NULL
+	   	       THEN #{reportTypeReplyText}
+	   	       ELSE #{reportTypeRecipeText}
+	   	        END                   AS REPORT_TYPE                      <!-- 신고 종류 -->
 			 , CASE
-			   WHEN RPT.REPORT_TYPE = 'RECIPE' 
+			   WHEN RPT.REPORT_TYPE = #{reportTypeRecipe} 
 			   THEN R.TITLE
 			   ELSE C.CONTENT
-			    END AS TARGET_CONTENT
-			 , CRR.TYPE AS REPORT_REASON
-		     , RPT.PROCESSED_AT AS REPORT_PROCESSED_AT
-		  FROM REPORT AS RPT
-    INNER JOIN USER AS U
+			    END                   AS TARGET_CONTENT                   <!-- 내용 -->
+			 , CRR.TYPE               AS REPORT_REASON                    <!-- 신고 사유 --> 
+		     , RPT.PROCESSED_AT       AS REPORT_PROCESSED_AT              <!-- 신고 처리일 -->
+		  FROM REPORT                 AS RPT                              <!-- 신고 테이블 -->
+    INNER JOIN USER                   AS U                                <!-- 유저 테이블 -->
 		    ON RPT.REPORTED_ID = U.USER_ID
-    INNER JOIN CATEGORY_REPORT_REASON AS CRR
+    INNER JOIN CATEGORY_REPORT_REASON AS CRR                              <!-- 카테고리 신고 사유 테이블 -->
 	 	    ON RPT.CATEGORY_REPORT_REASON_ID = CRR.CATEGORY_REPORT_REASON_ID
-	 LEFT JOIN RECIPE AS R
+	 LEFT JOIN RECIPE                 AS R                                <!-- 레시피 테이블 -->
 	        ON RPT.RECIPE_ID = R.RECIPE_ID
-	 LEFT JOIN COMMENT AS C 
+	 LEFT JOIN COMMENT                AS C                                <!-- 댓글 테이블 --> 
 	 	    ON RPT.COMMENT_ID = C.COMMENT_ID
  	     WHERE RPT.REPORTED_ID = #{userId}
 		   AND RPT.STATUS = #{statusReportApproved}
@@ -382,13 +399,13 @@
 	<select id="getSanctionCount" resultType="int">
 	   	SELECT COUNT(DISTINCT_REPORTS.REPORT_TARGET_ID) AS sanction_count
 		  FROM (
-		    	SELECT DISTINCT RECIPE_ID AS REPORT_TARGET_ID
+		    	SELECT DISTINCT RECIPE_ID               AS REPORT_TARGET_ID
 		    	  FROM REPORT
 	    		 WHERE REPORTED_ID = #{userId}
 	      		   AND STATUS = #{statusReportApproved}
 		      	   AND RECIPE_ID IS NOT NULL
 		    	 UNION
-		    	SELECT DISTINCT COMMENT_ID AS REPORT_TARGET_ID
+		    	SELECT DISTINCT COMMENT_ID              AS REPORT_TARGET_ID
 		    	  FROM REPORT
 		    	 WHERE REPORTED_ID = #{userId}
 	      		   AND STATUS = #{statusReportApproved}
@@ -398,79 +415,78 @@
 	
 	<!-- 쉐프 검색 - 게시글 0.2, 북마크 0.2, 좋아요 0.2, 팔로워 0.5 (인기순) -->
 	<select id="getSearchChefList" resultType="UserSearchChefResponseDTO">
-		SELECT U.USER_ID										AS USER_ID
-			 , U.NICKNAME										AS NICKNAME
-			 , U.PROFILE_IMAGE									AS PROFILE_IMAGE
-			 , IFNULL(FOLLOW_CNT.FOLLOWER_COUNT, 0) 			AS FOLLOWER_COUNT
-			 , IFNULL(RECIPE_CNT.RECIPE_COUNT, 0) 				AS RECIPE_COUNT
- 			 , IFNULL(LIKE_CNT.LIKE_COUNT, 0) 					AS LIKE_COUNT
-			 , IFNULL(BOOKMARK_CNT.BOOKMARK_COUNT, 0) 			AS BOOKMARK_COUNT
-			 , IFNULL(FOLLOW_CNT.FOLLOWER_COUNT, 0) * 0.4 
-			 	   + (IFNULL(RECIPE_CNT.RECIPE_COUNT, 0) * 0.2)
-			 	   + (IFNULL(LIKE_CNT.LIKE_COUNT, 0) * 0.2) 
-			 	   + (IFNULL(BOOKMARK_CNT.BOOKMARK_COUNT, 0) * 0.2) AS POPULARITY_SCORE
+		SELECT U.USER_ID										                AS USER_ID               <!-- 유저 PK -->
+			 , U.NICKNAME										                AS NICKNAME              <!-- 유저 닉네임 -->
+			 , U.PROFILE_IMAGE									                AS PROFILE_IMAGE         <!-- 유저 프로파일 이미지 -->
+			 , IFNULL(FOLLOW_CNT.FOLLOWER_COUNT, 0) 			                AS FOLLOWER_COUNT        <!-- 유저 팔로워 수 -->
+			 , IFNULL(RECIPE_CNT.RECIPE_COUNT, 0) 				                AS RECIPE_COUNT          <!-- 유저가 작성한 레시피 수 -->
+ 			 , IFNULL(LIKE_CNT.LIKE_COUNT, 0) 				 	                AS LIKE_COUNT            <!-- 유저가 받은 좋아요 수 -->
+			 , IFNULL(BOOKMARK_CNT.BOOKMARK_COUNT, 0) 			                AS BOOKMARK_COUNT        <!-- 유저가 받은 북마크 수 -->
+			 , IFNULL(FOLLOW_CNT.FOLLOWER_COUNT, 0) * #{chefFollowWeight} 
+			 + (IFNULL(RECIPE_CNT.RECIPE_COUNT, 0) * #{chefRecipeWeight})
+			 + (IFNULL(LIKE_CNT.LIKE_COUNT, 0) * #{chefLikeWeight}) 
+			 + (IFNULL(BOOKMARK_CNT.BOOKMARK_COUNT, 0) * #{chefBookmarkWeight}) AS POPULARITY_SCORE      <!-- 인기순 -->
 			 , <if test="userId != null">
         	   CASE 
         	   WHEN LOGIN_USER_FOLLOW.FOLLOWING_ID IS NOT NULL
         	   THEN TRUE
         	   ELSE FALSE
-        	    END  												AS IS_FOLLOWING
+        	    END  												            AS IS_FOLLOWING          <!-- 팔로잉 여부 (로그인) -->
       		   </if>
       		   <if test="userId == null">
-        	   FALSE 												AS IS_FOLLOWING
+        	   FALSE 												            AS IS_FOLLOWING          <!-- 팔로잉 여부 (비로그인) -->
       		   </if>
 		  FROM USER U
 	 LEFT JOIN (
 		    	SELECT FOLLOWING_ID
-		    	     , COUNT(FOLLOWING_ID) 						AS FOLLOWER_COUNT
-		    	  FROM FOLLOW 									AS FLW
-		    INNER JOIN USER   									AS SUSR
+		    	     , COUNT(FOLLOWING_ID) 						                AS FOLLOWER_COUNT        <!-- 팔로워 카운트 -->
+		    	  FROM FOLLOW 									                AS FLW                   <!-- 팔로우 테이블 -->
+		    INNER JOIN USER   									                AS SUSR                  <!-- 서브 유저 테이블 -->
 		            ON FLW.FOLLOWER_ID = SUSR.USER_ID
 		           AND SUSR.STATUS = #{statusUserActive}
 		       GROUP BY FOLLOWING_ID
-		  	   ) 												AS FOLLOW_CNT 
+		  	   ) 												                AS FOLLOW_CNT            <!-- 팔로우 카운트 -->
 			ON FOLLOW_CNT.FOLLOWING_ID = U.USER_ID
      LEFT JOIN (
 		    	SELECT WRITER_ID
-		    	   	 , COUNT(WRITER_ID) 						AS RECIPE_COUNT
+		    	   	 , COUNT(WRITER_ID) 						                AS RECIPE_COUNT          <!-- 유저가 작성한 레시피 수 -->
 		    	  FROM RECIPE
 		         WHERE STATUS = #{statusRecipePublic}
 		      GROUP BY WRITER_ID
-		  	   ) 												AS RECIPE_CNT 
+		  	   ) 												                AS RECIPE_CNT            <!-- 레시피 수 (별명) -->
 			ON RECIPE_CNT.WRITER_ID = U.USER_ID
      LEFT JOIN (
 		    	SELECT R.WRITER_ID
-		    	     , COUNT(R.WRITER_ID) 						AS LIKE_COUNT
-		    	  FROM RECIPE_LIKE 								AS RL
-		    INNER JOIN RECIPE 									AS R 
+		    	     , COUNT(R.WRITER_ID) 						                AS LIKE_COUNT            <!-- 유저가 받은 좋아요 수 -->
+		    	  FROM RECIPE_LIKE 								                AS RL                    <!-- 레시피 좋아요 테이블 -->
+		    INNER JOIN RECIPE 									                AS R                     <!-- 레시피 테이블 -->
 		       		ON RL.RECIPE_ID = R.RECIPE_ID
-		    INNER JOIN USER AS SUSR
+		    INNER JOIN USER                                                     AS SUSR                  <!-- 유저 서브 테이블 -->
 		            ON RL.USER_ID = SUSR.USER_ID
 		           AND SUSR.STATUS = #{statusUserActive}
 		      GROUP BY R.WRITER_ID
-		  	   )												AS LIKE_CNT	
+		  	   )												                AS LIKE_CNT	             <!-- 좋아요 수 (별명) -->
 		  	ON LIKE_CNT.WRITER_ID = U.USER_ID  					
      LEFT JOIN (
 		    	SELECT R.WRITER_ID
-		    	     , COUNT(R.WRITER_ID) 						AS BOOKMARK_COUNT
-		    	  FROM RECIPE_BOOKMARK 							AS RB
-		    INNER JOIN RECIPE 									AS R 
+		    	     , COUNT(R.WRITER_ID) 						                AS BOOKMARK_COUNT        <!-- 유저가 받은 북마크 수 -->
+		    	  FROM RECIPE_BOOKMARK 							                AS RB                    <!-- 북마크 테이블 -->
+		    INNER JOIN RECIPE 									                AS R                     <!-- 레시피 테이블 -->
 		       		ON RB.RECIPE_ID = R.RECIPE_ID
-       		INNER JOIN USER AS SUSR
+       		INNER JOIN USER                                                     AS SUSR                  <!-- 서브 유저 테이블 -->
 		            ON RB.USER_ID = SUSR.USER_ID
 		           AND SUSR.STATUS = #{statusUserActive}
 		      GROUP BY R.WRITER_ID
-		  	   )  												AS BOOKMARK_CNT 
+		  	   )  												                AS BOOKMARK_CNT          <!-- 북마크 수 (별명) -->
 		    ON BOOKMARK_CNT.WRITER_ID = U.USER_ID
 	 <if test="userId != null">
  	 LEFT JOIN (
 	    		SELECT FOLLOWING_ID
 	    		  FROM FOLLOW
 	    		 WHERE FOLLOWER_ID = #{userId}
-				) 												AS LOGIN_USER_FOLLOW 
+				) 												                AS LOGIN_USER_FOLLOW     <!-- 팔로우 테이블 (로그인) -->
 			ON LOGIN_USER_FOLLOW.FOLLOWING_ID = U.USER_ID
 	 </if>
-		    
 		 WHERE U.STATUS = #{statusUserActive}
 		   <if test="userId != null">
  		   AND U.USER_ID != #{userId}
@@ -491,7 +507,7 @@
 	<!-- 쉐프 검색 토탈 갯수 -->
 	<select id="getSearchChefListCount" resultType="int">
 		SELECT COUNT(U.USER_ID)
-		  FROM USER U
+		  FROM USER AS U
 		WHERE U.STATUS = #{statusUserActive}
 		  <if test="userId != null">
  		  AND U.USER_ID != #{userId}
